@@ -1,0 +1,112 @@
+import { PrismaClient } from '@prisma/client'
+
+export class ParticipationRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async findByStudentId(studentId: string, options: {
+    status?: string
+    fromDate?: Date
+    toDate?: Date
+  }) {
+    const where: any = { studentId }
+    
+    if (options.status) {
+      where.status = options.status
+    }
+    
+    if (options.fromDate || options.toDate) {
+      where.recreation = {
+        startDatetime: {}
+      }
+      if (options.fromDate) {
+        where.recreation.startDatetime.gte = options.fromDate
+      }
+      if (options.toDate) {
+        where.recreation.startDatetime.lte = options.toDate
+      }
+    }
+
+    return this.prisma.participation.findMany({
+      where,
+      include: {
+        student: true,
+        recreation: true
+      },
+      orderBy: {
+        recreation: {
+          startDatetime: 'asc'
+        }
+      }
+    })
+  }
+
+  async findByRecreationId(recreationId: number) {
+    return this.prisma.participation.findMany({
+      where: { recreationId },
+      include: {
+        student: true,
+        recreation: true
+      },
+      orderBy: {
+        registeredAt: 'asc'
+      }
+    })
+  }
+
+  async findById(id: number) {
+    return this.prisma.participation.findUnique({
+      where: { participationId: id },
+      include: {
+        student: true,
+        recreation: true
+      }
+    })
+  }
+
+  async findByStudentAndRecreation(studentId: string, recreationId: number) {
+    return this.prisma.participation.findUnique({
+      where: {
+        studentId_recreationId: {
+          studentId,
+          recreationId
+        }
+      }
+    })
+  }
+
+  async create(data: {
+    studentId: string
+    recreationId: number
+    status?: string
+  }) {
+    return this.prisma.participation.create({
+      data: {
+        ...data,
+        status: data.status || 'registered'
+      },
+      include: {
+        student: true,
+        recreation: true
+      }
+    })
+  }
+
+  async update(id: number, data: {
+    status?: string
+  }) {
+    return this.prisma.participation.update({
+      where: { participationId: id },
+      data,
+      include: {
+        student: true,
+        recreation: true
+      }
+    })
+  }
+
+  async delete(id: number) {
+    return this.prisma.participation.delete({
+      where: { participationId: id }
+    })
+  }
+}

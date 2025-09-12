@@ -1,0 +1,1 @@
+export { createPrismaStudentRepository } from './PrismaStudentRepository'

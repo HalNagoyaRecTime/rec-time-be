@@ -1,0 +1,1 @@
+export { createStudentRoutes } from './studentRoutes'

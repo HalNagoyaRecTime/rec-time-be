@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  studentId        String          @id @map("student_id")
+  classCode        String          @map("class_code")
+  attendanceNumber Int             @map("attendance_number")
+  name             String
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  
+  // Relations
+  participations   Participation[]
+
+  @@map("students")
+}
+
+model Recreation {
+  recreationId     Int                @id @default(autoincrement()) @map("recreation_id")
+  title            String
+  description      String?
+  location         String
+  startDatetime    DateTime           @map("start_datetime")
+  endDatetime      DateTime           @map("end_datetime")
+  maxParticipants  Int                @map("max_participants")
+  status           String             @default("scheduled")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  
+  // Relations
+  participations   Participation[]
+
+  @@map("recreations")
+}
+
+model Participation {
+  participationId  Int                 @id @default(autoincrement()) @map("participation_id")
+  studentId        String              @map("student_id")
+  recreationId     Int                 @map("recreation_id")
+  status           String              @default("registered")
+  registeredAt     DateTime            @default(now()) @map("registered_at")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  
+  // Relations
+  student          Student             @relation(fields: [studentId], references: [studentId])
+  recreation       Recreation          @relation(fields: [recreationId], references: [recreationId])
+
+  @@unique([studentId, recreationId])
+  @@map("participations")
+}

@@ -1,0 +1,1 @@
+export type { StudentRepository, CreateStudentInput } from './StudentRepository'
