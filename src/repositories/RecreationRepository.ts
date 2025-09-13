@@ -65,12 +65,6 @@ export function createRecreationRepository(prisma: PrismaClient) {
       return { recreations, total }
     },
 
-    async findById(id: number) {
-      return prisma.recreation.findUnique({
-        where: { recreationId: id }
-      })
-    },
-
     async findByIdWithParticipantCount(id: number) {
       const recreation = await prisma.recreation.findUnique({
         where: { recreationId: id },
@@ -93,44 +87,6 @@ export function createRecreationRepository(prisma: PrismaClient) {
         ...recreation,
         current_participants: recreation._count.participations
       }
-    },
-
-    async create(data: {
-      title: string
-      description?: string
-      location: string
-      startTime: number
-      endTime: number
-      maxParticipants: number
-      status?: string
-    }) {
-      return prisma.recreation.create({ 
-        data: {
-          ...data,
-          status: data.status || 'scheduled'
-        }
-      })
-    },
-
-    async update(id: number, data: {
-      title?: string
-      description?: string
-      location?: string
-      startTime?: number
-      endTime?: number
-      maxParticipants?: number
-      status?: string
-    }) {
-      return prisma.recreation.update({
-        where: { recreationId: id },
-        data
-      })
-    },
-
-    async delete(id: number) {
-      await prisma.recreation.delete({
-        where: { recreationId: id }
-      })
     }
   }
 }

@@ -1,6 +1,7 @@
+import { RecreationEntity } from "./domains"
+
 // Student Service Types
 export interface StudentServiceFunctions {
-  getAllStudents: () => Promise<any[]>
   getStudentById: (id: number) => Promise<any>
 }
 
@@ -12,22 +13,9 @@ export interface RecreationServiceFunctions {
     toDate?: string
     limit?: number
     offset?: number
-  }) => Promise<{ recreations: any[], total: number }>
-  getRecreationById: (id: number) => Promise<any>
+  }) => Promise<{ recreations: 
+    RecreationEntity[], total: number }>
+  getRecreationById: (id: number) => Promise<
+  RecreationEntity
+  >
 }
-
-// Participation Service Types
-export interface ParticipationServiceFunctions {
-  getStudentParticipations: (studentId: number, options: {
-    status?: string
-    fromDate?: string
-    toDate?: string
-  }) => Promise<any[]>
-  getRecreationParticipants: (recreationId: number) => Promise<any[]>
-}
-
-// All Service Functions
-export interface AllServiceFunctions 
-  extends StudentServiceFunctions, 
-          RecreationServiceFunctions, 
-          ParticipationServiceFunctions {}

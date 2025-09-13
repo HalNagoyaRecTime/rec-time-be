@@ -2,10 +2,6 @@ import { StudentRepositoryFunctions, StudentServiceFunctions } from "../types"
 
 export function createStudentService(studentRepository: StudentRepositoryFunctions): StudentServiceFunctions {
   return {
-    async getAllStudents() {
-      return studentRepository.findAll()
-    },
-
     async getStudentById(id: number) {
       const student = await studentRepository.findById(id)
       if (!student) {
