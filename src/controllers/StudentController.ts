@@ -1,11 +1,14 @@
 import { Context } from 'hono'
+import { StudentControllerFunctions } from '../types/controllers'
+import { StudentServiceFunctions } from '../types/services'
 
-export class StudentController {
-  constructor(private studentService: any) {}
+export function createStudentController(
+  studentService: StudentServiceFunctions
+): StudentControllerFunctions {
 
-  async getAllStudents(c: Context) {
+  const getAllStudents = async (c: Context) => {
     try {
-      const students = await this.studentService.getAllStudents()
+      const students = await studentService.getAllStudents()
       return c.json(students)
     } catch (error) {
       console.error('Error in getAllStudents:', error)
@@ -13,44 +16,52 @@ export class StudentController {
     }
   }
 
-  async getStudentById(c: Context) {
+  const getStudentById = async (c: Context) => {
     try {
-      const id = c.req.param('id')
-      const student = await this.studentService.getStudentById(id)
+      const id = c.req.param('studentId') || c.req.param('id')
+      const student = await studentService.getStudentById(id)
       return c.json(student)
     } catch (error) {
       return c.json({ error: 'Student not found' }, 404)
     }
   }
 
-  async createStudent(c: Context) {
+  const createStudent = async (c: Context) => {
     try {
       const body = await c.req.json()
-      const student = await this.studentService.createStudent(body)
+      const student = await studentService.createStudent(body)
       return c.json(student, 201)
     } catch (error) {
       return c.json({ error: 'Failed to create student' }, 400)
     }
   }
 
-  async updateStudent(c: Context) {
+  const updateStudent = async (c: Context) => {
     try {
-      const id = c.req.param('id')
+      const id = c.req.param('studentId') || c.req.param('id')
       const body = await c.req.json()
-      const student = await this.studentService.updateStudent(id, body)
+      const student = await studentService.updateStudent(id, body)
       return c.json(student)
     } catch (error) {
       return c.json({ error: 'Failed to update student' }, 400)
     }
   }
 
-  async deleteStudent(c: Context) {
+  const deleteStudent = async (c: Context) => {
     try {
-      const id = c.req.param('id')
-      await this.studentService.deleteStudent(id)
+      const id = c.req.param('studentId') || c.req.param('id')
+      await studentService.deleteStudent(id)
       return c.json({ message: 'Student deleted successfully' })
     } catch (error) {
       return c.json({ error: 'Failed to delete student' }, 400)
     }
+  }
+
+  return {
+    getAllStudents,
+    getStudentById,
+    createStudent,
+    updateStudent,
+    deleteStudent
   }
 }

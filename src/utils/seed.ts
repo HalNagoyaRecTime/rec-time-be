@@ -8,31 +8,31 @@ async function main() {
   // 学生データ
   const students = [
     {
-      studentId: 'S001',
+      studentId: 20001,
       classCode: '1A',
       attendanceNumber: 1,
       name: '田中太郎'
     },
     {
-      studentId: 'S002',
+      studentId: 20002,
       classCode: '1A',
       attendanceNumber: 2,
       name: '佐藤花子'
     },
     {
-      studentId: 'S003',
+      studentId: 20003,
       classCode: '1B',
       attendanceNumber: 1,
       name: '鈴木一郎'
     },
     {
-      studentId: 'S004',
+      studentId: 20004,
       classCode: '1B',
       attendanceNumber: 2,
       name: '高橋美咲'
     },
     {
-      studentId: 'S005',
+      studentId: 20005,
       classCode: '2A',
       attendanceNumber: 1,
       name: '山田健太'
@@ -90,12 +90,12 @@ async function main() {
 
   // 参加データ
   const participations = [
-    { studentId: 'S001', recreationId: createdRecreations[0].recreationId, status: 'registered' },
-    { studentId: 'S002', recreationId: createdRecreations[0].recreationId, status: 'registered' },
-    { studentId: 'S003', recreationId: createdRecreations[1].recreationId, status: 'registered' },
-    { studentId: 'S004', recreationId: createdRecreations[1].recreationId, status: 'registered' },
-    { studentId: 'S005', recreationId: createdRecreations[2].recreationId, status: 'registered' },
-    { studentId: 'S001', recreationId: createdRecreations[2].recreationId, status: 'registered' },
+    { studentId: 20001, recreationId: createdRecreations[0].recreationId, status: 'registered' },
+    { studentId: 20002, recreationId: createdRecreations[0].recreationId, status: 'registered' },
+    { studentId: 20003, recreationId: createdRecreations[1].recreationId, status: 'registered' },
+    { studentId: 20004, recreationId: createdRecreations[1].recreationId, status: 'registered' },
+    { studentId: 20005, recreationId: createdRecreations[2].recreationId, status: 'registered' },
+    { studentId: 20001, recreationId: createdRecreations[2].recreationId, status: 'registered' },
   ]
 
   for (const participation of participations) {

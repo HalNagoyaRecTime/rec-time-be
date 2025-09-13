@@ -15,7 +15,12 @@ export function createRecreationService(recreationRepository: any) {
         offset: options.offset || 0
       }
 
-      return recreationRepository.findAll(queryOptions)
+      const result = await recreationRepository.findAll(queryOptions)
+      
+      return {
+        recreations: result.recreations || result,
+        total: result.total || (Array.isArray(result) ? result.length : 0)
+      }
     },
 
     async getRecreationById(id: number) {

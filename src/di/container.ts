@@ -2,13 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { getPrisma } from '../lib/db'
 import { createStudentRepository } from '../repositories/StudentRepository'
 import { createStudentService } from '../services/StudentService'
-import { StudentController } from '../controllers/StudentController'
+import { createStudentController } from '../controllers/StudentController'
 import { createRecreationRepository } from '../repositories/RecreationRepository'
 import { createRecreationService } from '../services/RecreationService'
-import { RecreationController } from '../controllers/RecreationController'
+import { createRecreationController } from '../controllers/RecreationController'
 import { createParticipationRepository } from '../repositories/ParticipationRepository'
 import { createParticipationService } from '../services/ParticipationService'
-import { ParticipationController } from '../controllers/ParticipationController'
+import { createParticipationController } from '../controllers/ParticipationController'
+import { StudentControllerFunctions } from '../types/controllers'
+import { RecreationControllerFunctions } from '../types/controllers'
+import { ParticipationControllerFunctions } from '../types/controllers'
+
 type Env = {
   DB: D1Database;
 }
@@ -26,10 +30,10 @@ export function createDIContainer(env?: Env) {
   const recreationService = createRecreationService(recreationRepository)
   const participationService = createParticipationService(participationRepository, recreationRepository, studentRepository)
   
-  // Controllers
-  const studentController = new StudentController(studentService)
-  const recreationController = new RecreationController(recreationService)
-  const participationController = new ParticipationController(participationService)
+  // Controllers (function-based)
+  const studentController = createStudentController(studentService)
+  const recreationController = createRecreationController(recreationService)
+  const participationController = createParticipationController(participationService)
 
   return {
     prisma,

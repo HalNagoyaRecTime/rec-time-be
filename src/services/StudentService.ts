@@ -9,7 +9,13 @@ export function createStudentService(studentRepository: any) {
       if (!student) {
         throw new Error('Student not found')
       }
-      return student
+      // Transform to match frontend interface
+      return {
+        studentId: student.studentId.toString(),
+        class: student.classCode,
+        attendanceNumber: student.attendanceNumber.toString(),
+        name: student.name
+      }
     },
 
     async createStudent(data: {

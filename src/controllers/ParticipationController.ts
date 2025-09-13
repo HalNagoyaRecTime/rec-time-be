@@ -1,16 +1,19 @@
 import { Context } from 'hono'
+import { ParticipationControllerFunctions } from '../types/controllers'
+import { ParticipationServiceFunctions } from '../types/services'
 
-export class ParticipationController {
-  constructor(private participationService: any) {}
-
-  async getStudentParticipations(c: Context) {
+export function createParticipationController(
+  participationService: ParticipationServiceFunctions
+): ParticipationControllerFunctions {
+  
+  const getStudentParticipations = async (c: Context) => {
     try {
       const studentId = c.req.param('studentId')
       const status = c.req.query('status')
       const fromDate = c.req.query('from_date')
       const toDate = c.req.query('to_date')
 
-      const participations = await this.participationService.getStudentParticipations(studentId, {
+      const participations = await participationService.getStudentParticipations(studentId, {
         status,
         fromDate,
         toDate
@@ -26,10 +29,10 @@ export class ParticipationController {
     }
   }
 
-  async getRecreationParticipants(c: Context) {
+  const getRecreationParticipants = async (c: Context) => {
     try {
       const recreationId = parseInt(c.req.param('recreationId'))
-      const participants = await this.participationService.getRecreationParticipants(recreationId)
+      const participants = await participationService.getRecreationParticipants(recreationId)
       return c.json(participants)
     } catch (error) {
       console.error('Error in getRecreationParticipants:', error)
@@ -40,10 +43,10 @@ export class ParticipationController {
     }
   }
 
-  async createParticipation(c: Context) {
+  const createParticipation = async (c: Context) => {
     try {
       const body = await c.req.json()
-      const participation = await this.participationService.createParticipation(body)
+      const participation = await participationService.createParticipation(body)
       return c.json(participation, 201)
     } catch (error) {
       console.error('Error in createParticipation:', error)
@@ -70,10 +73,10 @@ export class ParticipationController {
     }
   }
 
-  async cancelParticipation(c: Context) {
+  const cancelParticipation = async (c: Context) => {
     try {
       const participationId = parseInt(c.req.param('participationId'))
-      await this.participationService.cancelParticipation(participationId)
+      await participationService.cancelParticipation(participationId)
       return c.body(null, 204)
     } catch (error) {
       console.error('Error in cancelParticipation:', error)
@@ -87,5 +90,12 @@ export class ParticipationController {
         details: error instanceof Error ? error.message : String(error) 
       }, 400)
     }
+  }
+
+  return {
+    getStudentParticipations,
+    getRecreationParticipants,
+    createParticipation,
+    cancelParticipation
   }
 }

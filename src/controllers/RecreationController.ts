@@ -1,9 +1,12 @@
 import { Context } from 'hono'
+import { RecreationControllerFunctions } from '../types/controllers'
+import { RecreationServiceFunctions } from '../types/services'
 
-export class RecreationController {
-  constructor(private recreationService: any) {}
+export function createRecreationController(
+  recreationService: RecreationServiceFunctions
+): RecreationControllerFunctions {
 
-  async getAllRecreations(c: Context) {
+  const getAllRecreations = async (c: Context) => {
     try {
       const status = c.req.query('status')
       const fromDate = c.req.query('from_date')
@@ -11,7 +14,7 @@ export class RecreationController {
       const limit = c.req.query('limit')
       const offset = c.req.query('offset')
 
-      const result = await this.recreationService.getAllRecreations({
+      const result = await recreationService.getAllRecreations({
         status,
         fromDate,
         toDate,
@@ -34,10 +37,10 @@ export class RecreationController {
     }
   }
 
-  async getRecreationById(c: Context) {
+  const getRecreationById = async (c: Context) => {
     try {
       const id = parseInt(c.req.param('recreationId'))
-      const recreation = await this.recreationService.getRecreationById(id)
+      const recreation = await recreationService.getRecreationById(id)
       return c.json(recreation)
     } catch (error) {
       console.error('Error in getRecreationById:', error)
@@ -51,10 +54,10 @@ export class RecreationController {
     }
   }
 
-  async createRecreation(c: Context) {
+  const createRecreation = async (c: Context) => {
     try {
       const body = await c.req.json()
-      const recreation = await this.recreationService.createRecreation(body)
+      const recreation = await recreationService.createRecreation(body)
       return c.json(recreation, 201)
     } catch (error) {
       console.error('Error in createRecreation:', error)
@@ -65,11 +68,11 @@ export class RecreationController {
     }
   }
 
-  async updateRecreation(c: Context) {
+  const updateRecreation = async (c: Context) => {
     try {
       const id = parseInt(c.req.param('recreationId'))
       const body = await c.req.json()
-      const recreation = await this.recreationService.updateRecreation(id, body)
+      const recreation = await recreationService.updateRecreation(id, body)
       return c.json(recreation)
     } catch (error) {
       console.error('Error in updateRecreation:', error)
@@ -80,10 +83,10 @@ export class RecreationController {
     }
   }
 
-  async deleteRecreation(c: Context) {
+  const deleteRecreation = async (c: Context) => {
     try {
       const id = parseInt(c.req.param('recreationId'))
-      await this.recreationService.deleteRecreation(id)
+      await recreationService.deleteRecreation(id)
       return c.json({ message: 'Recreation deleted successfully' })
     } catch (error) {
       console.error('Error in deleteRecreation:', error)
@@ -92,5 +95,13 @@ export class RecreationController {
         details: error instanceof Error ? error.message : String(error) 
       }, 400)
     }
+  }
+
+  return {
+    getAllRecreations,
+    getRecreationById,
+    createRecreation,
+    updateRecreation,
+    deleteRecreation
   }
 }

@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Student {
-  studentId        String          @id @map("student_id")
+  studentId        Int             @id @map("student_id")
   classCode        String          @map("class_code")
   attendanceNumber Int             @map("attendance_number")
   name             String
@@ -32,6 +32,8 @@ model Recreation {
   location         String
   startDatetime    DateTime           @map("start_datetime")
   endDatetime      DateTime           @map("end_datetime")
+  startTime        Int?               @map("start_time") // 0910形式
+  endTime          Int?               @map("end_time")   // 1630形式
   maxParticipants  Int                @map("max_participants")
   status           String             @default("scheduled")
   createdAt        DateTime           @default(now()) @map("created_at")
@@ -45,7 +47,7 @@ model Recreation {
 
 model Participation {
   participationId  Int                 @id @default(autoincrement()) @map("participation_id")
-  studentId        String              @map("student_id")
+  studentId        Int                 @map("student_id")
   recreationId     Int                 @map("recreation_id")
   status           String              @default("registered")
   registeredAt     DateTime            @default(now()) @map("registered_at")

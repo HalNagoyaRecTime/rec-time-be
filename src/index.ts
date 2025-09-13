@@ -47,7 +47,7 @@ apiV1.delete('/participations/:participationId', (c) => participationController.
 app.route('/api/v1', apiV1)
 
 
-const port = 3000
+const port = 8080
 console.log(`Server is running on http://localhost:${port}`)
 console.log(`API documentation: http://localhost:${port}/swagger.yml`)
 console.log(`API v1 base URL: http://localhost:${port}/api/v1`)
