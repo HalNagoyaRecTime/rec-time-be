@@ -1,1 +1,1 @@
-export { createStudentUseCases, type StudentUseCases } from './StudentUseCases'
+export { StudentUseCases, createStudentUseCases } from './StudentUseCases'

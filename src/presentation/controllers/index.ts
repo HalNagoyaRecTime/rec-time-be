@@ -1,1 +1,1 @@
-export { createStudentController, type StudentController } from './StudentController'
+export { StudentController, createStudentController } from './StudentController'

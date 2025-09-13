@@ -1,8 +1,7 @@
 import { Context } from 'hono'
-import { RecreationService } from '../services/RecreationService'
 
 export class RecreationController {
-  constructor(private recreationService: RecreationService) {}
+  constructor(private recreationService: any) {}
 
   async getAllRecreations(c: Context) {
     try {

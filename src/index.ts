@@ -1,34 +1,15 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serve } from '@hono/node-server'
-import { PrismaClient } from '@prisma/client'
-import { StudentRepository } from './repositories/StudentRepository'
-import { StudentService } from './services/StudentService'
-import { StudentController } from './controllers/StudentController'
-import { RecreationRepository } from './repositories/RecreationRepository'
-import { RecreationService } from './services/RecreationService'
-import { RecreationController } from './controllers/RecreationController'
-import { ParticipationRepository } from './repositories/ParticipationRepository'
-import { ParticipationService } from './services/ParticipationService'
-import { ParticipationController } from './controllers/ParticipationController'
+import { getDIContainer } from './di/container'
 
 const app = new Hono()
 
 app.use('*', cors())
 
-// Initialize dependencies with regular Prisma (local SQLite)
-const prisma = new PrismaClient()
-const studentRepository = new StudentRepository(prisma)
-const studentService = new StudentService(studentRepository)
-const studentController = new StudentController(studentService)
-
-const recreationRepository = new RecreationRepository(prisma)
-const recreationService = new RecreationService(recreationRepository)
-const recreationController = new RecreationController(recreationService)
-
-const participationRepository = new ParticipationRepository(prisma)
-const participationService = new ParticipationService(participationRepository, recreationRepository, studentRepository)
-const participationController = new ParticipationController(participationService)
+// Initialize dependencies through DI container
+const container = getDIContainer()
+const { studentController, recreationController, participationController } = container
 
 app.get('/', (c) => {
   return c.json({
@@ -65,12 +46,6 @@ apiV1.delete('/participations/:participationId', (c) => participationController.
 // Mount API v1
 app.route('/api/v1', apiV1)
 
-// Legacy routes for backward compatibility
-app.get('/api/students', (c) => studentController.getAllStudents(c))
-app.get('/api/students/:id', (c) => studentController.getStudentById(c))
-app.post('/api/students', (c) => studentController.createStudent(c))
-app.put('/api/students/:id', (c) => studentController.updateStudent(c))
-app.delete('/api/students/:id', (c) => studentController.deleteStudent(c))
 
 const port = 3000
 console.log(`Server is running on http://localhost:${port}`)

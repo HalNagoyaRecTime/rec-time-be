@@ -1,8 +1,7 @@
 import { Context } from 'hono'
-import { StudentService } from '../services/StudentService'
 
 export class StudentController {
-  constructor(private studentService: StudentService) {}
+  constructor(private studentService: any) {}
 
   async getAllStudents(c: Context) {
     try {

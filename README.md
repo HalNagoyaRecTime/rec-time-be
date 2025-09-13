@@ -85,14 +85,33 @@ npm run db:seed
 
 ```
 be/
-├── src/                    # アプリケーションソースコード
-│   └── utils/             # ユーティリティ（シードデータなど）
-├── prisma/                 # Prismaスキーマとマイグレーション
-│   └── schema.prisma      # データベーススキーマ定義
-├── dev.db                  # SQLiteデータベースファイル
-├── .env                    # 環境変数設定
-├── package.json           # 依存関係とスクリプト
-└── README.md              # プロジェクトドキュメント
+├── src/                           # アプリケーションソースコード
+│   ├── application/              # アプリケーション層
+│   │   └── usecases/            # ユースケース
+│   ├── controllers/             # コントローラー（レガシー）
+│   ├── di/                      # 依存性注入
+│   ├── domain/                  # ドメイン層
+│   │   ├── entities/           # エンティティ
+│   │   └── repositories/       # リポジトリインターフェース
+│   ├── infrastructure/          # インフラストラクチャ層
+│   │   └── database/          # データベース設定
+│   ├── lib/                     # ライブラリ
+│   ├── presentation/            # プレゼンテーション層
+│   │   ├── controllers/        # APIコントローラー
+│   │   └── routes/            # ルーティング
+│   ├── repositories/            # リポジトリ実装
+│   ├── services/               # サービス
+│   └── utils/                  # ユーティリティ
+├── prisma/                      # Prismaスキーマとマイグレーション
+│   └── schema.prisma          # データベーススキーマ定義
+├── migrations/                  # データベースマイグレーション
+├── .env                        # 環境変数設定
+├── .env.example               # 環境変数設定例
+├── package.json               # 依存関係とスクリプト
+├── swagger.yml                # API仕様書
+├── tsconfig.json              # TypeScript設定
+├── wrangler.toml              # Cloudflare Workers設定
+└── README.md                  # プロジェクトドキュメント
 ```
 
 ## 利用可能なコマンド

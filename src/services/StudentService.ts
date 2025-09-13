@@ -1,38 +1,36 @@
-import { StudentRepository } from '../repositories/StudentRepository'
+export function createStudentService(studentRepository: any) {
+  return {
+    async getAllStudents() {
+      return studentRepository.findAll()
+    },
 
-export class StudentService {
-  constructor(private studentRepository: StudentRepository) {}
+    async getStudentById(id: string) {
+      const student = await studentRepository.findById(id)
+      if (!student) {
+        throw new Error('Student not found')
+      }
+      return student
+    },
 
-  async getAllStudents() {
-    return this.studentRepository.findAll()
-  }
+    async createStudent(data: {
+      studentId: string
+      classCode: string
+      attendanceNumber: number
+      name: string
+    }) {
+      return studentRepository.create(data)
+    },
 
-  async getStudentById(id: string) {
-    const student = await this.studentRepository.findById(id)
-    if (!student) {
-      throw new Error('Student not found')
+    async updateStudent(id: string, data: {
+      classCode?: string
+      attendanceNumber?: number
+      name?: string
+    }) {
+      return studentRepository.update(id, data)
+    },
+
+    async deleteStudent(id: string) {
+      return studentRepository.delete(id)
     }
-    return student
-  }
-
-  async createStudent(data: {
-    studentId: string
-    classCode: string
-    attendanceNumber: number
-    name: string
-  }) {
-    return this.studentRepository.create(data)
-  }
-
-  async updateStudent(id: string, data: {
-    classCode?: string
-    attendanceNumber?: number
-    name?: string
-  }) {
-    return this.studentRepository.update(id, data)
-  }
-
-  async deleteStudent(id: string) {
-    return this.studentRepository.delete(id)
   }
 }

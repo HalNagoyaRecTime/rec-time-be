@@ -1,8 +1,7 @@
 import { Context } from 'hono'
-import { ParticipationService } from '../services/ParticipationService'
 
 export class ParticipationController {
-  constructor(private participationService: ParticipationService) {}
+  constructor(private participationService: any) {}
 
   async getStudentParticipations(c: Context) {
     try {

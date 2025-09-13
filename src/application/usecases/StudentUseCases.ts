@@ -1,28 +1,30 @@
 import type { Student } from '../../domain/entities'
 import type { StudentRepository, CreateStudentInput } from '../../domain/repositories'
 
-export function createStudentUseCases(studentRepository: StudentRepository) {
-  return {
-    getAllStudents: async (): Promise<Student[]> => {
-      return studentRepository.findMany()
-    },
+export class StudentUseCases {
+  constructor(private studentRepository: StudentRepository) {}
 
-    getStudentById: async (id: string): Promise<Student | null> => {
-      return studentRepository.findById(id)
-    },
+  async getAllStudents(): Promise<Student[]> {
+    return this.studentRepository.findMany()
+  }
 
-    createStudent: async (data: CreateStudentInput): Promise<Student> => {
-      return studentRepository.create(data)
-    },
+  async getStudentById(id: string): Promise<Student | null> {
+    return this.studentRepository.findById(id)
+  }
 
-    updateStudent: async (id: string, data: Partial<CreateStudentInput>): Promise<Student> => {
-      return studentRepository.update(id, data)
-    },
+  async createStudent(data: CreateStudentInput): Promise<Student> {
+    return this.studentRepository.create(data)
+  }
 
-    deleteStudent: async (id: string): Promise<void> => {
-      return studentRepository.delete(id)
-    }
+  async updateStudent(id: string, data: Partial<CreateStudentInput>): Promise<Student> {
+    return this.studentRepository.update(id, data)
+  }
+
+  async deleteStudent(id: string): Promise<void> {
+    return this.studentRepository.delete(id)
   }
 }
 
-export type StudentUseCases = ReturnType<typeof createStudentUseCases>
+export function createStudentUseCases(studentRepository: StudentRepository) {
+  return new StudentUseCases(studentRepository)
+}
