@@ -19,7 +19,7 @@ export function createStudentController(
   const getStudentById = async (c: Context) => {
     try {
       const id = c.req.param('studentId') || c.req.param('id')
-      const student = await studentService.getStudentById(id)
+      const student = await studentService.getStudentById(parseInt(id))
       return c.json(student)
     } catch (error) {
       return c.json({ error: 'Student not found' }, 404)
@@ -40,7 +40,7 @@ export function createStudentController(
     try {
       const id = c.req.param('studentId') || c.req.param('id')
       const body = await c.req.json()
-      const student = await studentService.updateStudent(id, body)
+      const student = await studentService.updateStudent(parseInt(id), body)
       return c.json(student)
     } catch (error) {
       return c.json({ error: 'Failed to update student' }, 400)
@@ -50,7 +50,7 @@ export function createStudentController(
   const deleteStudent = async (c: Context) => {
     try {
       const id = c.req.param('studentId') || c.req.param('id')
-      await studentService.deleteStudent(id)
+      await studentService.deleteStudent(parseInt(id))
       return c.json({ message: 'Student deleted successfully' })
     } catch (error) {
       return c.json({ error: 'Failed to delete student' }, 400)

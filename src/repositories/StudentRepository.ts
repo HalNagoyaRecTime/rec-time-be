@@ -6,14 +6,14 @@ export function createStudentRepository(prisma: PrismaClient) {
       return prisma.student.findMany()
     },
 
-    async findById(id: string) {
+    async findById(id: number) {
       return prisma.student.findUnique({
-        where: { studentId: parseInt(id) }
+        where: { studentId: id }
       })
     },
 
     async create(data: {
-      studentId: string
+      studentId: number
       classCode: string
       attendanceNumber: number
       name: string
@@ -21,25 +21,25 @@ export function createStudentRepository(prisma: PrismaClient) {
       return prisma.student.create({ 
         data: {
           ...data,
-          studentId: parseInt(data.studentId)
-        }
+          studentId: data.studentId
+        } 
       })
     },
 
-    async update(id: string, data: {
+    async update(id: number, data: {
       classCode?: string
       attendanceNumber?: number
       name?: string
     }) {
       return prisma.student.update({
-        where: { studentId: parseInt(id) },
+        where: { studentId: id },
         data
       })
     },
 
-    async delete(id: string) {
-      return prisma.student.delete({
-        where: { studentId: parseInt(id) }
+    async delete(id: number) {
+      await prisma.student.delete({
+        where: { studentId: id }
       })
     }
   }

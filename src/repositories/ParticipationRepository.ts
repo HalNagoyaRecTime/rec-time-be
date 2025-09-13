@@ -123,7 +123,7 @@ export function createParticipationRepository(prisma: PrismaClient) {
     },
 
     async delete(id: number) {
-      return prisma.participation.delete({
+      await prisma.participation.delete({
         where: { participationId: id }
       })
     }

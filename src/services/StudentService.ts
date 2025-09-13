@@ -1,10 +1,12 @@
-export function createStudentService(studentRepository: any) {
+import { StudentRepositoryFunctions, StudentServiceFunctions } from "../types"
+
+export function createStudentService(studentRepository: StudentRepositoryFunctions): StudentServiceFunctions {
   return {
     async getAllStudents() {
       return studentRepository.findAll()
     },
 
-    async getStudentById(id: string) {
+    async getStudentById(id: number) {
       const student = await studentRepository.findById(id)
       if (!student) {
         throw new Error('Student not found')
@@ -17,26 +19,5 @@ export function createStudentService(studentRepository: any) {
         name: student.name
       }
     },
-
-    async createStudent(data: {
-      studentId: string
-      classCode: string
-      attendanceNumber: number
-      name: string
-    }) {
-      return studentRepository.create(data)
-    },
-
-    async updateStudent(id: string, data: {
-      classCode?: string
-      attendanceNumber?: number
-      name?: string
-    }) {
-      return studentRepository.update(id, data)
-    },
-
-    async deleteStudent(id: string) {
-      return studentRepository.delete(id)
-    }
   }
 }

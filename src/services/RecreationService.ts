@@ -1,14 +1,18 @@
-export function createRecreationService(recreationRepository: any) {
+import { RecreationRepositoryFunctions, RecreationServiceFunctions } from "../types"
+
+export function createRecreationService(recreationRepository: RecreationRepositoryFunctions): RecreationServiceFunctions {
   return {
     async getAllRecreations(options: {
       status?: string
-      fromTime?: number
-      toTime?: number
+      fromDate?: string
+      toDate?: string
       limit?: number
       offset?: number
     }) {
       const result = await recreationRepository.findAll({
         ...options,
+        fromTime: options.fromDate ? new Date(options.fromDate).getTime() : undefined,
+        toTime: options.toDate ? new Date(options.toDate).getTime() : undefined,
         limit: options.limit || 50,
         offset: options.offset || 0
       })
@@ -25,34 +29,6 @@ export function createRecreationService(recreationRepository: any) {
         throw new Error('Recreation not found')
       }
       return recreation
-    },
-
-    async createRecreation(data: {
-      title: string
-      description?: string
-      location: string
-      startTime: number
-      endTime: number
-      maxParticipants: number
-      status?: string
-    }) {
-      return recreationRepository.create(data)
-    },
-
-    async updateRecreation(id: number, data: {
-      title?: string
-      description?: string
-      location?: string
-      startTime?: number
-      endTime?: number
-      maxParticipants?: number
-      status?: string
-    }) {
-      return recreationRepository.update(id, data)
-    },
-
-    async deleteRecreation(id: number) {
-      return recreationRepository.delete(id)
     }
   }
 }

@@ -7,26 +7,18 @@ export type ControllerFunction = (c: Context) => Promise<Response>
 export interface StudentControllerFunctions {
   getAllStudents: ControllerFunction
   getStudentById: ControllerFunction
-  createStudent: ControllerFunction
-  updateStudent: ControllerFunction
-  deleteStudent: ControllerFunction
 }
 
 // Recreation Controller Functions
 export interface RecreationControllerFunctions {
   getAllRecreations: ControllerFunction
   getRecreationById: ControllerFunction
-  createRecreation: ControllerFunction
-  updateRecreation: ControllerFunction
-  deleteRecreation: ControllerFunction
 }
 
 // Participation Controller Functions
 export interface ParticipationControllerFunctions {
   getStudentParticipations: ControllerFunction
   getRecreationParticipants: ControllerFunction
-  createParticipation: ControllerFunction
-  cancelParticipation: ControllerFunction
 }
 
 // All Controller Functions

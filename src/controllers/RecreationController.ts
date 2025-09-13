@@ -54,54 +54,10 @@ export function createRecreationController(
     }
   }
 
-  const createRecreation = async (c: Context) => {
-    try {
-      const body = await c.req.json()
-      const recreation = await recreationService.createRecreation(body)
-      return c.json(recreation, 201)
-    } catch (error) {
-      console.error('Error in createRecreation:', error)
-      return c.json({ 
-        error: 'Failed to create recreation', 
-        details: error instanceof Error ? error.message : String(error) 
-      }, 400)
-    }
-  }
 
-  const updateRecreation = async (c: Context) => {
-    try {
-      const id = parseInt(c.req.param('recreationId'))
-      const body = await c.req.json()
-      const recreation = await recreationService.updateRecreation(id, body)
-      return c.json(recreation)
-    } catch (error) {
-      console.error('Error in updateRecreation:', error)
-      return c.json({ 
-        error: 'Failed to update recreation', 
-        details: error instanceof Error ? error.message : String(error) 
-      }, 400)
-    }
-  }
-
-  const deleteRecreation = async (c: Context) => {
-    try {
-      const id = parseInt(c.req.param('recreationId'))
-      await recreationService.deleteRecreation(id)
-      return c.json({ message: 'Recreation deleted successfully' })
-    } catch (error) {
-      console.error('Error in deleteRecreation:', error)
-      return c.json({ 
-        error: 'Failed to delete recreation', 
-        details: error instanceof Error ? error.message : String(error) 
-      }, 400)
-    }
-  }
 
   return {
     getAllRecreations,
     getRecreationById,
-    createRecreation,
-    updateRecreation,
-    deleteRecreation
   }
 }

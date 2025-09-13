@@ -9,7 +9,7 @@ app.use('*', cors())
 
 // Initialize dependencies through DI container
 const container = getDIContainer()
-const { studentController, recreationController, participationController } = container
+const { studentController, recreationController } = container
 
 app.get('/', (c) => {
   return c.json({
@@ -18,7 +18,6 @@ app.get('/', (c) => {
     endpoints: {
       students: '/api/v1/students/{studentId}',
       recreations: '/api/v1/recreations',
-      participations: '/api/v1/participations',
     },
     swagger: '/swagger.yml'
   })
@@ -29,19 +28,10 @@ const apiV1 = new Hono()
 
 // Student routes
 apiV1.get('/students/:studentId', (c) => studentController.getStudentById(c))
-apiV1.get('/students/:studentId/participations', (c) => participationController.getStudentParticipations(c))
 
 // Recreation routes
 apiV1.get('/recreations', (c) => recreationController.getAllRecreations(c))
 apiV1.get('/recreations/:recreationId', (c) => recreationController.getRecreationById(c))
-apiV1.get('/recreations/:recreationId/competitions', (c) => participationController.getRecreationParticipants(c))
-apiV1.post('/recreations', (c) => recreationController.createRecreation(c))
-apiV1.put('/recreations/:recreationId', (c) => recreationController.updateRecreation(c))
-apiV1.delete('/recreations/:recreationId', (c) => recreationController.deleteRecreation(c))
-
-// Participation routes
-apiV1.post('/participations', (c) => participationController.createParticipation(c))
-apiV1.delete('/participations/:participationId', (c) => participationController.cancelParticipation(c))
 
 // Mount API v1
 app.route('/api/v1', apiV1)

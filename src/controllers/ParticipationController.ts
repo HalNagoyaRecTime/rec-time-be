@@ -13,7 +13,7 @@ export function createParticipationController(
       const fromDate = c.req.query('from_date')
       const toDate = c.req.query('to_date')
 
-      const participations = await participationService.getStudentParticipations(studentId, {
+      const participations = await participationService.getStudentParticipations(parseInt(studentId), {
         status,
         fromDate,
         toDate

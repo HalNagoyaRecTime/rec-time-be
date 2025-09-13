@@ -128,7 +128,7 @@ export function createRecreationRepository(prisma: PrismaClient) {
     },
 
     async delete(id: number) {
-      return prisma.recreation.delete({
+      await prisma.recreation.delete({
         where: { recreationId: id }
       })
     }
