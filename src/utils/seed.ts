@@ -48,33 +48,50 @@ async function main() {
     console.log(`学生を登録: ${student.name} (${student.studentId})`)
   }
 
-  // レクリエーションデータ
+  // レクリエーションデータ（今日の日付: 2025-09-13）
   const recreations = [
     {
-      title: 'スポーツフェスティバル',
-      description: '年次恒例の体育祭です',
+      title: 'バスケットボール大会',
+      description: '3on3バスケットボールトーナメント',
       location: '体育館',
-      startDatetime: new Date('2024-05-15T09:00:00Z'),
-      endDatetime: new Date('2024-05-15T17:00:00Z'),
-      maxParticipants: 100,
+      startDatetime: new Date('2025-09-13T11:00:00Z'),
+      endDatetime: new Date('2025-09-13T13:00:00Z'),
+      startTime: 1100,
+      endTime: 1300,
+      maxParticipants: 24,
       status: 'scheduled'
     },
     {
-      title: '文化祭',
-      description: '学生による文化祭の開催',
-      location: '学校全体',
-      startDatetime: new Date('2024-06-20T10:00:00Z'),
-      endDatetime: new Date('2024-06-20T16:00:00Z'),
-      maxParticipants: 200,
+      title: '文化祭準備',
+      description: '来月の文化祭に向けた展示物準備',
+      location: '第1教室',
+      startDatetime: new Date('2025-09-13T14:00:00Z'),
+      endDatetime: new Date('2025-09-13T16:00:00Z'),
+      startTime: 1400,
+      endTime: 1600,
+      maxParticipants: 30,
       status: 'scheduled'
     },
     {
-      title: 'ゲーム大会',
-      description: 'eスポーツとボードゲームの大会',
-      location: '第2教室',
-      startDatetime: new Date('2024-07-10T13:00:00Z'),
-      endDatetime: new Date('2024-07-10T18:00:00Z'),
+      title: '英語スピーチコンテスト',
+      description: '学年対抗英語プレゼンテーション大会',
+      location: '講堂',
+      startDatetime: new Date('2025-09-13T16:30:00Z'),
+      endDatetime: new Date('2025-09-13T18:00:00Z'),
+      startTime: 1630,
+      endTime: 1800,
       maxParticipants: 50,
+      status: 'scheduled'
+    },
+    {
+      title: 'プログラミング勉強会',
+      description: 'React/TypeScript実践セッション',
+      location: 'PC教室',
+      startDatetime: new Date('2025-09-13T19:00:00Z'),
+      endDatetime: new Date('2025-09-13T21:00:00Z'),
+      startTime: 1900,
+      endTime: 2100,
+      maxParticipants: 20,
       status: 'scheduled'
     }
   ]

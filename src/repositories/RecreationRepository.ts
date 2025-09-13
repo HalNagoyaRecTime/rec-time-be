@@ -47,6 +47,17 @@ export function createRecreationRepository(prisma: PrismaClient) {
           orderBy: { startDatetime: 'asc' },
           take: options.limit,
           skip: options.offset,
+          include: {
+            participations: {
+              where: {
+                status: 'registered'
+              },
+              select: {
+                studentId: true,
+                status: true
+              }
+            }
+          }
         }),
         prisma.recreation.count({ where })
       ])
