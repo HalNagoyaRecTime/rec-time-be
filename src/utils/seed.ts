@@ -1,49 +1,48 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-
   // 学生データ
   const students = [
     {
       studentId: 20001,
       classCode: '1A',
       attendanceNumber: 1,
-      name: '田中太郎'
+      name: '田中太郎',
     },
     {
       studentId: 20002,
       classCode: '1A',
       attendanceNumber: 2,
-      name: '佐藤花子'
+      name: '佐藤花子',
     },
     {
       studentId: 20003,
       classCode: '1B',
       attendanceNumber: 1,
-      name: '鈴木一郎'
+      name: '鈴木一郎',
     },
     {
       studentId: 20004,
       classCode: '1B',
       attendanceNumber: 2,
-      name: '高橋美咲'
+      name: '高橋美咲',
     },
     {
       studentId: 20005,
       classCode: '2A',
       attendanceNumber: 1,
-      name: '山田健太'
-    }
-  ]
+      name: '山田健太',
+    },
+  ];
 
   for (const student of students) {
     await prisma.student.upsert({
       where: { studentId: student.studentId },
       update: {},
       create: student,
-    })
+    });
   }
 
   // レクリエーションデータ
@@ -55,7 +54,7 @@ async function main() {
       startTime: 1100,
       endTime: 1300,
       maxParticipants: 24,
-      status: 'scheduled'
+      status: 'scheduled',
     },
     {
       title: '文化祭準備',
@@ -64,7 +63,7 @@ async function main() {
       startTime: 1400,
       endTime: 1600,
       maxParticipants: 30,
-      status: 'scheduled'
+      status: 'scheduled',
     },
     {
       title: '英語スピーチコンテスト',
@@ -73,7 +72,7 @@ async function main() {
       startTime: 1630,
       endTime: 1800,
       maxParticipants: 50,
-      status: 'scheduled'
+      status: 'scheduled',
     },
     {
       title: 'プログラミング勉強会',
@@ -82,43 +81,64 @@ async function main() {
       startTime: 1900,
       endTime: 2100,
       maxParticipants: 20,
-      status: 'scheduled'
-    }
-  ]
+      status: 'scheduled',
+    },
+  ];
 
-  const createdRecreations = []
+  const createdRecreations = [];
   for (const recreation of recreations) {
     const created = await prisma.recreation.create({
-      data: recreation
-    })
-    createdRecreations.push(created)
+      data: recreation,
+    });
+    createdRecreations.push(created);
   }
 
   // 参加データ
   const participations = [
-    { studentId: 20001, recreationId: createdRecreations[0].recreationId, status: 'registered' },
-    { studentId: 20002, recreationId: createdRecreations[0].recreationId, status: 'registered' },
-    { studentId: 20003, recreationId: createdRecreations[1].recreationId, status: 'registered' },
-    { studentId: 20004, recreationId: createdRecreations[1].recreationId, status: 'registered' },
-    { studentId: 20005, recreationId: createdRecreations[2].recreationId, status: 'registered' },
-    { studentId: 20001, recreationId: createdRecreations[2].recreationId, status: 'registered' },
-  ]
+    {
+      studentId: 20001,
+      recreationId: createdRecreations[0].recreationId,
+      status: 'registered',
+    },
+    {
+      studentId: 20002,
+      recreationId: createdRecreations[0].recreationId,
+      status: 'registered',
+    },
+    {
+      studentId: 20003,
+      recreationId: createdRecreations[1].recreationId,
+      status: 'registered',
+    },
+    {
+      studentId: 20004,
+      recreationId: createdRecreations[1].recreationId,
+      status: 'registered',
+    },
+    {
+      studentId: 20005,
+      recreationId: createdRecreations[2].recreationId,
+      status: 'registered',
+    },
+    {
+      studentId: 20001,
+      recreationId: createdRecreations[2].recreationId,
+      status: 'registered',
+    },
+  ];
 
   for (const participation of participations) {
     await prisma.participation.upsert({
       where: {
         studentId_recreationId: {
           studentId: participation.studentId,
-          recreationId: participation.recreationId
-        }
+          recreationId: participation.recreationId,
+        },
       },
       update: {},
-      create: participation
-    })
+      create: participation,
+    });
   }
-
 }
 
-main()
-  .catch(() => {
-  })
+main().catch(() => {});

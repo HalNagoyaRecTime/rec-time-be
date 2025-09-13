@@ -1,13 +1,13 @@
-import { Context } from 'hono'
+import { Context } from 'hono';
 
-export type ControllerFunction = (c: Context) => Promise<any>
+export type ControllerFunction = (c: Context) => Promise<any>;
 
 export interface StudentControllerFunctions {
-  getStudentById: ControllerFunction
+  getStudentById: ControllerFunction;
 }
 
 // Recreation Controller Functions
 export interface RecreationControllerFunctions {
-  getAllRecreations: ControllerFunction
-  getRecreationById: ControllerFunction
+  getAllRecreations: ControllerFunction;
+  getRecreationById: ControllerFunction;
 }

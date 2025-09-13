@@ -1,45 +1,45 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 function buildWhereClause(options: {
-  status?: string
-  fromTime?: number
-  toTime?: number
+  status?: string;
+  fromTime?: number;
+  toTime?: number;
 }) {
   const where: {
-    status?: string
+    status?: string;
     startTime?: {
-      gte?: number
-      lte?: number
-    }
-  } = {}
+      gte?: number;
+      lte?: number;
+    };
+  } = {};
 
   if (options.status) {
-    where.status = options.status
+    where.status = options.status;
   }
 
   if (options.fromTime || options.toTime) {
-    where.startTime = {}
+    where.startTime = {};
     if (options.fromTime) {
-      where.startTime.gte = options.fromTime
+      where.startTime.gte = options.fromTime;
     }
     if (options.toTime) {
-      where.startTime.lte = options.toTime
+      where.startTime.lte = options.toTime;
     }
   }
 
-  return where
+  return where;
 }
 
 export function createRecreationRepository(prisma: PrismaClient) {
   return {
     async findAll(options: {
-      status?: string
-      fromTime?: number
-      toTime?: number
-      limit?: number
-      offset?: number
+      status?: string;
+      fromTime?: number;
+      toTime?: number;
+      limit?: number;
+      offset?: number;
     }) {
-      const where = buildWhereClause(options)
+      const where = buildWhereClause(options);
 
       const [recreations, total] = await Promise.all([
         prisma.recreation.findMany({
@@ -50,19 +50,19 @@ export function createRecreationRepository(prisma: PrismaClient) {
           include: {
             participations: {
               where: {
-                status: 'registered'
+                status: 'registered',
               },
               select: {
                 studentId: true,
-                status: true
-              }
-            }
-          }
+                status: true,
+              },
+            },
+          },
         }),
-        prisma.recreation.count({ where })
-      ])
+        prisma.recreation.count({ where }),
+      ]);
 
-      return { recreations, total }
+      return { recreations, total };
     },
 
     async findByIdWithParticipantCount(id: number) {
@@ -73,20 +73,20 @@ export function createRecreationRepository(prisma: PrismaClient) {
             select: {
               participations: {
                 where: {
-                  status: { not: 'cancelled' }
-                }
-              }
-            }
-          }
-        }
-      })
+                  status: { not: 'cancelled' },
+                },
+              },
+            },
+          },
+        },
+      });
 
-      if (!recreation) return null
+      if (!recreation) return null;
 
       return {
         ...recreation,
-        current_participants: recreation._count.participations
-      }
-    }
-  }
+        current_participants: recreation._count.participations,
+      };
+    },
+  };
 }

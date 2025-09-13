@@ -1,12 +1,17 @@
-import { StudentEntity, StudentRepositoryFunctions, StudentServiceFunctions } from "../types"
+import {
+  StudentEntity,
+  StudentRepositoryFunctions,
+  StudentServiceFunctions,
+} from '../types';
 
-export function createStudentService(studentRepository: StudentRepositoryFunctions): StudentServiceFunctions {
+export function createStudentService(
+  studentRepository: StudentRepositoryFunctions
+): StudentServiceFunctions {
   return {
-    async getStudentById(id: number) 
-      : Promise<StudentEntity> {
-      const student = await studentRepository.findById(id)
+    async getStudentById(id: number): Promise<StudentEntity> {
+      const student = await studentRepository.findById(id);
       if (!student) {
-        throw new Error('Student not found')
+        throw new Error('Student not found');
       }
       // Transform to match frontend interface
       return {
@@ -15,8 +20,8 @@ export function createStudentService(studentRepository: StudentRepositoryFunctio
         attendanceNumber: student.attendanceNumber,
         name: student.name,
         createdAt: student.createdAt,
-        updatedAt: student.updatedAt
-      }
+        updatedAt: student.updatedAt,
+      };
     },
-  }
+  };
 }

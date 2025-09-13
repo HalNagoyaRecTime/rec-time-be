@@ -16,11 +16,10 @@ export function getPrisma(env?: Env): PrismaClient {
   if (!env?.DB) {
     return globalForPrisma.prisma ?? new PrismaClient();
   }
-  
+
   // 本番のCloudflare Workers環境でD1を使用
   const adapter = new PrismaD1(env.DB);
-  return new PrismaClient({ adapter })
-    
+  return new PrismaClient({ adapter });
 }
 
 // ローカル開発用の既存エクスポート（後方互換性のため）
