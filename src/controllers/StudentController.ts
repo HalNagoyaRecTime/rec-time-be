@@ -12,7 +12,10 @@ export function createStudentController(
       const student = await studentService.getStudentById(parseInt(id))
       return c.json(student)
     } catch (error) {
-      return c.json({ error: 'Student not found' }, 404)
+      if (error instanceof Error && error.message === 'Student not found') {
+        return c.json({ error: 'Student not found' }, 404)
+      }
+      return c.json({ error: 'Failed to fetch student' }, 500)
     }
   }
 
@@ -20,3 +23,4 @@ export function createStudentController(
     getStudentById
   }
 }
+

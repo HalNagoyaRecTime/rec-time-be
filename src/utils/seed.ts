@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('シードデータを投入中...')
 
   // 学生データ
   const students = [
@@ -45,7 +44,6 @@ async function main() {
       update: {},
       create: student,
     })
-    console.log(`学生を登録: ${student.name} (${student.studentId})`)
   }
 
   // レクリエーションデータ
@@ -94,7 +92,6 @@ async function main() {
       data: recreation
     })
     createdRecreations.push(created)
-    console.log(`レクリエーションを登録: ${recreation.title} (ID: ${created.recreationId})`)
   }
 
   // 参加データ
@@ -118,13 +115,10 @@ async function main() {
       update: {},
       create: participation
     })
-    console.log(`参加登録: 学生ID ${participation.studentId} → レクリエーションID ${participation.recreationId}`)
   }
 
-  console.log('シードデータの投入が完了しました！')
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
+  .catch(() => {
   })

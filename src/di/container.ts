@@ -6,9 +6,7 @@ import { createStudentController } from '../controllers/StudentController'
 import { createRecreationRepository } from '../repositories/RecreationRepository'
 import { createRecreationService } from '../services/RecreationService'
 import { createRecreationController } from '../controllers/RecreationController'
-import { StudentControllerFunctions } from '../types/controllers'
-import { RecreationControllerFunctions } from '../types/controllers'
-
+import { D1Database } from '@cloudflare/workers-types'
 type Env = {
   DB: D1Database;
 }

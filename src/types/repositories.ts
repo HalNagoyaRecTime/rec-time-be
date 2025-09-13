@@ -1,8 +1,10 @@
-import { RecreationEntity } from "./domains"
+import { RecreationEntity, StudentEntity } from "./domains"
 
 // Student Repository Types
 export interface StudentRepositoryFunctions {
-  findById: (id: number) => Promise<any | null>
+  findById: (id: number) => Promise<
+    StudentEntity | null
+  >
 }
 
 // Recreation Repository Types

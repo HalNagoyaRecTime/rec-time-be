@@ -1,9 +1,7 @@
 import { Context } from 'hono'
 
-// Base Controller Function Type
-export type ControllerFunction = (c: Context) => Promise<Response>
+export type ControllerFunction = (c: Context) => Promise<any>
 
-// Student Controller Functions
 export interface StudentControllerFunctions {
   getStudentById: ControllerFunction
 }

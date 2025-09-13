@@ -1,11 +1,12 @@
-import { RecreationEntity } from "./domains"
+import { RecreationEntity, StudentEntity } from "./domains"
 
 // Student Service Types
 export interface StudentServiceFunctions {
-  getStudentById: (id: number) => Promise<any>
+  getStudentById: (id: number) => Promise<
+    StudentEntity
+  >
 }
 
-// Recreation Service Types
 export interface RecreationServiceFunctions {
   getAllRecreations: (options: {
     status?: string

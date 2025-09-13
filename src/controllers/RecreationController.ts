@@ -29,7 +29,6 @@ export function createRecreationController(
         offset: offset ? parseInt(offset) : 0
       })
     } catch (error) {
-      console.error('Error in getAllRecreations:', error)
       return c.json({ 
         error: 'Failed to fetch recreations', 
         details: error instanceof Error ? error.message : String(error) 
@@ -43,7 +42,6 @@ export function createRecreationController(
       const recreation = await recreationService.getRecreationById(id)
       return c.json(recreation)
     } catch (error) {
-      console.error('Error in getRecreationById:', error)
       if (error instanceof Error && error.message === 'Recreation not found') {
         return c.json({ error: 'Recreation not found', code: 'RECREATION_NOT_FOUND' }, 404)
       }

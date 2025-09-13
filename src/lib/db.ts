@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaD1 } from '@prisma/adapter-d1';
+import { D1Database } from '@cloudflare/workers-types';
 
 type Env = {
   DB: D1Database;
@@ -18,7 +19,8 @@ export function getPrisma(env?: Env): PrismaClient {
   
   // 本番のCloudflare Workers環境でD1を使用
   const adapter = new PrismaD1(env.DB);
-  return new PrismaClient({ adapter } as any);
+  return new PrismaClient({ adapter })
+    
 }
 
 // ローカル開発用の既存エクスポート（後方互換性のため）

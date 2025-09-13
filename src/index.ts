@@ -38,9 +38,6 @@ app.route('/api/v1', apiV1)
 
 
 const port = 8080
-console.log(`Server is running on http://localhost:${port}`)
-console.log(`API documentation: http://localhost:${port}/swagger.yml`)
-console.log(`API v1 base URL: http://localhost:${port}/api/v1`)
 
 serve({
   fetch: app.fetch,
