@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 
-function buildWhereClauseForStudent(studentId: string, options: {
+function buildWhereClauseForStudent(studentId: number, options: {
   status?: string
   fromTime?: number
   toTime?: number
 }) {
   const where: {
-    studentId: string
+    studentId: number
     status?: string
     recreation?: {
       startTime?: {
@@ -37,7 +37,7 @@ function buildWhereClauseForStudent(studentId: string, options: {
 
 export function createParticipationRepository(prisma: PrismaClient) {
   return {
-    async findByStudentId(studentId: string, options: {
+    async findByStudentId(studentId: number, options: {
       status?: string
       fromTime?: number
       toTime?: number
@@ -81,7 +81,7 @@ export function createParticipationRepository(prisma: PrismaClient) {
       })
     },
 
-    async findByStudentAndRecreation(studentId: string, recreationId: number) {
+    async findByStudentAndRecreation(studentId: number, recreationId: number) {
       return prisma.participation.findUnique({
         where: {
           studentId_recreationId: {
@@ -93,7 +93,7 @@ export function createParticipationRepository(prisma: PrismaClient) {
     },
 
     async create(data: {
-      studentId: string
+      studentId: number
       recreationId: number
       status?: string
     }) {

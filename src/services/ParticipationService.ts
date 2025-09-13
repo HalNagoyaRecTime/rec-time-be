@@ -10,13 +10,11 @@ export function createParticipationService(
       fromDate?: string
       toDate?: string
     }) {
-      const queryOptions = {
+      const participations = await participationRepository.findByStudentId(studentId, {
         ...options,
         fromDate: options.fromDate ? new Date(options.fromDate) : undefined,
         toDate: options.toDate ? new Date(options.toDate) : undefined
-      }
-
-      const participations = await participationRepository.findByStudentId(studentId, queryOptions)
+      })
       
       return participations.map((participation: any) => ({
         ...participation,

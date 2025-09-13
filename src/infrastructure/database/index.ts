@@ -1,1 +1,0 @@
-export { PrismaStudentRepository, createPrismaStudentRepository } from './PrismaStudentRepository'

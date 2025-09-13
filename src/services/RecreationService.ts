@@ -7,13 +7,11 @@ export function createRecreationService(recreationRepository: any) {
       limit?: number
       offset?: number
     }) {
-      const queryOptions = {
+      const result = await recreationRepository.findAll({
         ...options,
         limit: options.limit || 50,
         offset: options.offset || 0
-      }
-
-      const result = await recreationRepository.findAll(queryOptions)
+      })
       
       return {
         recreations: result.recreations || result,
