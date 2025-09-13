@@ -2,33 +2,33 @@ import { PrismaClient } from '@prisma/client'
 
 function buildWhereClauseForStudent(studentId: string, options: {
   status?: string
-  fromDate?: Date
-  toDate?: Date
+  fromTime?: number
+  toTime?: number
 }) {
   const where: {
     studentId: string
     status?: string
     recreation?: {
-      startDatetime?: {
-        gte?: Date
-        lte?: Date
+      startTime?: {
+        gte?: number
+        lte?: number
       }
     }
   } = { studentId }
-  
+
   if (options.status) {
     where.status = options.status
   }
-  
-  if (options.fromDate || options.toDate) {
+
+  if (options.fromTime || options.toTime) {
     where.recreation = {
-      startDatetime: {}
+      startTime: {}
     }
-    if (options.fromDate) {
-      where.recreation.startDatetime!.gte = options.fromDate
+    if (options.fromTime) {
+      where.recreation.startTime!.gte = options.fromTime
     }
-    if (options.toDate) {
-      where.recreation.startDatetime!.lte = options.toDate
+    if (options.toTime) {
+      where.recreation.startTime!.lte = options.toTime
     }
   }
 
@@ -39,8 +39,8 @@ export function createParticipationRepository(prisma: PrismaClient) {
   return {
     async findByStudentId(studentId: string, options: {
       status?: string
-      fromDate?: Date
-      toDate?: Date
+      fromTime?: number
+      toTime?: number
     }) {
       const where = buildWhereClauseForStudent(studentId, options)
 
@@ -52,7 +52,7 @@ export function createParticipationRepository(prisma: PrismaClient) {
         },
         orderBy: {
           recreation: {
-            startDatetime: 'asc'
+            startTime: 'asc'
           }
         }
       })

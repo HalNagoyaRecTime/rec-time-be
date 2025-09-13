@@ -30,15 +30,13 @@ model Recreation {
   title            String
   description      String?
   location         String
-  startDatetime    DateTime           @map("start_datetime")
-  endDatetime      DateTime           @map("end_datetime")
-  startTime        Int?               @map("start_time") // 0910形式
-  endTime          Int?               @map("end_time")   // 1630形式
+  startTime        Int                @map("start_time") // 0910形式
+  endTime          Int                @map("end_time")   // 1630形式
   maxParticipants  Int                @map("max_participants")
   status           String             @default("scheduled")
   createdAt        DateTime           @default(now()) @map("created_at")
   updatedAt        DateTime           @updatedAt @map("updated_at")
-  
+
   // Relations
   participations   Participation[]
 

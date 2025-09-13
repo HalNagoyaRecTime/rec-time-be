@@ -2,28 +2,28 @@ import { PrismaClient } from '@prisma/client'
 
 function buildWhereClause(options: {
   status?: string
-  fromDate?: Date
-  toDate?: Date
+  fromTime?: number
+  toTime?: number
 }) {
   const where: {
     status?: string
-    startDatetime?: {
-      gte?: Date
-      lte?: Date
+    startTime?: {
+      gte?: number
+      lte?: number
     }
   } = {}
-  
+
   if (options.status) {
     where.status = options.status
   }
-  
-  if (options.fromDate || options.toDate) {
-    where.startDatetime = {}
-    if (options.fromDate) {
-      where.startDatetime.gte = options.fromDate
+
+  if (options.fromTime || options.toTime) {
+    where.startTime = {}
+    if (options.fromTime) {
+      where.startTime.gte = options.fromTime
     }
-    if (options.toDate) {
-      where.startDatetime.lte = options.toDate
+    if (options.toTime) {
+      where.startTime.lte = options.toTime
     }
   }
 
@@ -34,8 +34,8 @@ export function createRecreationRepository(prisma: PrismaClient) {
   return {
     async findAll(options: {
       status?: string
-      fromDate?: Date
-      toDate?: Date
+      fromTime?: number
+      toTime?: number
       limit?: number
       offset?: number
     }) {
@@ -44,7 +44,7 @@ export function createRecreationRepository(prisma: PrismaClient) {
       const [recreations, total] = await Promise.all([
         prisma.recreation.findMany({
           where,
-          orderBy: { startDatetime: 'asc' },
+          orderBy: { startTime: 'asc' },
           take: options.limit,
           skip: options.offset,
           include: {
@@ -99,8 +99,8 @@ export function createRecreationRepository(prisma: PrismaClient) {
       title: string
       description?: string
       location: string
-      startDatetime: Date
-      endDatetime: Date
+      startTime: number
+      endTime: number
       maxParticipants: number
       status?: string
     }) {
@@ -116,8 +116,8 @@ export function createRecreationRepository(prisma: PrismaClient) {
       title?: string
       description?: string
       location?: string
-      startDatetime?: Date
-      endDatetime?: Date
+      startTime?: number
+      endTime?: number
       maxParticipants?: number
       status?: string
     }) {

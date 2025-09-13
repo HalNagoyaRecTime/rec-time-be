@@ -48,14 +48,12 @@ async function main() {
     console.log(`学生を登録: ${student.name} (${student.studentId})`)
   }
 
-  // レクリエーションデータ（今日の日付: 2025-09-13）
+  // レクリエーションデータ
   const recreations = [
     {
       title: 'バスケットボール大会',
       description: '3on3バスケットボールトーナメント',
       location: '体育館',
-      startDatetime: new Date('2025-09-13T11:00:00Z'),
-      endDatetime: new Date('2025-09-13T13:00:00Z'),
       startTime: 1100,
       endTime: 1300,
       maxParticipants: 24,
@@ -65,8 +63,6 @@ async function main() {
       title: '文化祭準備',
       description: '来月の文化祭に向けた展示物準備',
       location: '第1教室',
-      startDatetime: new Date('2025-09-13T14:00:00Z'),
-      endDatetime: new Date('2025-09-13T16:00:00Z'),
       startTime: 1400,
       endTime: 1600,
       maxParticipants: 30,
@@ -76,8 +72,6 @@ async function main() {
       title: '英語スピーチコンテスト',
       description: '学年対抗英語プレゼンテーション大会',
       location: '講堂',
-      startDatetime: new Date('2025-09-13T16:30:00Z'),
-      endDatetime: new Date('2025-09-13T18:00:00Z'),
       startTime: 1630,
       endTime: 1800,
       maxParticipants: 50,
@@ -87,8 +81,6 @@ async function main() {
       title: 'プログラミング勉強会',
       description: 'React/TypeScript実践セッション',
       location: 'PC教室',
-      startDatetime: new Date('2025-09-13T19:00:00Z'),
-      endDatetime: new Date('2025-09-13T21:00:00Z'),
       startTime: 1900,
       endTime: 2100,
       maxParticipants: 20,
