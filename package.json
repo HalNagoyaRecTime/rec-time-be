@@ -9,7 +9,13 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx src/utils/seed.ts"
+    "db:seed": "tsx src/utils/seed.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.2",
@@ -21,6 +27,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250909.0",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
     "prisma": "^5.22.0",
     "tsx": "^4.4.0",
     "typescript": "^5.9.2",
