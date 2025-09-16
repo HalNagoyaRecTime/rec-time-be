@@ -1,6 +1,6 @@
 # レクリエーション管理API
 
-Node.js + Hono + Prisma + SQLiteを使用したレクリエーション管理システムのバックエンドAPI
+Hono + Cloudflare D1 + TypeScriptを使用したレクリエーション管理システムのバックエンドAPI
 
 ## セットアップ
 
@@ -12,129 +12,104 @@ npm install
 
 ### 2. 環境変数の設定
 
-`.env` ファイルでデータベースURLを設定：
+`.env` ファイルを作成（`.env.example` を参考に）：
 
 ```bash
-DATABASE_URL="file:./dev.db"
+cp .env.example .env
 ```
 
-### 3. データベースの初期化
-
-Prismaクライアントを生成し、データベーススキーマを作成：
+### 3. 開発サーバーの起動
 
 ```bash
-npm run db:generate
-npm run db:push
-```
-
-### 4. 開発サーバーの起動
-
-```bash
+# ローカル開発（tsx使用）
 npm run dev
+
+# Cloudflare Workers開発環境
+npm run dev:wrangler
 ```
 
 ## データベース操作
 
-### Prismaクライアントの生成
+### マイグレーションの実行
 
-スキーマ変更後、クライアントを再生成：
-
+ローカル環境：
 ```bash
-npm run db:generate
+npm run "db:migrate --local"
 ```
 
-### データベーススキーマの更新
-
-開発環境でスキーマをプッシュ：
-
+本番環境：
 ```bash
-npm run db:push
-```
-
-### マイグレーションの作成・実行
-
-本番環境用のマイグレーション：
-
-```bash
-npm run db:migrate
-```
-
-### シードデータの投入
-
-テスト用データを投入：
-
-```bash
-npm run db:seed
+npm run "db:migrate --remote"
 ```
 
 ## データベーステーブル
 
-### students テーブル
-- 学生情報を管理
-- student_id (主キー), class_code, attendance_number, name
+### Student テーブル
+- `studentId` (主キー): 学生ID
+- `classCode`: クラスコード
+- `attendanceNumber`: 出席番号
+- `name`: 学生名
+- `createdAt`, `updatedAt`: タイムスタンプ
 
-### recreations テーブル
-- レクリエーション情報を管理
-- recreation_id (主キー), title, description, location, start_datetime, end_datetime
+### Recreation テーブル
+- `recreationId` (主キー): レクリエーションID
+- `title`: タイトル
+- `description`: 説明
+- `location`: 開催場所
+- `startDatetime`, `endDatetime`: 開始・終了日時
 
-### participations テーブル
-- 学生のレクリエーション参加状況を管理
-- student_id と recreation_id の関連テーブル
+### Participation テーブル
+- 学生とレクリエーションの参加関係を管理
+- `studentId` と `recreationId` の関連テーブル
 
 ## プロジェクト構成
 
 ```
 be/
-├── src/                           # アプリケーションソースコード
-│   ├── application/              # アプリケーション層
-│   │   └── usecases/            # ユースケース
-│   ├── controllers/             # コントローラー（レガシー）
-│   ├── di/                      # 依存性注入
-│   ├── domain/                  # ドメイン層
-│   │   ├── entities/           # エンティティ
-│   │   └── repositories/       # リポジトリインターフェース
-│   ├── infrastructure/          # インフラストラクチャ層
-│   │   └── database/          # データベース設定
-│   ├── lib/                     # ライブラリ
-│   ├── presentation/            # プレゼンテーション層
-│   │   ├── controllers/        # APIコントローラー
-│   │   └── routes/            # ルーティング
-│   ├── repositories/            # リポジトリ実装
-│   ├── services/               # サービス
-│   └── utils/                  # ユーティリティ
-├── prisma/                      # Prismaスキーマとマイグレーション
-│   └── schema.prisma          # データベーススキーマ定義
-├── migrations/                  # データベースマイグレーション
-├── .env                        # 環境変数設定
-├── .env.example               # 環境変数設定例
-├── package.json               # 依存関係とスクリプト
-├── swagger.yml                # API仕様書
-├── tsconfig.json              # TypeScript設定
-├── wrangler.toml              # Cloudflare Workers設定
-└── README.md                  # プロジェクトドキュメント
+├── src/                       # アプリケーションソースコード
+│   ├── controllers/          # コントローラー
+│   ├── di/                   # 依存性注入
+│   ├── lib/                  # ライブラリ（DB接続など）
+│   ├── repositories/         # リポジトリ実装
+│   ├── services/            # サービス層
+│   ├── types/               # 型定義
+│   │   └── domains/        # ドメイン型
+│   └── utils/               # ユーティリティ
+├── migrations/               # D1データベースマイグレーション
+├── .env                     # 環境変数設定
+├── .env.example            # 環境変数設定例
+├── package.json            # 依存関係とスクリプト
+├── swagger.yml             # API仕様書
+├── tsconfig.json           # TypeScript設定
+├── wrangler.toml           # Cloudflare Workers設定
+└── README.md               # プロジェクトドキュメント
 ```
 
 ## 利用可能なコマンド
 
 ### 開発・デプロイ関連
-- `npm run dev` - 開発サーバーを起動 (Wrangler使用)
-- `npm run deploy` - 本番環境にデプロイ (minify付き)
+- `npm run dev` - ローカル開発サーバーを起動（tsx使用）
+- `npm run dev:wrangler` - Cloudflare Workers開発環境で起動
+- `npm run deploy` - 本番環境にデプロイ（minify付き）
 - `npm run cf-typegen` - Cloudflare Bindingsの型定義を生成
 
 ### データベース管理
-- `npm run db:generate` - Prismaクライアントを生成
-- `npm run db:push` - データベーススキーマをプッシュ (開発用)
-- `npm run db:migrate` - マイグレーションを作成・実行
-- `npm run db:seed` - データベースにシードデータを投入
+- `npm run "db:migrate --local"` - ローカルD1データベースでマイグレーション実行
+- `npm run "db:migrate --remote"` - 本番D1データベースでマイグレーション実行
+
+### コード品質
+- `npm run format` - Prettierでコードフォーマット
+- `npm run format:check` - フォーマットチェック
+- `npm run type-check` - TypeScriptの型チェック
 
 ## 技術スタック
 
-- **Runtime**: Node.js
+- **Runtime**: Cloudflare Workers
 - **Framework**: Hono
-- **Database**: SQLite
-- **ORM**: Prisma
-- **Deployment**: Cloudflare Workers
+- **Database**: Cloudflare D1 (SQLite)
 - **Language**: TypeScript
+- **バリデーション**: Zod
+- **ローカル開発**: tsx
 
 ## デプロイ
 
@@ -143,4 +118,7 @@ be/
 ```bash
 npm run deploy
 ```
-# rec-time-be
+
+## API仕様
+
+API仕様は `swagger.yml` に記載されています。
