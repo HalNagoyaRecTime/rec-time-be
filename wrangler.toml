@@ -1,7 +1,6 @@
 name = "recreation-management-api"
 main = "src/index.ts"
-
-
+observability = true
 #nodeライブラリ互換フラグ
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-09-23"
