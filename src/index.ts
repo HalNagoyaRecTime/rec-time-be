@@ -2,8 +2,12 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { getDIContainer } from './di/container';
+import { D1Database } from '@cloudflare/workers-types';
+type Bindings = {
+  DB: D1Database;
+};
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', cors());
 
