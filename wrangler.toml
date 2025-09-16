@@ -1,6 +1,10 @@
 name = "recreation-management-api"
 main = "src/index.ts"
-compatibility_date = "2024-05-15"
+
+
+#nodeライブラリ互換フラグ
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-09-23"
 
 # ローカル開発用の設定
 [env.development]
@@ -9,5 +13,5 @@ vars = { NODE_ENV = "development" }
 # 本番用D1データベース設定（後で設定）
 [[d1_databases]]
 binding = "DB"
-database_name = "recreation-db"
-database_id = "your-database-id-here"
+database_name = "rectime"
+database_id = "de999791-7919-4866-ae7c-79a83d083578"
