@@ -1,36 +1,51 @@
-import { PrismaClient } from '@prisma/client';
+import { D1Database } from '@cloudflare/workers-types';
+import { RecreationEntity } from '../types/domains/Recreation';
 
 function buildWhereClause(options: {
   status?: string;
   fromTime?: number;
   toTime?: number;
 }) {
-  const where: {
-    status?: string;
-    startTime?: {
-      gte?: number;
-      lte?: number;
-    };
-  } = {};
+  const conditions = [];
+  const params = [];
 
   if (options.status) {
-    where.status = options.status;
+    conditions.push('status = ?');
+    params.push(options.status);
   }
 
-  if (options.fromTime || options.toTime) {
-    where.startTime = {};
-    if (options.fromTime) {
-      where.startTime.gte = options.fromTime;
-    }
-    if (options.toTime) {
-      where.startTime.lte = options.toTime;
-    }
+  if (options.fromTime) {
+    conditions.push('startTime >= ?');
+    params.push(options.fromTime);
   }
 
-  return where;
+  if (options.toTime) {
+    conditions.push('startTime <= ?');
+    params.push(options.toTime);
+  }
+
+  return {
+    whereClause: conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '',
+    params,
+  };
 }
 
-export function createRecreationRepository(prisma: PrismaClient) {
+function transformToRecreationEntity(raw: any): RecreationEntity {
+  return {
+    recreationId: raw.recreationId as number,
+    title: raw.title as string,
+    description: raw.description as string | null,
+    location: raw.location as string,
+    startTime: raw.startTime as number,
+    endTime: raw.endTime as number,
+    maxParticipants: raw.maxParticipants as number,
+    status: raw.status as string,
+    createdAt: new Date(raw.createdAt as string),
+    updatedAt: new Date(raw.updatedAt as string),
+  };
+}
+
+export function createRecreationRepository(db: D1Database) {
   return {
     async findAll(options: {
       status?: string;
@@ -38,55 +53,57 @@ export function createRecreationRepository(prisma: PrismaClient) {
       toTime?: number;
       limit?: number;
       offset?: number;
-    }) {
-      const where = buildWhereClause(options);
+    }): Promise<{ recreations: RecreationEntity[]; total: number }> {
+      const { whereClause, params } = buildWhereClause(options);
 
-      const [recreations, total] = await Promise.all([
-        prisma.recreation.findMany({
-          where,
-          orderBy: { startTime: 'asc' },
-          take: options.limit,
-          skip: options.offset,
-          include: {
-            participations: {
-              where: {
-                status: 'registered',
-              },
-              select: {
-                studentId: true,
-                status: true,
-              },
-            },
-          },
-        }),
-        prisma.recreation.count({ where }),
+      let query = `
+        SELECT r.*,
+               COUNT(p.participationId) as participant_count
+        FROM Recreation r
+        LEFT JOIN Participation p ON r.recreationId = p.recreationId
+                                   AND p.status = 'registered'
+        ${whereClause}
+        GROUP BY r.recreationId
+        ORDER BY r.startTime ASC
+      `;
+
+      if (options.limit) {
+        query += ` LIMIT ${options.limit}`;
+      }
+      if (options.offset) {
+        query += ` OFFSET ${options.offset}`;
+      }
+
+      const countQuery = `SELECT COUNT(*) as total FROM Recreation ${whereClause}`;
+
+      const [recreations, totalResult] = await Promise.all([
+        db.prepare(query).bind(...params).all(),
+        db.prepare(countQuery).bind(...params).first()
       ]);
 
-      return { recreations, total };
+      return {
+        recreations: recreations.results.map(transformToRecreationEntity),
+        total: (totalResult as any)?.total || 0
+      };
     },
 
-    async findByIdWithParticipantCount(id: number) {
-      const recreation = await prisma.recreation.findUnique({
-        where: { recreationId: id },
-        include: {
-          _count: {
-            select: {
-              participations: {
-                where: {
-                  status: { not: 'cancelled' },
-                },
-              },
-            },
-          },
-        },
-      });
+    async findByIdWithParticipantCount(id: number): Promise<RecreationEntity | null> {
+      const query = `
+        SELECT r.*,
+               COUNT(CASE WHEN p.status != 'cancelled' THEN p.participationId END) as current_participants
+        FROM Recreation r
+        LEFT JOIN Participation p ON r.recreationId = p.recreationId
+        WHERE r.recreationId = ?
+        GROUP BY r.recreationId
+      `;
 
-      if (!recreation) return null;
+      const result = await db.prepare(query).bind(id).first();
 
-      return {
-        ...recreation,
-        current_participants: recreation._count.participations,
-      };
+      if (!result) {
+        return null;
+      }
+
+      return transformToRecreationEntity(result);
     },
   };
 }
