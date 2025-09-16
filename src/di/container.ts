@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import { getPrisma } from '../lib/db';
+import { getDb } from '../lib/db';
 import { createStudentRepository } from '../repositories/StudentRepository';
 import { createStudentService } from '../services/StudentService';
 import { createStudentController } from '../controllers/StudentController';
@@ -7,16 +6,21 @@ import { createRecreationRepository } from '../repositories/RecreationRepository
 import { createRecreationService } from '../services/RecreationService';
 import { createRecreationController } from '../controllers/RecreationController';
 import { D1Database } from '@cloudflare/workers-types';
+
 type Env = {
   DB: D1Database;
 };
 
 export function createDIContainer(env?: Env) {
-  const prisma = env ? getPrisma(env) : new PrismaClient();
+  const db = getDb(env);
+
+  if (!db) {
+    throw new Error('Database is not available');
+  }
 
   // Repositories
-  const studentRepository = createStudentRepository(prisma);
-  const recreationRepository = createRecreationRepository(prisma);
+  const studentRepository = createStudentRepository(db);
+  const recreationRepository = createRecreationRepository(db);
 
   // Services
   const studentService = createStudentService(studentRepository);
@@ -27,7 +31,7 @@ export function createDIContainer(env?: Env) {
   const recreationController = createRecreationController(recreationService);
 
   return {
-    prisma,
+    db,
     studentController,
     recreationController,
   };
