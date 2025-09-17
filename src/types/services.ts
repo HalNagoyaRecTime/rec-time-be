@@ -1,17 +1,26 @@
-import { RecreationEntity, StudentEntity } from './domains';
+import { EventEntity, EntryEntity, StudentEntity } from './domains';
 
 // Student Service Types
 export interface StudentServiceFunctions {
   getStudentById: (id: number) => Promise<StudentEntity>;
 }
 
-export interface RecreationServiceFunctions {
-  getAllRecreations: (options: {
-    status?: string;
-    fromDate?: string;
-    toDate?: string;
+export interface EventServiceFunctions {
+  getAllEvents: (options: {
+    f_event_code?: string;
+    f_time?: string;
     limit?: number;
     offset?: number;
-  }) => Promise<{ recreations: RecreationEntity[]; total: number }>;
-  getRecreationById: (id: number) => Promise<RecreationEntity>;
+  }) => Promise<{ events: EventEntity[]; total: number }>;
+  getEventById: (id: number) => Promise<EventEntity>;
+}
+
+export interface EntryServiceFunctions {
+  getAllEntries: (options: {
+    f_student_id?: number;
+    f_event_id?: number;
+    limit?: number;
+    offset?: number;
+  }) => Promise<{ entries: EntryEntity[]; total: number }>;
+  getEntryById: (id: number) => Promise<EntryEntity>;
 }

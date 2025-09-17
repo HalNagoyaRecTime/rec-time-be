@@ -1,2 +1,3 @@
 export * from './Student';
-export * from './Recreation';
+export * from './Event';
+export * from './Entry';

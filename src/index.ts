@@ -4,9 +4,9 @@ import { getDb } from './lib/db';
 import { createStudentRepository } from './repositories/StudentRepository';
 import { createStudentService } from './services/StudentService';
 import { createStudentController } from './controllers/StudentController';
-import { createRecreationRepository } from './repositories/RecreationRepository';
-import { createRecreationService } from './services/RecreationService';
-import { createRecreationController } from './controllers/RecreationController';
+import { createEventRepository } from './repositories/EventRepository';
+import { createEventService } from './services/EventService';
+import { createEventController } from './controllers/EventController';
 import { D1Database } from '@cloudflare/workers-types';
 
 type Bindings = {
@@ -23,7 +23,7 @@ app.get('/', c => {
     version: '1.0.0',
     endpoints: {
       students: '/api/v1/students/{studentId}',
-      recreations: '/api/v1/recreations',
+      events: '/api/v1/events',
     },
     swagger: '/swagger.yml',
   });
@@ -41,21 +41,21 @@ apiV1.get('/students/:studentId', c => {
   return studentController.getStudentById(c);
 });
 
-// Recreation routes
-apiV1.get('/recreations', c => {
+// Event routes
+apiV1.get('/events', c => {
   const db = getDb(c.env);
-  const recreationRepository = createRecreationRepository(db);
-  const recreationService = createRecreationService(recreationRepository);
-  const recreationController = createRecreationController(recreationService);
-  return recreationController.getAllRecreations(c);
+  const eventRepository = createEventRepository(db);
+  const eventService = createEventService(eventRepository);
+  const eventController = createEventController(eventService);
+  return eventController.getAllEvents(c);
 });
 
-apiV1.get('/recreations/:recreationId', c => {
+apiV1.get('/events/:eventId', c => {
   const db = getDb(c.env);
-  const recreationRepository = createRecreationRepository(db);
-  const recreationService = createRecreationService(recreationRepository);
-  const recreationController = createRecreationController(recreationService);
-  return recreationController.getRecreationById(c);
+  const eventRepository = createEventRepository(db);
+  const eventService = createEventService(eventRepository);
+  const eventController = createEventController(eventService);
+  return eventController.getEventById(c);
 });
 
 // Mount API v1

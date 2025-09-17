@@ -1,15 +1,17 @@
 export interface StudentEntity {
-  studentId: number;
-  classCode: string;
-  attendanceNumber: number;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  f_student_id: number;
+  f_student_num: string;
+  f_class: string;
+  f_number: string;
+  f_name: string;
+  f_note: string | null;
 }
 
 export interface StudentDTO {
-  studentId: string;
-  class: string;
-  attendanceNumber: string;
-  name: string;
+  f_student_id: string;
+  f_student_num: string;
+  f_class: string;
+  f_number: string;
+  f_name: string;
+  f_note?: string;
 }

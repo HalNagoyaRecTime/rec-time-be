@@ -4,7 +4,7 @@ import { StudentEntity } from '../types/domains/Student';
 export function createStudentRepository(db: D1Database) {
   return {
     async findById(id: number): Promise<StudentEntity | null> {
-      const result = await db.prepare('SELECT * FROM Student WHERE studentId = ?').bind(id).first();
+      const result = await db.prepare('SELECT * FROM m_student WHERE f_student_id = ?').bind(id).first();
 
       if (!result) {
         return null;
@@ -12,12 +12,42 @@ export function createStudentRepository(db: D1Database) {
 
       // Transform raw database result to typed entity
       return {
-        studentId: result.studentId as number,
-        classCode: result.classCode as string,
-        attendanceNumber: result.attendanceNumber as number,
-        name: result.name as string,
-        createdAt: new Date(result.createdAt as string),
-        updatedAt: new Date(result.updatedAt as string),
+        f_student_id: result.f_student_id as number,
+        f_student_num: result.f_student_num as string,
+        f_class: result.f_class as string,
+        f_number: result.f_number as string,
+        f_name: result.f_name as string,
+        f_note: result.f_note as string | null,
+      };
+    },
+
+    async findAll(): Promise<StudentEntity[]> {
+      const result = await db.prepare('SELECT * FROM m_student ORDER BY f_student_num').all();
+
+      return result.results.map(row => ({
+        f_student_id: row.f_student_id as number,
+        f_student_num: row.f_student_num as string,
+        f_class: row.f_class as string,
+        f_number: row.f_number as string,
+        f_name: row.f_name as string,
+        f_note: row.f_note as string | null,
+      }));
+    },
+
+    async findByStudentNum(studentNum: string): Promise<StudentEntity | null> {
+      const result = await db.prepare('SELECT * FROM m_student WHERE f_student_num = ?').bind(studentNum).first();
+
+      if (!result) {
+        return null;
+      }
+
+      return {
+        f_student_id: result.f_student_id as number,
+        f_student_num: result.f_student_num as string,
+        f_class: result.f_class as string,
+        f_number: result.f_number as string,
+        f_name: result.f_name as string,
+        f_note: result.f_note as string | null,
       };
     },
   };

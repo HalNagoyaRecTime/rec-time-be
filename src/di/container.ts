@@ -2,9 +2,12 @@ import { getDb } from '../lib/db';
 import { createStudentRepository } from '../repositories/StudentRepository';
 import { createStudentService } from '../services/StudentService';
 import { createStudentController } from '../controllers/StudentController';
-import { createRecreationRepository } from '../repositories/RecreationRepository';
-import { createRecreationService } from '../services/RecreationService';
-import { createRecreationController } from '../controllers/RecreationController';
+import { createEventRepository } from '../repositories/EventRepository';
+import { createEventService } from '../services/EventService';
+import { createEventController } from '../controllers/EventController';
+import { createEntryRepository } from '../repositories/EntryRepository';
+import { createEntryService } from '../services/EntryService';
+import { createEntryController } from '../controllers/EntryController';
 import { D1Database } from '@cloudflare/workers-types';
 
 type Env = {
@@ -20,20 +23,24 @@ export function createDIContainer(env?: Env) {
 
   // Repositories
   const studentRepository = createStudentRepository(db);
-  const recreationRepository = createRecreationRepository(db);
+  const eventRepository = createEventRepository(db);
+  const entryRepository = createEntryRepository(db);
 
   // Services
   const studentService = createStudentService(studentRepository);
-  const recreationService = createRecreationService(recreationRepository);
+  const eventService = createEventService(eventRepository);
+  const entryService = createEntryService(entryRepository);
 
   // Controllers (function-based)
   const studentController = createStudentController(studentService);
-  const recreationController = createRecreationController(recreationService);
+  const eventController = createEventController(eventService);
+  const entryController = createEntryController(entryService);
 
   return {
     db,
     studentController,
-    recreationController,
+    eventController,
+    entryController,
   };
 }
 

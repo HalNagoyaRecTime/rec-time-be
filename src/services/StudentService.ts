@@ -13,15 +13,7 @@ export function createStudentService(
       if (!student) {
         throw new Error('Student not found');
       }
-      // Transform to match frontend interface
-      return {
-        studentId: student.studentId,
-        classCode: student.classCode,
-        attendanceNumber: student.attendanceNumber,
-        name: student.name,
-        createdAt: student.createdAt,
-        updatedAt: student.updatedAt,
-      };
+      return student;
     },
   };
 }
