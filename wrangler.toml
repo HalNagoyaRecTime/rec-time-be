@@ -1,4 +1,4 @@
-name = "recreation-management-api"
+name = "rec-time-be"
 main = "src/index.ts"
 #nodeライブラリ互換フラグ
 compatibility_flags = [ "nodejs_compat" ]
