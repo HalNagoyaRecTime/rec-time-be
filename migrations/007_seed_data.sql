@@ -2,7 +2,7 @@
 PRAGMA foreign_keys=ON;
 
 -- 学生マスターのサンプルデータ
-INSERT INTO m_student (f_student_id, f_student_num, f_class, f_number, f_name, f_note) VALUES
+INSERT INTO m_students (f_student_id, f_student_num, f_class, f_number, f_name, f_note) VALUES
 (1, 'S001', '1A', '01', '田中太郎', NULL),
 (2, 'S002', '1A', '02', '佐藤花子', NULL),
 (3, 'S003', '1A', '03', '鈴木次郎', NULL),

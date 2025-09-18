@@ -6,8 +6,8 @@ DROP TABLE IF EXISTS Participation;
 DROP TABLE IF EXISTS Recreation;
 DROP TABLE IF EXISTS Student;
 
--- 学生マスター(アップロードされたm_student.jsonのキーをそのまま使用)
-CREATE TABLE IF NOT EXISTS m_student (
+-- 学生マスター(アップロードされたm_students.jsonのキーをそのまま使用)
+CREATE TABLE IF NOT EXISTS m_students (
   f_student_id   INTEGER PRIMARY KEY,
   f_student_num  TEXT NOT NULL,
   f_class        TEXT NOT NULL,
@@ -33,13 +33,13 @@ CREATE TABLE IF NOT EXISTS t_entries (
   f_entry_id     INTEGER PRIMARY KEY,
   f_student_id   INTEGER NOT NULL,
   f_event_id     INTEGER NOT NULL,
-  FOREIGN KEY (f_student_id) REFERENCES m_student(f_student_id) ON DELETE CASCADE,
+  FOREIGN KEY (f_student_id) REFERENCES m_students(f_student_id) ON DELETE CASCADE,
   FOREIGN KEY (f_event_id)  REFERENCES t_events(f_event_id)    ON DELETE CASCADE
 );
 
 -- インデックス作成
-CREATE INDEX IF NOT EXISTS idx_m_student_num ON m_student(f_student_num);
-CREATE INDEX IF NOT EXISTS idx_m_student_class ON m_student(f_class);
+CREATE INDEX IF NOT EXISTS idx_m_students_num ON m_students(f_student_num);
+CREATE INDEX IF NOT EXISTS idx_m_students_class ON m_students(f_class);
 CREATE INDEX IF NOT EXISTS idx_t_events_code ON t_events(f_event_code);
 CREATE INDEX IF NOT EXISTS idx_t_events_time ON t_events(f_time);
 CREATE INDEX IF NOT EXISTS idx_t_entries_student ON t_entries(f_student_id);
