@@ -23,11 +23,13 @@
     "@prisma/adapter-d1": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "crypto": "^1.0.1",
+    "dotenv": "^17.2.2",
     "hono": "^4.9.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250909.0",
+    "@types/node": "^24.5.2",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.35.0",

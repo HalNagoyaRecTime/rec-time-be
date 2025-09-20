@@ -1,11 +1,17 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { serve } from '@hono/node-server';
+import { createAdaptorServer } from '@hono/node-server';
+import https from 'https';
+import fs from 'fs';
 import { getDIContainer } from './di/container';
+import { ENV } from './config/env';
 
 const app = new Hono();
 
-app.use('*', cors());
+app.use('*', cors({
+  origin: ENV.CORS_ORIGINS,
+  credentials: true
+}));
 
 // Initialize dependencies through DI container
 const container = getDIContainer();
@@ -38,9 +44,19 @@ apiV1.get('/recreations/:recreationId', c =>
 // Mount API v1
 app.route('/api/v1', apiV1);
 
-const port = 8080;
+// HTTPS options
+const httpsOptions = {
+  key: fs.readFileSync(ENV.HTTPS_KEY_PATH),
+  cert: fs.readFileSync(ENV.HTTPS_CERT_PATH),
+};
 
-serve({
+// HTTPS サーバーを作成
+const server = createAdaptorServer({
   fetch: app.fetch,
-  port,
+  createServer: https.createServer,
+  serverOptions: httpsOptions,
+});
+
+server.listen(ENV.PORT, ENV.HOST, () => {
+  console.log(`HTTPS Server running on https://localhost:${ENV.PORT}`);
 });
