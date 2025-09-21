@@ -8,7 +8,11 @@ compatibility_date = "2024-09-23"
 [env.development]
 vars = { NODE_ENV = "development" }
 
-# 本番用D1データベース設定（後で設定）
+[[d1_databases]]
+binding = "rec_time_stg"
+database_name = "rec_time_stg"
+database_id = "de999791-7919-4866-ae7c-79a83d083578"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "rectime"

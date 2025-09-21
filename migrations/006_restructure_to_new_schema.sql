@@ -1,10 +1,15 @@
 -- マイグレーション: 新しいテーブル構造に変更
 PRAGMA foreign_keys=ON;
 
--- 既存テーブルを削除
+-- 既存テーブルを削除(旧テーブル)
 DROP TABLE IF EXISTS Participation;
 DROP TABLE IF EXISTS Recreation;
 DROP TABLE IF EXISTS Student;
+-- 既存テーブルを削除
+DROP TABLE IF EXISTS m_students;
+DROP TABLE IF EXISTS t_events;
+DROP TABLE IF EXISTS t_entries;
+
 
 -- 学生マスター(アップロードされたm_students.jsonのキーをそのまま使用)
 CREATE TABLE IF NOT EXISTS m_students (
