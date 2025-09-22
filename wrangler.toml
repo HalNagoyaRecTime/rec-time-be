@@ -6,7 +6,7 @@ compatibility_date = "2024-09-23"
 
 # ローカル開発用の設定
 [env.development]
-vars = { NODE_ENV = "development" }
+vars = { NODE_ENV = "development"}
 
 # 本番用D1データベース設定（後で設定）
 [[d1_databases]]
