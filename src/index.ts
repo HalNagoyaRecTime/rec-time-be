@@ -1,64 +1,39 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { getDb } from './lib/db';
-import { createStudentRepository } from './repositories/StudentRepository';
-import { createStudentService } from './services/StudentService';
-import { createStudentController } from './controllers/StudentController';
-import { createEventRepository } from './repositories/EventRepository';
-import { createEventService } from './services/EventService';
-import { createEventController } from './controllers/EventController';
-import { D1Database } from '@cloudflare/workers-types';
+import { Hono } from 'hono'
+import eventsRoute from './routes/events'
+import studentsRoute from './routes/students'
+import studentsNameRoute from './routes/studentsname'
+import entryRoute from './routes/entry'
+import entryAllRoute from './routes/entry_all'
+import entryGroupRoute from './routes/entry_group'
 
-type Bindings = {
-  DB: D1Database;
-};
+const app = new Hono()
 
-const app = new Hono<{ Bindings: Bindings }>();
+app.route('/', eventsRoute)
+app.route('/', studentsRoute)
+app.route('/', studentsNameRoute)
+app.route('/', entryRoute)
+app.route('/', entryAllRoute)
+app.route('/', entryGroupRoute)
 
-app.use('*', cors());
+app.get('/', (c) => {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Backend Server</title>
+      </head>
+      <body>
+        <h1>Hello! This is the backend server.</h1>
+        <button onclick="location.href='/api/events'">Go to /api/events</button>
+        <button onclick="location.href='/api/students/50013'">Go to /api/students</button>
+        <button onclick="location.href='/api/entry'">Go to /api/entry</button>
+        <button onclick="location.href='/api/entry_group'">Go to /api/entry_group</button>
+      </body>
+    </html>
+  `
+return c.html(html)
+})
 
-app.get('/', c => {
-  return c.json({
-    message: 'Recreation Management API - Three Layer Architecture',
-    version: '1.0.0',
-    endpoints: {
-      students: '/api/v1/students/{studentId}',
-      events: '/api/v1/events',
-    },
-    swagger: '/swagger.yml',
-  });
-});
 
-// API v1 routes
-const apiV1 = new Hono<{ Bindings: Bindings }>();
-
-// Student routes
-apiV1.get('/students/:studentId', c => {
-  const db = getDb(c.env);
-  const studentRepository = createStudentRepository(db);
-  const studentService = createStudentService(studentRepository);
-  const studentController = createStudentController(studentService);
-  return studentController.getStudentById(c);
-});
-
-// Event routes
-apiV1.get('/events', c => {
-  const db = getDb(c.env);
-  const eventRepository = createEventRepository(db);
-  const eventService = createEventService(eventRepository);
-  const eventController = createEventController(eventService);
-  return eventController.getAllEvents(c);
-});
-
-apiV1.get('/events/:eventId', c => {
-  const db = getDb(c.env);
-  const eventRepository = createEventRepository(db);
-  const eventService = createEventService(eventRepository);
-  const eventController = createEventController(eventService);
-  return eventController.getEventById(c);
-});
-
-// Mount API v1
-app.route('/api/v1', apiV1);
-
-export default app;
+export default app

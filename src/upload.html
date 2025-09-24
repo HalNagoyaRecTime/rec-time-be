@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イベントCSVアップロード</title>
+</head>
+<body>
+  <h1>イベントCSVアップロード</h1>
+  <form action="http://localhost:8787/api/upload-events" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">アップロード</button>
+  </form>
+  <h1>学生CSVアップロード</h1>
+  <form action="http://localhost:8787/api/upload-students" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">アップロード</button>
+  </form>
+  <h1>エントリーCSVアップロード</h1>
+  <form action="http://localhost:8787/api/upload-entry" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">アップロード</button>
+  </form>
+  <h1>エントリーグループCSVアップロード</h1>
+  <form action="http://localhost:8787/api/upload-entry_group" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">アップロード</button>
+  </form>
+</body>
+</html>
