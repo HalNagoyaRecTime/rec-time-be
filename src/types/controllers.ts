@@ -16,3 +16,8 @@ export interface EntryControllerFunctions {
   // getAllEntries: ControllerFunction;
   getEntryById: ControllerFunction;
 }
+
+// Group Controller Functions
+export interface EntryGroupControllerFunctions {
+  getGroupsByEventId: ControllerFunction;
+}

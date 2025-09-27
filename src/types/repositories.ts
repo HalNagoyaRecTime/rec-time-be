@@ -1,4 +1,4 @@
-import { EventEntity, EntryEntity, StudentEntity } from './domains';
+import { EventEntity, EntryEntity, StudentEntity,Entry_groupEntity } from './domains';
 
 // Student Repository Types
 export interface StudentRepositoryFunctions {
@@ -26,4 +26,9 @@ export interface EntryRepositoryFunctions {
     offset?: number;
   }) => Promise<{ entries: EntryEntity[]; total: number }>;
   findById: (id: number) => Promise<EntryEntity | null>;
+}
+
+export interface EntryGroupRepositoryFunctions {
+  findByEventId: (f_event_id: number) => Promise<Entry_groupEntity | null>;
+  
 }

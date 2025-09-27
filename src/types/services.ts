@@ -1,4 +1,4 @@
-import { EventEntity, EntryEntity, StudentEntity } from './domains';
+import { EventEntity, Entry_groupEntity, EntryEntity,StudentEntity } from './domains';
 
 // Student Service Types
 export interface StudentServiceFunctions {
@@ -16,12 +16,9 @@ export interface EventServiceFunctions {
 }
 
 export interface EntryServiceFunctions {
-  // getAllEntries: (options: {
-  //   f_student_id?: number;
-  //   f_event_id?: number;
-  //   limit?: number;
-  //   offset?: number;
-  // }) => Promise<{ entries: EntryEntity[]; total: number }>;
   getEntryById: (id: number) => Promise<EntryEntity>;
-  // getStudentById: (id: number) => Promise<any>;
+}
+
+export interface EntryGroupServiceFunctions {
+  getGroupsByEventId: (id: number) => Promise<Entry_groupEntity>;
 }
