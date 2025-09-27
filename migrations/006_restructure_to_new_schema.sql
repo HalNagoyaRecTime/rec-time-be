@@ -28,8 +28,6 @@ CREATE TABLE IF NOT EXISTS t_events (
   f_event_name   TEXT NOT NULL,
   f_time         TEXT NOT NULL,      -- 「0930」などHHMM文字列
   f_duration     TEXT NOT NULL,      -- 「20」等分単位文字列
-  f_place        TEXT NOT NULL,
-  f_gather_time  TEXT NOT NULL,
   f_summary      TEXT
 );
 
@@ -38,8 +36,10 @@ CREATE TABLE IF NOT EXISTS t_entries (
   f_entry_id     INTEGER PRIMARY KEY,
   f_student_id   INTEGER NOT NULL,
   f_event_id     INTEGER NOT NULL,
+  f_seq         INTEGER NOT NULL,
   FOREIGN KEY (f_student_id) REFERENCES m_students(f_student_id) ON DELETE CASCADE,
-  FOREIGN KEY (f_event_id)  REFERENCES t_events(f_event_id)    ON DELETE CASCADE
+  FOREIGN KEY (f_event_id)  REFERENCES t_events(f_event_id)    ON DELETE CASCADE,
+  FOREIGN KEY (f_seq)  REFERENCES t_entries_group(f_seq)    ON DELETE CASCADE
 );
 
 -- インデックス作成

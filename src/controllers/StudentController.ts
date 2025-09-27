@@ -5,20 +5,21 @@ import { StudentServiceFunctions } from '../types/services';
 export function createStudentController(
   studentService: StudentServiceFunctions
 ): StudentControllerFunctions {
-  const getStudentById = async (c: Context) => {
+
+  const getStudentByNum = async (c: Context) => {
     try {
-      const id = c.req.param('studentId') || c.req.param('id');
-      const student = await studentService.getStudentById(parseInt(id));
+      const num = c.req.param('f_student_num');
+      const student = await studentService.getStudentByNum(num);
       return c.json(student);
     } catch (error) {
       if (error instanceof Error && error.message === 'Student not found') {
-        return c.json({ error: 'Student not found' }, 404);
+        return c.json({ error: 'Student nott found' }, 404);
       }
       return c.json({ error: 'Failed to fetch student' }, 500);
     }
   };
 
   return {
-    getStudentById,
+    getStudentByNum,
   };
 }

@@ -8,8 +8,8 @@ export function createStudentService(
   studentRepository: StudentRepositoryFunctions
 ): StudentServiceFunctions {
   return {
-    async getStudentById(id: number): Promise<StudentEntity> {
-      const student = await studentRepository.findById(id);
+    async getStudentByNum(num: string): Promise<StudentEntity> {
+      const student = await studentRepository.findByStudentNum(num);
       if (!student) {
         throw new Error('Student not found');
       }

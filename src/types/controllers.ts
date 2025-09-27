@@ -3,7 +3,7 @@ import { Context } from 'hono';
 export type ControllerFunction = (c: Context) => Promise<any>;
 
 export interface StudentControllerFunctions {
-  getStudentById: ControllerFunction;
+  getStudentByNum: ControllerFunction;
 }
 
 // Event Controller Functions

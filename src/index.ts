@@ -12,6 +12,9 @@ import { createEntryRepository } from './repositories/EntryRepository'
 import { createEventRepository } from './repositories/EventRepository'
 import { createEventService } from './services/EventService'
 import { createEventController } from './controllers/EventController'
+import { createStudentRepository } from './repositories/StudentRepository'
+import { createStudentService } from './services/StudentService'
+import { createStudentController } from './controllers/StudentController'
 
 const entryRepository = createEntryRepository(db)
 const entryService = createEntryService(entryRepository)
@@ -21,9 +24,13 @@ const eventRepository = createEventRepository(db)
 const eventService = createEventService(eventRepository)
 const eventController = createEventController(eventService)
 
-// app.get('/entries', entryController.getAllEntries)
+const studentRepository = createStudentRepository(db)
+const studentService = createStudentService(studentRepository)
+const studentController = createStudentController(studentService)
+
 app.get('/entries/:f_entry_id', entryController.getEntryById)
 app.get('/events', eventController.getAllEvents)
+app.get('/students/:f_student_num', studentController.getStudentByNum)
 
 
 
