@@ -1,11 +1,6 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import Database from 'better-sqlite3'
- 
-const app = new Hono()
-const db = new Database('./sqlite-tools-win-x64-3500400/mine.db')
- 
-
 import { createEntryController } from './controllers/EntryController'
 import { createEntryService } from './services/EntryService'
 import { createEntryRepository } from './repositories/EntryRepository'
@@ -18,6 +13,9 @@ import { createStudentController } from './controllers/StudentController'
 import { createEntryGroupController } from './controllers/Entry_groupController'
 import { createEntryGroupService } from './services/Entry_groupService'
 import { createEntryGroupRepository } from './repositories/Entry_groupRepository'
+
+const app = new Hono()
+const db = new Database('./sqlite-tools-win-x64-3500400/mine.db')
 
 const entryRepository = createEntryRepository(db)
 const entryService = createEntryService(entryRepository)
