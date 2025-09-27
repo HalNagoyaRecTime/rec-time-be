@@ -9,7 +9,6 @@ export interface StudentControllerFunctions {
 // Event Controller Functions
 export interface EventControllerFunctions {
   getAllEvents: ControllerFunction;
-  getEventById: ControllerFunction;
 }
 
 // Entry Controller Functions
