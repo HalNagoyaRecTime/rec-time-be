@@ -6,3 +6,8 @@ compatibility_date = "2025-09-24"
 binding = "DB"
 database_name = "mine.db"
 database_id = "de999791-7919-4866-ae7c-79a83d083578"
+
+[site]
+bucket = "./dist"          # vite build 결과물이 들어가는 위치
+entry-point = "./src"      # 백엔드 코드 위치 (Hono + Workers)
+
