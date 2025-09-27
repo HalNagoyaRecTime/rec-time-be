@@ -1,4 +1,5 @@
-import { D1Database } from '@cloudflare/workers-types';
+//import { D1Database } from '@cloudflare/workers-types';
+import {Database} from 'better-sqlite3'
 import { EventEntity } from '../types/domains/Event';
 
 function buildWhereClause(options: {
@@ -37,7 +38,7 @@ function transformToEventEntity(raw: Record<string, unknown>): EventEntity {
   };
 }
 
-export function createEventRepository(db: D1Database) {
+export function createEventRepository(db: Database) {
   return {
     async findAll(options: {
       f_event_code?: string;
@@ -68,11 +69,11 @@ export function createEventRepository(db: D1Database) {
 
       const [events, totalResult] = await Promise.all([
         db.prepare(query).bind(...params).all(),
-        db.prepare(countQuery).bind(...params).first()
+        db.prepare(countQuery).bind(...params).get()
       ]);
 
       return {
-        events: events.results.map(transformToEventEntity),
+        events: events.map(e => transformToEventEntity(e as Record<string, unknown>)),
         total: (totalResult as Record<string, unknown>)?.total as number || 0
       };
     },
@@ -87,33 +88,33 @@ export function createEventRepository(db: D1Database) {
         GROUP BY e.f_event_id
       `;
 
-      const result = await db.prepare(query).bind(id).first();
+      const result = await db.prepare(query).bind(id).get();
 
       if (!result) {
         return null;
       }
 
-      return transformToEventEntity(result);
+      return transformToEventEntity(result as Record<string, unknown>);
     },
 
     async findById(id: number): Promise<EventEntity | null> {
-      const result = await db.prepare('SELECT * FROM t_events WHERE f_event_id = ?').bind(id).first();
+      const result = await db.prepare('SELECT * FROM t_events WHERE f_event_id = ?').bind(id).get();
 
       if (!result) {
         return null;
       }
 
-      return transformToEventEntity(result);
+      return transformToEventEntity(result as Record<string, unknown>);
     },
 
     async findByEventCode(eventCode: string): Promise<EventEntity | null> {
-      const result = await db.prepare('SELECT * FROM t_events WHERE f_event_code = ?').bind(eventCode).first();
+      const result = await db.prepare('SELECT * FROM t_events WHERE f_event_code = ?').bind(eventCode).get();
 
       if (!result) {
         return null;
       }
 
-      return transformToEventEntity(result);
+      return transformToEventEntity(result as Record<string, unknown>);
     },
   };
 }

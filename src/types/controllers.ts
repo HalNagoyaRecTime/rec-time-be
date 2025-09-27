@@ -14,6 +14,6 @@ export interface EventControllerFunctions {
 
 // Entry Controller Functions
 export interface EntryControllerFunctions {
-  getAllEntries: ControllerFunction;
+  // getAllEntries: ControllerFunction;
   getEntryById: ControllerFunction;
 }

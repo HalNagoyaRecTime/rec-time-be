@@ -1,10 +1,12 @@
-import { D1Database } from '@cloudflare/workers-types';
+//import { D1Database } from '@cloudflare/workers-types';
+import {Database} from 'better-sqlite3'
+
 import { StudentEntity } from '../types/domains/Student';
 
-export function createStudentRepository(db: D1Database) {
+export function createStudentRepository(db: Database) {
   return {
     async findById(id: number): Promise<StudentEntity | null> {
-      const result = await db.prepare('SELECT * FROM m_students WHERE f_student_id = ?').bind(id).first();
+      const result = await db.prepare('SELECT * FROM m_students WHERE f_student_id = ?').bind(id).get() as any;
 
       if (!result) {
         return null;
@@ -22,9 +24,9 @@ export function createStudentRepository(db: D1Database) {
     },
 
     async findAll(): Promise<StudentEntity[]> {
-      const result = await db.prepare('SELECT * FROM m_students ORDER BY f_student_num').all();
+      const result = await db.prepare('SELECT * FROM m_students ORDER BY f_student_num').all() as any[];
 
-      return result.results.map(row => ({
+      return result.map(row => ({
         f_student_id: row.f_student_id as number,
         f_student_num: row.f_student_num as string,
         f_class: row.f_class as string,
@@ -35,7 +37,7 @@ export function createStudentRepository(db: D1Database) {
     },
 
     async findByStudentNum(studentNum: string): Promise<StudentEntity | null> {
-      const result = await db.prepare('SELECT * FROM m_students WHERE f_student_num = ?').bind(studentNum).first();
+      const result = await db.prepare('SELECT * FROM m_students WHERE f_student_num = ?').bind(studentNum).get() as StudentEntity | undefined;
 
       if (!result) {
         return null;

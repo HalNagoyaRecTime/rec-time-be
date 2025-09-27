@@ -16,11 +16,12 @@ export interface EventServiceFunctions {
 }
 
 export interface EntryServiceFunctions {
-  getAllEntries: (options: {
-    f_student_id?: number;
-    f_event_id?: number;
-    limit?: number;
-    offset?: number;
-  }) => Promise<{ entries: EntryEntity[]; total: number }>;
+  // getAllEntries: (options: {
+  //   f_student_id?: number;
+  //   f_event_id?: number;
+  //   limit?: number;
+  //   offset?: number;
+  // }) => Promise<{ entries: EntryEntity[]; total: number }>;
   getEntryById: (id: number) => Promise<EntryEntity>;
+  // getStudentById: (id: number) => Promise<any>;
 }

@@ -8,10 +8,15 @@ import { createEventController } from '../controllers/EventController';
 import { createEntryRepository } from '../repositories/EntryRepository';
 import { createEntryService } from '../services/EntryService';
 import { createEntryController } from '../controllers/EntryController';
-import { D1Database } from '@cloudflare/workers-types';
+// import { D1Database } from '@cloudflare/workers-types';
+
+// type Env = {
+//   DB: D1Database;
+// };
+import type { Database } from 'better-sqlite3';
 
 type Env = {
-  DB: D1Database;
+  DB: Database;
 };
 
 export function createDIContainer(env?: Env) {
