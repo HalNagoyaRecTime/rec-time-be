@@ -45,10 +45,10 @@ const changeLogRepository = createChangeLogRepository(db as any);
 // Services
 // ------------------------
 import { createStudentService } from './services/StudentService';
+import { createEventService } from './services/EventService';
 import { createEntryGroupService } from './services/EntryGroupService';
 import { createNotificationService } from './services/NotificationService';
 import { createChangeLogService } from './services/ChangeLogService';
-import { createEventService } from './services/EventService';
 
 const studentService = createStudentService(
   studentRepository,
@@ -58,31 +58,31 @@ const studentService = createStudentService(
   notificationRepository,
   changeLogRepository
 );
+const eventService = createEventService(eventRepository);
 const entryGroupService = createEntryGroupService(entryGroupRepository);
 const notificationService = createNotificationService(notificationRepository);
 const changeLogService = createChangeLogService(changeLogRepository);
-const eventService = createEventService(eventRepository);
 
 // ------------------------
 // Controllers
 // ------------------------
 import { createStudentController } from './controllers/StudentController';
+import { createEventController } from './controllers/EventController';
+import { createEntryController } from './controllers/EntryController';
 import { createEntryGroupController } from './controllers/EntryGroupController';
 import { createNotificationController } from './controllers/NotificationController';
 import { createChangeLogController } from './controllers/ChangeLogController';
-import { createEventController } from './controllers/EventController';
-import { createEntryController } from './controllers/EntryController';
 
 const studentController = createStudentController(studentService);
-const entryGroupController = createEntryGroupController(entryGroupService);
-const notificationController =
-  createNotificationController(notificationService);
-const changeLogController = createChangeLogController(changeLogService);
 const eventController = createEventController(eventService);
 const entryController = createEntryController(
   entryRepository,
   studentRepository
 );
+const entryGroupController = createEntryGroupController(entryGroupService);
+const notificationController =
+  createNotificationController(notificationService);
+const changeLogController = createChangeLogController(changeLogService);
 
 // ------------------------
 // Routes
@@ -114,9 +114,13 @@ app.get(
   entryController.getEntriesByStudentNum
 );
 
-// EntryGroup, Notification, ChangeLog
+// EntryGroup
 app.get('/entry-groups', entryGroupController.getAll);
+
+// Notification
 app.get('/notifications', notificationController.getAll);
+
+// ChangeLog
 app.get('/change-logs', changeLogController.getAll);
 
 // ------------------------

@@ -1,3 +1,5 @@
+// src/types/domains/ChangeLog.ts
+
 export interface ChangeLogEntity {
   f_change_log_id: number;
   f_table_name: string;

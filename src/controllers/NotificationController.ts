@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { NotificationServiceFunctions } from '../types/services';
+import { NotificationServiceFunctions } from '../types/services'; // ✅ 여기로 수정
 
 export function createNotificationController(
   service: NotificationServiceFunctions

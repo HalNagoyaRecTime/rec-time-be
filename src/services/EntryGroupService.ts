@@ -1,5 +1,7 @@
+// src/services/EntryGroupService.ts
+
 import { EntryGroupRepositoryFunctions } from '../types/repositories';
-import { EntryGroupEntity } from '../types/domains';
+import { EntryGroupEntity } from '../types/domains/EntryGroup';
 
 export function createEntryGroupService(
   entryGroupRepository: EntryGroupRepositoryFunctions

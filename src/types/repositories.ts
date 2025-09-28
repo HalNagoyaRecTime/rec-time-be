@@ -1,14 +1,19 @@
-import { EventEntity, EntryEntity, StudentEntity } from './domains';
+import {
+  EventEntity,
+  EntryEntity,
+  StudentEntity,
+  EntryGroupEntity,
+  NotificationEntity,
+  ChangeLogEntity,
+} from './domains';
 
-// Student Repository Types
+// --- Student Repository ---
 export interface StudentRepositoryFunctions {
   findById: (id: number) => Promise<StudentEntity | null>;
   findByStudentNum: (studentNum: string) => Promise<StudentEntity | null>;
 }
 
-// Event Repository Types
-// types/repositories.ts
-
+// --- Event Repository ---
 export interface EventRepositoryFunctions {
   findAll: (options: {
     f_event_code?: string;
@@ -22,7 +27,7 @@ export interface EventRepositoryFunctions {
   findByEventCode: (eventCode: string) => Promise<EventEntity | null>;
 }
 
-// ✅ Entry Repository Types
+// --- Entry Repository ---
 export interface EntryRepositoryFunctions {
   findAll: (options: {
     f_student_id?: number;
@@ -32,8 +37,6 @@ export interface EntryRepositoryFunctions {
   }) => Promise<{ entries: EntryEntity[]; total: number }>;
 
   findById: (id: number) => Promise<EntryEntity | null>;
-
-  // ✅ optional 제거 (에러 원인 제거)
   findByStudentId: (studentId: number) => Promise<EntryEntity[]>;
   findByEventId: (eventId: number) => Promise<EntryEntity[]>;
   findByStudentAndEvent: (
@@ -44,20 +47,17 @@ export interface EntryRepositoryFunctions {
   delete: (id: number) => Promise<boolean>;
 }
 
-import {
-  EntryGroupEntity,
-  NotificationEntity,
-  ChangeLogEntity,
-} from './domains';
-
+// --- Entry Group Repository ---
 export interface EntryGroupRepositoryFunctions {
   findAll: () => Promise<EntryGroupEntity[]>;
 }
 
+// --- Notification Repository ---
 export interface NotificationRepositoryFunctions {
   findAll: () => Promise<NotificationEntity[]>;
 }
 
+// --- Change Log Repository ---
 export interface ChangeLogRepositoryFunctions {
   findAll: () => Promise<ChangeLogEntity[]>;
 }

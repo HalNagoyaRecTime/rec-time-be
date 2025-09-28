@@ -1,6 +1,9 @@
+// src/repositories/EntryGroupRepository.ts
+
 import { D1Database } from '@cloudflare/workers-types';
 import { EntryGroupEntity } from '../types/domains/EntryGroup';
 
+// 👉 결과 레코드를 Entity 타입으로 변환
 function transformToEntryGroupEntity(raw: any): EntryGroupEntity {
   return {
     f_entry_group_id: raw.f_entry_group_id as number,
@@ -10,6 +13,7 @@ function transformToEntryGroupEntity(raw: any): EntryGroupEntity {
   };
 }
 
+// ✅ Repository 생성 함수
 export function createEntryGroupRepository(db: D1Database) {
   return {
     async findAll(): Promise<EntryGroupEntity[]> {
