@@ -1,3 +1,4 @@
+// src/types/controllers.ts
 import { Context } from 'hono';
 
 export type ControllerFunction = (c: Context) => Promise<any>;
@@ -10,8 +11,14 @@ export interface StudentControllerFunctions {
 }
 
 export interface EntryControllerFunctions {
-  getEventById: ControllerFunction;
+  getEntriesByStudentNum: ControllerFunction;
+  getAllEntries: ControllerFunction;
+  getEntryById: ControllerFunction;
+}
+
+export interface EventControllerFunctions {
   getAllEvents: ControllerFunction;
+  getEventById: ControllerFunction;
 }
 
 export interface EntryGroupControllerFunctions {

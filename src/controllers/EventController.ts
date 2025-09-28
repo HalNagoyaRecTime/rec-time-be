@@ -1,10 +1,11 @@
+// src/controllers/eventController.ts
 import { Context } from 'hono';
-import { EntryControllerFunctions } from '../types/controllers';
+import { EventControllerFunctions } from '../types/controllers';
 import { EventServiceFunctions } from '../types/services';
 
 export function createEventController(
   eventService: EventServiceFunctions
-): EntryControllerFunctions {
+): EventControllerFunctions {
   const getAllEvents = async (c: Context) => {
     try {
       const f_event_code = c.req.query('f_event_code');
