@@ -1,5 +1,6 @@
 import { D1Database } from '@cloudflare/workers-types';
 import { EntryEntity } from '../types/domains/Entry';
+import { EntryRepositoryFunctions } from '../types/repositories';
 
 function transformToEntryEntity(raw: any): EntryEntity {
   return {
@@ -9,7 +10,9 @@ function transformToEntryEntity(raw: any): EntryEntity {
   };
 }
 
-export function createEntryRepository(db: D1Database) {
+export function createEntryRepository(
+  db: D1Database
+): EntryRepositoryFunctions {
   return {
     async findAll(options: {
       f_student_id?: number;

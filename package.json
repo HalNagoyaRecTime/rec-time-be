@@ -1,27 +1,25 @@
 {
   "name": "recreation-management-api",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx --watch src/index.ts",
-    "dev:wrangler": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
-    "db:migrate --remote": "wrangler d1 migrations apply rec_time_stg --remote",
-    "db:migrate --local": "wrangler d1 migrations apply rec_time_stg --local",
+    "dev": "tsx --watch src/index.local.ts",
+    "dev:wrangler": "npx wrangler dev",
+    "deploy": "npx wrangler deploy --minify",
+    "db:migrate:local": "npx wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "npx wrangler d1 migrations apply DB --remote",
+    "cf:typegen": "npx wrangler types --env-interface CloudflareBindings",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "format:fix": "prettier --write .",
+    "lint": "eslint . --ext .ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.2",
-    "@prisma/adapter-d1": "^5.22.0",
-    "@prisma/client": "^5.22.0",
     "better-sqlite3": "^12.4.1",
-    "crypto": "^1.0.1",
     "hono": "^4.9.9",
     "papaparse": "^5.5.3",
-    "sqlite3": "^5.1.7",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -29,16 +27,16 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.5.2",
     "@types/papaparse": "^5.3.16",
-    "@types/sqlite3": "^3.1.11",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
-    "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.4.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7",
+    "wrangler": "^4.40.2"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "npm@10"
 }

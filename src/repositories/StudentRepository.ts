@@ -1,6 +1,7 @@
-import { Context } from 'hono';
+// src/repositories/StudentRepository.ts
+
 import { D1Database } from '@cloudflare/workers-types';
-import { StudentEntity } from '../types/domains/Student'; // ✅ 이 줄 추가
+import { StudentEntity } from '../types/domains/Student';
 
 export function createStudentRepository(db: D1Database) {
   return {
@@ -23,12 +24,22 @@ export function createStudentRepository(db: D1Database) {
     },
 
     async findByStudentNum(studentNum: string): Promise<StudentEntity | null> {
+      console.log(
+        '[DEBUG] studentNum =',
+        studentNum,
+        'type:',
+        typeof studentNum
+      ); // 🐛 디버깅 로그
+
       const result = await db
         .prepare('SELECT * FROM m_students WHERE f_student_num = ?')
-        .bind(studentNum)
+        .bind(studentNum.toString()) // 🐛 명시적 변환
         .first();
 
-      if (!result) return null;
+      if (!result) {
+        console.log('[DEBUG] No student found for:', studentNum); // 🐛 결과 없음 로그
+        return null;
+      }
 
       return {
         f_student_id: result.f_student_id as number,

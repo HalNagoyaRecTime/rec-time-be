@@ -7,6 +7,8 @@ export interface StudentRepositoryFunctions {
 }
 
 // Event Repository Types
+// types/repositories.ts
+
 export interface EventRepositoryFunctions {
   findAll: (options: {
     f_event_code?: string;
@@ -40,4 +42,22 @@ export interface EntryRepositoryFunctions {
   ) => Promise<EntryEntity | null>;
   create: (studentId: number, eventId: number) => Promise<EntryEntity>;
   delete: (id: number) => Promise<boolean>;
+}
+
+import {
+  EntryGroupEntity,
+  NotificationEntity,
+  ChangeLogEntity,
+} from './domains';
+
+export interface EntryGroupRepositoryFunctions {
+  findAll: () => Promise<EntryGroupEntity[]>;
+}
+
+export interface NotificationRepositoryFunctions {
+  findAll: () => Promise<NotificationEntity[]>;
+}
+
+export interface ChangeLogRepositoryFunctions {
+  findAll: () => Promise<ChangeLogEntity[]>;
 }

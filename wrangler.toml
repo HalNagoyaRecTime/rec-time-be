@@ -1,13 +1,21 @@
-name = "my-d1-api"
+name = "rec-time-be"
 main = "src/index.ts"
-compatibility_date = "2025-09-24"
+compatibility_date = "2024-09-23"
+compatibility_flags = [ "nodejs_compat" ]
 
+# ✅ 기본 환경 (배포, 일반 dev 등)
 [[d1_databases]]
-binding = "DB"
-database_name = "mine.db"
+binding = "DB"  # ✅ 코드에서 항상 c.env.DB 로 접근
+database_name = "rectime"
 database_id = "de999791-7919-4866-ae7c-79a83d083578"
 
-[site]
-bucket = "./dist"          # vite build 결과물이 들어가는 위치
-entry-point = "./src"      # 백엔드 코드 위치 (Hono + Workers)
+# ✅ 로컬/개발 전용 환경
+[env.development]
+vars = { NODE_ENV = "development" }
+
+[[env.development.d1_databases]]
+binding = "DB"  # ✅ dev 환경에서도 여전히 c.env.DB
+database_name = "rec_time_stg"
+database_id = "de999791-7919-4866-ae7c-79a83d083578"
+
 

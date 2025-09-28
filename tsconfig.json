@@ -8,7 +8,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "types": ["vite/client", "@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types"], // 👈 여기만 남기기
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "baseUrl": "./src",

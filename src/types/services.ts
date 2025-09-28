@@ -1,20 +1,32 @@
-import { EventEntity, EntryEntity, StudentEntity } from './domains';
+import {
+  EventEntity,
+  EntryEntity,
+  StudentEntity,
+  EntryGroupEntity,
+  NotificationEntity,
+  ChangeLogEntity,
+} from './domains';
 
-// Student Service Types
 export interface StudentServiceFunctions {
   getStudentById: (id: number) => Promise<StudentEntity>;
 
-  // ✅ 학번으로 학생 조회
   getStudentByStudentNum: (studentNum: string) => Promise<StudentEntity>;
 
-  // ✅ 학생 + 전체 이벤트 + 참가 여부 포함된 페이로드 반환
   getStudentPayloadByStudentNum: (studentNum: string) => Promise<{
     m_students: StudentEntity;
     t_events: (EventEntity & { f_is_my_entry: boolean })[];
   }>;
+
+  getStudentFullPayload: (studentNum: string) => Promise<{
+    m_students: StudentEntity;
+    t_entries: EntryEntity[];
+    t_events: EventEntity[];
+    t_entry_groups: EntryGroupEntity[];
+    t_notifications: NotificationEntity[];
+    t_change_logs: ChangeLogEntity[];
+  }>;
 }
 
-// Event Service Types
 export interface EventServiceFunctions {
   getAllEvents: (options: {
     f_event_code?: string;
@@ -22,10 +34,10 @@ export interface EventServiceFunctions {
     limit?: number;
     offset?: number;
   }) => Promise<{ events: EventEntity[]; total: number }>;
+
   getEventById: (id: number) => Promise<EventEntity>;
 }
 
-// Entry Service Types
 export interface EntryServiceFunctions {
   getAllEntries: (options: {
     f_student_id?: number;
@@ -33,6 +45,18 @@ export interface EntryServiceFunctions {
     limit?: number;
     offset?: number;
   }) => Promise<{ entries: EntryEntity[]; total: number }>;
+
   getEntryById: (id: number) => Promise<EntryEntity>;
 }
 
+export interface EntryGroupServiceFunctions {
+  findAll: () => Promise<EntryGroupEntity[]>;
+}
+
+export interface NotificationServiceFunctions {
+  findAll: () => Promise<NotificationEntity[]>;
+}
+
+export interface ChangeLogServiceFunctions {
+  findAll: () => Promise<ChangeLogEntity[]>;
+}

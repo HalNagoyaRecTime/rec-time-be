@@ -1,5 +1,4 @@
-// Export all type definitions for easy importing
 export * from './controllers';
 export * from './services';
 export * from './repositories';
-export * from './domains';
+export * from './domains'; // ✅ 여기서 domains/index.ts를 바라봄

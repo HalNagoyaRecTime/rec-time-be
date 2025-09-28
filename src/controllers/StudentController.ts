@@ -18,7 +18,6 @@ export function createStudentController(
     }
   };
 
-  // ✅ 추가: getStudentByStudentNum
   const getStudentByStudentNum = async (c: Context) => {
     try {
       const studentNum = c.req.param('studentNum');
@@ -35,9 +34,7 @@ export function createStudentController(
   const getStudentPayloadByStudentNum = async (c: Context) => {
     try {
       const studentNum = c.req.param('studentNum');
-      if (!studentNum) {
-        return c.json({ error: 'studentNum is required' }, 400);
-      }
+      if (!studentNum) return c.json({ error: 'studentNum is required' }, 400);
 
       const payload =
         await studentService.getStudentPayloadByStudentNum(studentNum);
@@ -50,9 +47,25 @@ export function createStudentController(
     }
   };
 
+  const getStudentFullPayload = async (c: Context) => {
+    try {
+      const studentNum = c.req.param('studentNum');
+      if (!studentNum) return c.json({ error: 'studentNum is required' }, 400);
+
+      const payload = await studentService.getStudentFullPayload(studentNum);
+      return c.json(payload);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Student not found') {
+        return c.json({ error: 'Student not found' }, 404);
+      }
+      return c.json({ error: 'Failed to fetch full student payload' }, 500);
+    }
+  };
+
   return {
     getStudentById,
-    getStudentByStudentNum, // 👈 추가
+    getStudentByStudentNum,
     getStudentPayloadByStudentNum,
+    getStudentFullPayload, // ✅ 추가됨
   };
 }
