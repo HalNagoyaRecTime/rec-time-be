@@ -1,3 +1,4 @@
+
 -- 001_create_tables.sql
 
 -- 学生テーブル
@@ -25,33 +26,38 @@ CREATE TABLE IF NOT EXISTS t_entries (
   f_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
   f_student_id INTEGER NOT NULL,
   f_event_id INTEGER NOT NULL,
+  f_seq INTEGER NOT NULL,
   FOREIGN KEY (f_student_id) REFERENCES m_students(f_student_id),
   FOREIGN KEY (f_event_id) REFERENCES t_events(f_event_id)
 );
 
 -- 出場グループテーブル
-CREATE TABLE IF NOT EXISTS t_entry_groups (
-  f_entry_group_id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS t_entries_group (
   f_event_id INTEGER NOT NULL,
-  f_group_name TEXT NOT NULL,
-  FOREIGN KEY (f_event_id) REFERENCES t_events(f_event_id)
+  f_seq INTEGER NOT NULL,
+  f_place TEXT,
+  f_gather_time TEXT,
+  PRIMARY KEY (f_event_id, f_seq)
 );
 
 -- 通知履歴テーブル
-CREATE TABLE IF NOT EXISTS t_notifications (
-  f_notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  f_target_student_id INTEGER NOT NULL,
-  f_message TEXT NOT NULL,
-  f_sent_at TEXT NOT NULL,
-  FOREIGN KEY (f_target_student_id) REFERENCES m_students(f_student_id)
+CREATE TABLE IF NOT EXISTS t_notifs (
+  f_notif_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  f_type TEXT NOT NULL,
+  f_target TEXT NOT NULL,
+  f_event_id INTEGER,
+  f_title TEXT NOT NULL,
+  f_body TEXT NOT NULL,
+  f_sent_at TEXT NOT NULL
 );
 
 -- 変更履歴テーブル
-CREATE TABLE IF NOT EXISTS t_change_logs (
-  f_change_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  f_table_name TEXT NOT NULL,
-  f_record_id INTEGER NOT NULL,
-  f_change_type TEXT NOT NULL CHECK (f_change_type IN ('INSERT', 'UPDATE', 'DELETE')),
-  f_changed_at TEXT NOT NULL,
-  f_changed_by TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS t_update (
+  f_update_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  f_event_id INTEGER NOT NULL,
+  f_updated_item TEXT NOT NULL,
+  f_before TEXT,
+  f_after TEXT,
+  f_updated_at TEXT,
+  f_reason TEXT
 );
