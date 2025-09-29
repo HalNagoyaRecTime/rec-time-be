@@ -1,5 +1,6 @@
-// src/index.ts
+// src/index.local.ts
 import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
 import DatabaseConstructor from 'better-sqlite3';
 import { createD1Compat } from './lib/d1Compat';
 
@@ -11,8 +12,8 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ 프로덕션 SQLite 파일 경로 (루트 mine.db)
-const sqlitePath = path.resolve(__dirname, '../mine.db');
+// ✅ 로컬 SQLite 파일 경로 (루트 mine.db)
+const sqlitePath = path.resolve(__dirname, '../');
 
 if (!fs.existsSync(sqlitePath)) {
   console.error('❌ SQLite DB 파일을 찾을 수 없습니다:', sqlitePath);
@@ -89,7 +90,7 @@ const changeLogController = createChangeLogController(changeLogService);
 // ------------------------
 const app = new Hono();
 
-app.get('/', c => c.text('Hello (prod) 🚀'));
+app.get('/', c => c.text('Hello (local) 🚀'));
 
 // Student
 app.get(
@@ -124,8 +125,8 @@ app.get('/notifications', notificationController.getAll);
 app.get('/change-logs', changeLogController.getAll);
 
 // ------------------------
-// Cloudflare Workers fetch
+// 서버 실행
 // ------------------------
-export default {
-  fetch: app.fetch,
-};
+serve(app, info => {
+  console.log(`🚀 Local server running at http://localhost:${info.port}`);
+});

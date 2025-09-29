@@ -1,3 +1,4 @@
+// src/controllers/eventController.ts
 import { Context } from 'hono';
 import { EventControllerFunctions } from '../types/controllers';
 import { EventServiceFunctions } from '../types/services';
