@@ -1,6 +1,3 @@
-
--- 001_create_tables.sql
-
 -- 学生テーブル
 CREATE TABLE IF NOT EXISTS m_students (
   f_student_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,6 +15,8 @@ CREATE TABLE IF NOT EXISTS t_events (
   f_event_name TEXT NOT NULL,
   f_time TEXT NOT NULL,
   f_duration INTEGER,
+  f_place TEXT,         -- ✅ 追加: 開催場所
+  f_gather_time TEXT,   -- ✅ 追加: 集合時間
   f_summary TEXT
 );
 

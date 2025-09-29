@@ -3,19 +3,18 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = [ "nodejs_compat" ]
 
-# ✅ 기본 환경 (배포, 일반 dev 등)
+# ✅ 기본 환경 (배포 포함)
 [[d1_databases]]
-binding = "DB"  # ✅ 코드에서 항상 c.env.DB 로 접근
-database_name = "rectime"
-database_id = "de999791-7919-4866-ae7c-79a83d083578"
+binding = "DB"
+database_name = "rec_time_stg"
+database_id = "be740644-5280-4e1b-a0b1-a3e9f3dcc2b6"
 
-# ✅ 로컬/개발 전용 환경
+# ✅ 로컬 개발용
 [env.development]
+main = "src/index.local.ts"   # 🔹 로컬 실행시 index.local.ts 사용
 vars = { NODE_ENV = "development" }
 
 [[env.development.d1_databases]]
-binding = "DB"  # ✅ dev 환경에서도 여전히 c.env.DB
+binding = "DB"
 database_name = "rec_time_stg"
-database_id = "de999791-7919-4866-ae7c-79a83d083578"
-
-
+database_id = "be740644-5280-4e1b-a0b1-a3e9f3dcc2b6"
