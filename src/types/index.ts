@@ -1,4 +1,6 @@
-export * from './controllers';
-export * from './services';
-export * from './repositories';
-export * from './domains'; // ✅ 여기서 domains/index.ts를 바라봄
+export * from './domains'; // ← 타입 정의들 (예: Student, Event 등)
+
+export type Bindings = {
+  DB: D1Database;
+  NODE_ENV: string;
+};
