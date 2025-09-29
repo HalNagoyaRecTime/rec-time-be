@@ -66,6 +66,6 @@ export function createStudentController(
     getStudentById,
     getStudentByStudentNum,
     getStudentPayloadByStudentNum,
-    getStudentFullPayload, // ✅ 추가됨
+    getStudentFullPayload,
   };
 }

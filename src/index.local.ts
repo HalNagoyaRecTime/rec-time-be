@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ 로컬 SQLite 파일 경로 (루트 mine.db)
-const sqlitePath = path.resolve(__dirname, '../mine.db');
+const sqlitePath = path.resolve(__dirname, '../');
 
 if (!fs.existsSync(sqlitePath)) {
   console.error('❌ SQLite DB 파일을 찾을 수 없습니다:', sqlitePath);

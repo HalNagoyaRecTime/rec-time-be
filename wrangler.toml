@@ -7,7 +7,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [[d1_databases]]
 binding = "DB"
 database_name = "rec_time_stg"
-database_id = "be740644-5280-4e1b-a0b1-a3e9f3dcc2b6"
+database_id = "02e1f666-530e-4498-82ce-194e0d8269b9"
 
 # ✅ 로컬 개발용
 [env.development]
@@ -17,4 +17,4 @@ vars = { NODE_ENV = "development" }
 [[env.development.d1_databases]]
 binding = "DB"
 database_name = "rec_time_stg"
-database_id = "be740644-5280-4e1b-a0b1-a3e9f3dcc2b6"
+database_id = "02e1f666-530e-4498-82ce-194e0d8269b9"
