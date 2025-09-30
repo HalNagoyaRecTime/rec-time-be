@@ -7,7 +7,7 @@ export interface StudentControllerFunctions {
   getStudentById: ControllerFunction;
   getStudentByStudentNum: ControllerFunction;
   getStudentPayloadByStudentNum: ControllerFunction;
-  getStudentFullPayload: ControllerFunction; // ✅ 추가
+  getStudentFullPayload: ControllerFunction;
 }
 
 export interface EntryControllerFunctions {

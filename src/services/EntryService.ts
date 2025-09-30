@@ -1,8 +1,9 @@
-import {
-  EntryEntity,
-  EntryRepositoryFunctions,
-  EntryServiceFunctions,
-} from '../types';
+// src/services/EntryService.ts
+
+import { EntryRepositoryFunctions } from '../types/repositories';
+import { EntryDTO } from '../types/domains/Entry';
+import { EntryServiceFunctions } from '../types/services';
+import { toEntryDTO } from '../utils/transformers';
 
 export function createEntryService(
   entryRepository: EntryRepositoryFunctions
@@ -13,16 +14,18 @@ export function createEntryService(
       f_event_id?: number;
       limit?: number;
       offset?: number;
-    }): Promise<{ entries: EntryEntity[]; total: number }> {
-      return await entryRepository.findAll(options);
+    }): Promise<{ entries: EntryDTO[]; total: number }> {
+      const { entries, total } = await entryRepository.findAll(options);
+      return {
+        entries: entries.map(toEntryDTO),
+        total,
+      };
     },
 
-    async getEntryById(id: number): Promise<EntryEntity> {
+    async getEntryById(id: number): Promise<EntryDTO> {
       const entry = await entryRepository.findById(id);
-      if (!entry) {
-        throw new Error('Entry not found');
-      }
-      return entry;
+      if (!entry) throw new Error('Entry not found');
+      return toEntryDTO(entry);
     },
   };
 }

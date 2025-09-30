@@ -1,94 +1,61 @@
 import { Hono } from 'hono';
-import { env } from 'hono/adapter';
 import { Bindings } from './types';
-import {
-  createStudentController,
-  createEventController,
-  createEntryController,
-  createEntryGroupController,
-  createNotificationController,
-  createChangeLogController,
-  createStudentService,
-  createEventService,
-  createEntryGroupService,
-  createNotificationService,
-  createChangeLogService,
-  createStudentRepository,
-  createEventRepository,
-  createEntryRepository,
-  createEntryGroupRepository,
-  createNotificationRepository,
-  createChangeLogRepository,
-} from './exports';
+import { ControllerMap } from './types/context';
+import { getDIContainer } from './di/container';
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings; Variables: ControllerMap }>();
 
 app.use('*', async (c, next) => {
-  const db = c.env.DB;
+  const container = getDIContainer(c.env);
 
-  // Repository
-  const studentRepository = createStudentRepository(db);
-  const eventRepository = createEventRepository(db);
-  const entryRepository = createEntryRepository(db);
-  const entryGroupRepository = createEntryGroupRepository(db);
-  const notificationRepository = createNotificationRepository(db);
-  const changeLogRepository = createChangeLogRepository(db);
-
-  // Service
-  const studentService = createStudentService(
-    studentRepository,
-    eventRepository,
-    entryRepository,
-    entryGroupRepository,
-    notificationRepository,
-    changeLogRepository
-  );
-  const eventService = createEventService(eventRepository);
-  const entryGroupService = createEntryGroupService(entryGroupRepository);
-  const notificationService = createNotificationService(notificationRepository);
-  const changeLogService = createChangeLogService(changeLogRepository);
-
-  // Controller
-  const studentController = createStudentController(studentService);
-  const eventController = createEventController(eventService);
-  const entryController = createEntryController(
-    entryRepository,
-    studentRepository
-  );
-  const entryGroupController = createEntryGroupController(entryGroupService);
-  const notificationController =
-    createNotificationController(notificationService);
-  const changeLogController = createChangeLogController(changeLogService);
-
-  // Routes
-  app.get('/', c => c.text('Hello from Cloudflare Worker 🚀'));
-
-  app.get(
-    '/students/by-student-num/:studentNum',
-    studentController.getStudentByStudentNum
-  );
-  app.get(
-    '/student-payload/by-student-num/:studentNum',
-    studentController.getStudentPayloadByStudentNum
-  );
-  app.get('/student-data/:studentNum', studentController.getStudentFullPayload);
-
-  app.get('/events', eventController.getAllEvents);
-  app.get('/events/:eventId', eventController.getEventById);
-
-  app.get('/entries', entryController.getAllEntries);
-  app.get('/entries/:entryId', entryController.getEntryById);
-  app.get(
-    '/entries/by-student/:studentNum',
-    entryController.getEntriesByStudentNum
-  );
-
-  app.get('/entry-groups', entryGroupController.getAll);
-  app.get('/notifications', notificationController.getAll);
-  app.get('/change-logs', changeLogController.getAll);
+  c.set('studentController', container.studentController);
+  c.set('eventController', container.eventController);
+  c.set('entryController', container.entryController);
+  c.set('entryGroupController', container.entryGroupController);
+  c.set('notificationController', container.notificationController);
+  c.set('changeLogController', container.changeLogController);
 
   await next();
 });
+
+// ================================
+// API prefix 붙이기
+// ================================
+const api = app.basePath('/api');
+
+// Root
+api.get('/', c => c.text('Hello from Cloudflare Worker 🚀'));
+
+// Students
+api.get('/students/by-student-num/:studentNum', c =>
+  c.get('studentController').getStudentByStudentNum(c)
+);
+api.get('/student-payload/by-student-num/:studentNum', c =>
+  c.get('studentController').getStudentPayloadByStudentNum(c)
+);
+api.get('/student-data/:studentNum', c =>
+  c.get('studentController').getStudentFullPayload(c)
+);
+
+// Events
+api.get('/events', c => c.get('eventController').getAllEvents(c));
+api.get('/events/:eventId', c => c.get('eventController').getEventById(c));
+
+// Entries
+api.get('/entries', c => c.get('entryController').getAllEntries(c));
+api.get('/entries/:entryId', c => c.get('entryController').getEntryById(c));
+api.get('/entries/by-student/:studentNum', c =>
+  c.get('entryController').getEntriesByStudentNum(c)
+);
+
+// Entry Groups
+api.get('/entry-groups', c => c.get('entryGroupController').getAll(c));
+
+// Notifications
+api.get('/notifications', c => c.get('notificationController').getAll(c));
+
+// Change Logs
+api.get('/change-logs', c => c.get('changeLogController').getAll(c));
 
 export default {
   fetch: app.fetch,

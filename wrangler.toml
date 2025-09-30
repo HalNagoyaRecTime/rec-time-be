@@ -1,19 +1,13 @@
 name = "rec-time-be"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
-compatibility_flags = [ "nodejs_compat" ]
-compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
-# ローカル開発用の設定
 [env.development]
-vars = { NODE_ENV = "development"}
+vars = { NODE_ENV = "development" }
 
 [[d1_databases]]
-binding = "rec_time_stg"
+binding = "DB" # ✅ 앱에서 c.env.DB로 사용할 수 있음
 database_name = "rec_time_stg"
-database_id = "de999791-7919-4866-ae7c-79a83d083578"
+database_id = "3e6426ce-7b75-4b24-8634-5e9c3063689f"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "rectime"
-database_id = "de999791-7919-4866-ae7c-79a83d083578"
