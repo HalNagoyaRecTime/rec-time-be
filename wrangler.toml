@@ -3,11 +3,25 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# ----------------------------
+# 공통 환경변수 (모든 환경에서 사용)
+# ----------------------------
+[vars]
+NODE_ENV = "production"
+
+# ----------------------------
+# 개발 환경 (wrangler dev 시 사용)
+# ----------------------------
 [env.development]
-vars = { NODE_ENV = "development" }
+[env.development.vars]
+NODE_ENV = "development"
+PORT = "8787"
+HOST = "0.0.0.0"
 
+# ----------------------------
+# D1 Database 연결
+# ----------------------------
 [[d1_databases]]
-binding = "DB" # ✅ 앱에서 c.env.DB로 사용할 수 있음
-database_name = "rec_time_stg"
+binding = "DB"                  # c.env.DB 로 접근 가능
+database_name = "rec_time_stg"  # D1 DB 이름
 database_id = "3e6426ce-7b75-4b24-8634-5e9c3063689f"
-

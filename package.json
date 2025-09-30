@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx --watch src/index.local.ts",
-    "dev:wrangler": "wrangler dev --local-protocol https --ip 0.0.0.0 --port 8787",
+    "dev:http": "wrangler dev --local-protocol http --ip 0.0.0.0 --port 8787",
+    "dev:https": "wrangler dev --local-protocol https --ip 0.0.0.0 --port 8787",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",

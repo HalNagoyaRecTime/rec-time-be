@@ -1,13 +1,14 @@
-// src/repositories/NotificationRepository.ts
-
 import { D1Database } from '@cloudflare/workers-types';
 import { NotificationEntity } from '../types/domains/Notification';
 
 function transformToNotificationEntity(raw: any): NotificationEntity {
   return {
-    f_notification_id: raw.f_notification_id as number,
-    f_target_student_id: raw.f_target_student_id as number,
-    f_message: raw.f_message as string,
+    f_notif_id: raw.f_notif_id as number,
+    f_type: raw.f_type as string,
+    f_target: raw.f_target as string,
+    f_event_id: raw.f_event_id as number | null,
+    f_title: raw.f_title as string,
+    f_body: raw.f_body as string,
     f_sent_at: raw.f_sent_at as string,
   };
 }
@@ -15,7 +16,7 @@ function transformToNotificationEntity(raw: any): NotificationEntity {
 export function createNotificationRepository(db: D1Database) {
   return {
     async findAll(): Promise<NotificationEntity[]> {
-      const result = await db.prepare('SELECT * FROM t_notifications').all();
+      const result = await db.prepare('SELECT * FROM t_notifs').all();
       return result.results.map(transformToNotificationEntity);
     },
   };

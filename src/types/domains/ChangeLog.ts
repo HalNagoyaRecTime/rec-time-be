@@ -1,8 +1,9 @@
 export interface ChangeLogEntity {
-  f_change_log_id: number;
-  f_table_name: string;
-  f_record_id: number;
-  f_change_type: 'INSERT' | 'UPDATE' | 'DELETE';
-  f_changed_at: string; // ISO timestamp
-  f_changed_by: string;
+  f_update_id: number;
+  f_event_id: number;
+  f_updated_item: string;
+  f_before: string | null;
+  f_after: string | null;
+  f_updated_at: string;
+  f_reason: string | null;
 }

@@ -28,18 +28,21 @@ export function createStudentService(
   changeLogRepository: ChangeLogRepositoryFunctions
 ): StudentServiceFunctions {
   return {
+    // 🔹 학생 ID로 단건 조회
     async getStudentById(id: number): Promise<StudentEntity> {
       const student = await studentRepository.findById(id);
       if (!student) throw new Error('Student not found');
       return student;
     },
 
+    // 🔹 학번으로 단건 조회
     async getStudentByStudentNum(studentNum: string): Promise<StudentEntity> {
       const student = await studentRepository.findByStudentNum(studentNum);
       if (!student) throw new Error('Student not found');
       return student;
     },
 
+    // 🔹 학번 기준 기본 페이로드 (학생 + 이벤트 + 출전 여부 flag)
     async getStudentPayloadByStudentNum(studentNum: string): Promise<{
       m_students: StudentEntity;
       t_events: (EventEntity & { f_is_my_entry: boolean })[];
@@ -47,14 +50,17 @@ export function createStudentService(
       const student = await studentRepository.findByStudentNum(studentNum);
       if (!student) throw new Error('Student not found');
 
+      // 학생이 출전한 엔트리
       const myEntries = await entryRepository.findByStudentId(
         student.f_student_id
       );
       const myEventIds = new Set(myEntries.map(entry => entry.f_event_id));
 
+      // 전체 이벤트
       const allEventsResult = await eventRepository.findAll({});
       const allEvents = allEventsResult.events;
 
+      // 내 출전 여부 flag 추가
       const eventsWithFlag = allEvents.map(event => ({
         ...event,
         f_is_my_entry: myEventIds.has(event.f_event_id),
@@ -66,6 +72,7 @@ export function createStudentService(
       };
     },
 
+    // 🔹 학번 기준 전체 페이로드 (학생 + 엔트리 + 이벤트 + 그룹 + 알림 + 변경 로그)
     async getStudentFullPayload(studentNum: string): Promise<{
       m_students: StudentEntity;
       t_entries: EntryEntity[];
