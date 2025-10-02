@@ -61,10 +61,7 @@ export function createDIContainer(env?: Env) {
 
   const studentController = createStudentController(studentService);
   const eventController = createEventController(eventService);
-  const entryController = createEntryController(
-    entryRepository,
-    studentRepository
-  );
+  const entryController = createEntryController(entryService, studentService);
   const entryGroupController = createEntryGroupController(entryGroupService);
   const notificationController =
     createNotificationController(notificationService);

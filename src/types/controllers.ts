@@ -14,6 +14,7 @@ export interface EntryControllerFunctions {
   getEntriesByStudentNum: ControllerFunction;
   getAllEntries: ControllerFunction;
   getEntryById: ControllerFunction;
+  getAlarmEntriesByStudentNum: ControllerFunction;
 }
 
 export interface EventControllerFunctions {

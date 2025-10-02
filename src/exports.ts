@@ -8,6 +8,7 @@ export { createChangeLogController } from './controllers/ChangeLogController';
 
 export { createStudentService } from './services/StudentService';
 export { createEventService } from './services/EventService';
+export { createEntryService } from './services/EntryService';
 export { createEntryGroupService } from './services/EntryGroupService';
 export { createNotificationService } from './services/NotificationService';
 export { createChangeLogService } from './services/ChangeLogService';

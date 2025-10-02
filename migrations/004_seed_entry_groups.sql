@@ -9,8 +9,8 @@ INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(6,2,'�
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(7,1,'2Fクラス指定席','1230');
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(7,2,'集合場所A','1220');
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(8,1,'2Fクラス指定席','1300');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(9,1,'集合場所A','1330');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(10,1,'集合場所A','1430');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(11,1,'集合場所A','1500');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(12,1,'2Fクラス指定席','1530');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(13,1,'2Fクラス指定席','1545');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(9,1,'集合場所A','1310');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(10,1,'集合場所A','1420');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(11,1,'集合場所A','1445');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(12,1,'2Fクラス指定席','1515');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(13,1,'2Fクラス指定席','1530');

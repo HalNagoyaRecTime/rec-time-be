@@ -7,6 +7,7 @@ import {
   EntryGroupEntity,
   NotificationEntity,
   ChangeLogEntity,
+  EntryAlarmRow,
 } from './domains';
 
 // -------------------------
@@ -58,6 +59,8 @@ export interface EntryServiceFunctions {
   }) => Promise<{ entries: EntryDTO[]; total: number }>; // ✅ EntryDTO로 반환하도록 수정
 
   getEntryById: (id: number) => Promise<EntryDTO>; // ✅ EntryDTO로 반환하도록 수정
+
+  findAlarmEntriesByStudentNum(studentNum: string): Promise<EntryAlarmRow[]>;
 }
 
 // -------------------------

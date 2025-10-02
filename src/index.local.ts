@@ -11,6 +11,7 @@ import {
   createChangeLogController,
   createStudentService,
   createEventService,
+  createEntryService,
   createEntryGroupService,
   createNotificationService,
   createChangeLogService,
@@ -60,6 +61,7 @@ const studentService = createStudentService(
   changeLogRepository
 );
 const eventService = createEventService(eventRepository);
+const entryService = createEntryService(entryRepository);
 const entryGroupService = createEntryGroupService(entryGroupRepository);
 const notificationService = createNotificationService(notificationRepository);
 const changeLogService = createChangeLogService(changeLogRepository);
@@ -67,10 +69,7 @@ const changeLogService = createChangeLogService(changeLogRepository);
 // Controller
 const studentController = createStudentController(studentService);
 const eventController = createEventController(eventService);
-const entryController = createEntryController(
-  entryRepository,
-  studentRepository
-);
+const entryController = createEntryController(entryService, studentService);
 const entryGroupController = createEntryGroupController(entryGroupService);
 const notificationController =
   createNotificationController(notificationService);
@@ -99,6 +98,12 @@ app.get('/entries/:entryId', entryController.getEntryById);
 app.get(
   '/entries/by-student/:studentNum',
   entryController.getEntriesByStudentNum
+);
+
+// ✅ 알람용 엔트리 라우트 (로컬)
+app.get(
+  '/entries/alarm/:studentNum',
+  entryController.getAlarmEntriesByStudentNum
 );
 
 app.get('/entry-groups', entryGroupController.getAll);
