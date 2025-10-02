@@ -1,6 +1,6 @@
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(1,1,'クラス所定入口','0930');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(2,1,'2Fクラス指定席','1000');
-INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(3,1,'2Fクラス指定席','1000');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(1,1,'クラス所定入口','0950');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(2,1,'2Fクラス指定席','0950');
+INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(3,1,'2Fクラス指定席','0950');
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(4,1,'集合場所A','1015');
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(4,2,'集合場所A','1020');
 INSERT INTO t_entries_group(f_event_id,f_seq,f_place,f_gather_time)VALUES(5,1,'集合場所B','1030');
