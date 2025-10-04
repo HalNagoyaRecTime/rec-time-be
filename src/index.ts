@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { D1Database } from '@cloudflare/workers-types';
 import { Bindings } from './types';
 import { ControllerMap } from './types/context';
 import { getDIContainer } from './di/container';
@@ -50,6 +51,10 @@ api.get('/health', c =>
 api.get('/students/by-student-num/:studentNum', c =>
   c.get('studentController').getStudentByStudentNum(c)
 );
+// 🔒 보안 강화: 학번 + 생년월일로 학생 조회
+api.get('/students/by-student-num/:studentNum/birthday/:birthday', c =>
+  c.get('studentController').getStudentByStudentNumAndBirthday(c)
+);
 api.get('/students/payload/:studentNum', c =>
   c.get('studentController').getStudentPayloadByStudentNum(c)
 );
@@ -91,6 +96,12 @@ api.get('/notifications', c => c.get('notificationController').getAll(c));
 // Change Logs
 // ================================
 api.get('/change-logs', c => c.get('changeLogController').getAll(c));
+
+// ================================
+// Data Update Check
+// ================================
+api.get('/data-update/info', c => c.get('dataUpdateController').getUpdateInfo(c));
+api.get('/data-update/check', c => c.get('dataUpdateController').checkDataChanged(c));
 
 export default {
   fetch: app.fetch,

@@ -6,7 +6,8 @@ export function createChangeLogService(
 ) {
   return {
     async findAll(): Promise<ChangeLogEntity[]> {
-      return await changeLogRepository.findAll();
+      const result = await changeLogRepository.findAll({});
+      return result.changeLogs;
     },
   };
 }

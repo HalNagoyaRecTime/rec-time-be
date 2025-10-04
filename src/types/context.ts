@@ -10,6 +10,7 @@ import type {
   NotificationControllerFunctions,
   ChangeLogControllerFunctions,
 } from './controllers';
+import type { DataUpdateControllerFunctions } from '../controllers/DataUpdateController';
 
 export type ControllerMap = {
   studentController: StudentControllerFunctions;
@@ -18,6 +19,7 @@ export type ControllerMap = {
   entryGroupController: EntryGroupControllerFunctions;
   notificationController: NotificationControllerFunctions;
   changeLogController: ChangeLogControllerFunctions;
+  dataUpdateController: DataUpdateControllerFunctions;
 };
 
 export type CustomContext = Context<{

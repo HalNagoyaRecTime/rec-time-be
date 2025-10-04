@@ -16,6 +16,7 @@ import {
   createNotificationService,
   createChangeLogService,
 } from '../services';
+import { createDataUpdateService } from '../services/DataUpdateService';
 
 import {
   createStudentController,
@@ -25,6 +26,7 @@ import {
   createNotificationController,
   createChangeLogController,
 } from '../controllers';
+import { createDataUpdateController } from '../controllers/DataUpdateController';
 
 import { D1Database } from '@cloudflare/workers-types';
 
@@ -58,6 +60,7 @@ export function createDIContainer(env?: Env) {
   const entryGroupService = createEntryGroupService(entryGroupRepository);
   const notificationService = createNotificationService(notificationRepository);
   const changeLogService = createChangeLogService(changeLogRepository);
+  const dataUpdateService = createDataUpdateService(changeLogRepository);
 
   const studentController = createStudentController(studentService);
   const eventController = createEventController(eventService);
@@ -66,6 +69,7 @@ export function createDIContainer(env?: Env) {
   const notificationController =
     createNotificationController(notificationService);
   const changeLogController = createChangeLogController(changeLogService);
+  const dataUpdateController = createDataUpdateController(dataUpdateService);
 
   return {
     db,
@@ -75,6 +79,7 @@ export function createDIContainer(env?: Env) {
     entryGroupController,
     notificationController,
     changeLogController,
+    dataUpdateController,
   };
 }
 

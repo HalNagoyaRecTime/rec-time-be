@@ -19,7 +19,17 @@ export function createEventRepository(
   db: D1Database
 ): EventRepositoryFunctions {
   return {
-    async findAll({ f_event_code, f_time, limit, offset }) {
+    async findAll({
+      f_event_code,
+      f_time,
+      limit,
+      offset,
+    }: {
+      f_event_code?: string;
+      f_time?: string;
+      limit?: number;
+      offset?: number;
+    }) {
       const conditions = [];
       const params: any[] = [];
 
@@ -92,6 +102,75 @@ export function createEventRepository(
         .first();
 
       return row ? transformToEventEntity(row) : null;
+    },
+
+    async create(data: {
+      event_code: string;
+      name: string;
+      time: string;
+      description?: string;
+    }): Promise<any> {
+      const result = await db
+        .prepare(
+          'INSERT INTO t_events (f_event_code, f_event_name, f_time, f_summary) VALUES (?, ?, ?, ?)'
+        )
+        .bind(data.event_code, data.name, data.time, data.description || null)
+        .run();
+
+      return { id: result.meta.last_row_id, ...data };
+    },
+
+    async update(
+      id: number,
+      data: {
+        event_code?: string;
+        name?: string;
+        time?: string;
+        description?: string;
+      }
+    ): Promise<any> {
+      const fields = [];
+      const params = [];
+
+      if (data.event_code !== undefined) {
+        fields.push('f_event_code = ?');
+        params.push(data.event_code);
+      }
+      if (data.name !== undefined) {
+        fields.push('f_event_name = ?');
+        params.push(data.name);
+      }
+      if (data.time !== undefined) {
+        fields.push('f_time = ?');
+        params.push(data.time);
+      }
+      if (data.description !== undefined) {
+        fields.push('f_summary = ?');
+        params.push(data.description);
+      }
+
+      if (fields.length === 0) {
+        throw new Error('No fields to update');
+      }
+
+      params.push(id);
+      const query = `UPDATE t_events SET ${fields.join(', ')} WHERE f_event_id = ?`;
+
+      await db
+        .prepare(query)
+        .bind(...params)
+        .run();
+
+      return { id, ...data };
+    },
+
+    async delete(id: number): Promise<boolean> {
+      const result = await db
+        .prepare('DELETE FROM t_events WHERE f_event_id = ?')
+        .bind(id)
+        .run();
+
+      return result.meta.changes > 0;
     },
   };
 }

@@ -8,7 +8,8 @@ export function createEntryGroupService(
 ) {
   return {
     async findAll(): Promise<EntryGroupEntity[]> {
-      return await entryGroupRepository.findAll();
+      const result = await entryGroupRepository.findAll({});
+      return result.entryGroups;
     },
   };
 }

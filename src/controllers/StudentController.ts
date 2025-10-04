@@ -7,7 +7,7 @@ export function createStudentController(
 ): StudentControllerFunctions {
   return {
     // 🔹 학생 ID로 조회
-    getStudentById: async (c: Context): Promise<Response> => {
+    getStudentById: async (c: Context) => {
       try {
         const id = c.req.param('studentId') || c.req.param('id');
         const student = await studentService.getStudentById(parseInt(id));
@@ -22,7 +22,7 @@ export function createStudentController(
     },
 
     // 🔹 학번으로 학생 조회
-    getStudentByStudentNum: async (c: Context): Promise<Response> => {
+    getStudentByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
         const student = await studentService.getStudentByStudentNum(studentNum);
@@ -36,8 +36,24 @@ export function createStudentController(
       }
     },
 
+    // 🔒 보안 강화: 학번 + 생년월일로 학생 조회
+    getStudentByStudentNumAndBirthday: async (c: Context) => {
+      try {
+        const studentNum = c.req.param('studentNum');
+        const birthday = c.req.param('birthday');
+        const student = await studentService.getStudentByStudentNumAndBirthday(studentNum, birthday);
+        return c.json(student);
+      } catch (error) {
+        console.error('[getStudentByStudentNumAndBirthday] error =', error);
+        if (error instanceof Error && error.message === 'Student not found or invalid birthday') {
+          return c.json({ error: 'Student not found or invalid birthday' }, 404);
+        }
+        return c.json({ error: 'Failed to fetch student' }, 500);
+      }
+    },
+
     // 🔹 학번 기준 기본 페이로드 (학생 + 이벤트 + 내 출전 여부 flag)
-    getStudentPayloadByStudentNum: async (c: Context): Promise<Response> => {
+    getStudentPayloadByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
         if (!studentNum)
@@ -56,7 +72,7 @@ export function createStudentController(
     },
 
     // 🔹 학번 기준 풀 페이로드 (학생 + 엔트리 + 이벤트 + 그룹 + 알림 + 변경 로그)
-    getStudentFullPayload: async (c: Context): Promise<Response> => {
+    getStudentFullPayload: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
         if (!studentNum)

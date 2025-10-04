@@ -42,6 +42,13 @@ export function createStudentService(
       return student;
     },
 
+    // 🔹 학번 + 생년월일로 단건 조회 (보안 강화)
+    async getStudentByStudentNumAndBirthday(studentNum: string, birthday: string): Promise<StudentEntity> {
+      const student = await studentRepository.findByStudentNumAndBirthday(studentNum, birthday);
+      if (!student) throw new Error('Student not found or invalid birthday');
+      return student;
+    },
+
     // 🔹 학번 기준 기본 페이로드 (학생 + 이벤트 + 출전 여부 flag)
     async getStudentPayloadByStudentNum(studentNum: string): Promise<{
       m_students: StudentEntity;
@@ -61,7 +68,7 @@ export function createStudentService(
       const allEvents = allEventsResult.events;
 
       // 내 출전 여부 flag 추가
-      const eventsWithFlag = allEvents.map(event => ({
+      const eventsWithFlag = allEvents.map((event: any) => ({
         ...event,
         f_is_my_entry: myEventIds.has(event.f_event_id),
       }));
@@ -84,22 +91,27 @@ export function createStudentService(
       const student = await studentRepository.findByStudentNum(studentNum);
       if (!student) throw new Error('Student not found');
 
-      const [entries, eventsResult, entryGroups, notifications, changeLogs] =
-        await Promise.all([
-          entryRepository.findByStudentId(student.f_student_id),
-          eventRepository.findAll({}),
-          entryGroupRepository.findAll(),
-          notificationRepository.findAll(),
-          changeLogRepository.findAll(),
-        ]);
+      const [
+        entries,
+        eventsResult,
+        entryGroupsResult,
+        notificationsResult,
+        changeLogsResult,
+      ] = await Promise.all([
+        entryRepository.findByStudentId(student.f_student_id),
+        eventRepository.findAll({}),
+        entryGroupRepository.findAll({}),
+        notificationRepository.findAll({}),
+        changeLogRepository.findAll({}),
+      ]);
 
       return {
         m_students: student,
         t_entries: entries,
         t_events: eventsResult.events,
-        t_entry_groups: entryGroups,
-        t_notifications: notifications,
-        t_change_logs: changeLogs,
+        t_entry_groups: entryGroupsResult.entryGroups,
+        t_notifications: notificationsResult.notifications,
+        t_change_logs: changeLogsResult.changeLogs,
       };
     },
   };

@@ -8,7 +8,8 @@ export function createNotificationService(
 ) {
   return {
     async findAll(): Promise<NotificationEntity[]> {
-      return await notificationRepository.findAll();
+      const result = await notificationRepository.findAll({});
+      return result.notifications;
     },
   };
 }

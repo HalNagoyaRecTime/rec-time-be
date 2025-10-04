@@ -18,6 +18,8 @@ export interface StudentServiceFunctions {
 
   getStudentByStudentNum: (studentNum: string) => Promise<StudentEntity>;
 
+  getStudentByStudentNumAndBirthday: (studentNum: string, birthday: string) => Promise<StudentEntity>;
+
   getStudentPayloadByStudentNum: (studentNum: string) => Promise<{
     m_students: StudentEntity;
     t_events: (EventEntity & { f_is_my_entry: boolean })[];

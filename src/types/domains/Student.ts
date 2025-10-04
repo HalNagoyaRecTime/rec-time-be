@@ -5,6 +5,7 @@ export interface StudentEntity {
   f_number: string;
   f_name: string;
   f_note: string | null;
+  f_birthday: string | null;
 }
 
 export interface StudentDTO {
@@ -14,4 +15,5 @@ export interface StudentDTO {
   f_number: string;
   f_name: string;
   f_note?: string;
+  f_birthday?: string;
 }

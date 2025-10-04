@@ -11,7 +11,7 @@ export function createEntryController(
   studentService: StudentServiceFunctions
 ): EntryControllerFunctions {
   return {
-    getAllEntries: async (c: Context): Promise<Response> => {
+    getAllEntries: async (c: Context) => {
       try {
         const limit = c.req.query('limit');
         const offset = c.req.query('offset');
@@ -26,23 +26,23 @@ export function createEntryController(
         });
 
         return c.json(result);
-      } catch (error) {
+      } catch {
         return c.json({ error: 'Failed to fetch entries' }, 500);
       }
     },
 
-    getEntryById: async (c: Context): Promise<Response> => {
+    getEntryById: async (c: Context) => {
       try {
         const id = parseInt(c.req.param('entryId'));
         const entry = await entryService.getEntryById(id);
         if (!entry) return c.json({ error: 'Entry not found' }, 404);
         return c.json(entry);
-      } catch (error) {
+      } catch {
         return c.json({ error: 'Failed to fetch entry' }, 500);
       }
     },
 
-    getEntriesByStudentNum: async (c: Context): Promise<Response> => {
+    getEntriesByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
         if (!studentNum)
@@ -55,12 +55,12 @@ export function createEntryController(
           f_student_id: student.f_student_id,
         });
         return c.json(entries);
-      } catch (error) {
+      } catch {
         return c.json({ error: 'Failed to fetch entries' }, 500);
       }
     },
 
-    getAlarmEntriesByStudentNum: async (c: Context): Promise<Response> => {
+    getAlarmEntriesByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
         if (!studentNum)
@@ -69,7 +69,7 @@ export function createEntryController(
         const entries =
           await entryService.findAlarmEntriesByStudentNum(studentNum);
         return c.json(entries);
-      } catch (error) {
+      } catch {
         return c.json({ error: 'Failed to fetch alarm entries' }, 500);
       }
     },

@@ -3,10 +3,6 @@ import { EventEntity } from '../types/domains/Event';
 import { EventServiceFunctions } from '../types/services';
 import { EventRepositoryFunctions } from '../types/repositories';
 
-interface GetAllEventsOptions {
-  f_event_code?: string;
-}
-
 export function createEventService(
   eventRepository: EventRepositoryFunctions
 ): EventServiceFunctions {

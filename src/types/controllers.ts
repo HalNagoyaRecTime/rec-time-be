@@ -6,6 +6,7 @@ export type ControllerFunction = (c: Context) => Promise<any>;
 export interface StudentControllerFunctions {
   getStudentById: ControllerFunction;
   getStudentByStudentNum: ControllerFunction;
+  getStudentByStudentNumAndBirthday: ControllerFunction;
   getStudentPayloadByStudentNum: ControllerFunction;
   getStudentFullPayload: ControllerFunction;
 }

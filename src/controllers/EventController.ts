@@ -6,7 +6,7 @@ export function createEventController(
   eventService: EventServiceFunctions
 ): EventControllerFunctions {
   return {
-    getAllEvents: async (c: Context): Promise<Response> => {
+    getAllEvents: async (c: Context) => {
       try {
         const f_event_code = c.req.query('f_event_code');
         const f_time = c.req.query('f_time');
@@ -37,7 +37,7 @@ export function createEventController(
       }
     },
 
-    getEventById: async (c: Context): Promise<Response> => {
+    getEventById: async (c: Context) => {
       try {
         const id = parseInt(c.req.param('eventId'));
         const event = await eventService.getEventById(id);
