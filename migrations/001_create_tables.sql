@@ -25,9 +25,7 @@ CREATE TABLE IF NOT EXISTS t_entries (
   f_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
   f_student_id INTEGER NOT NULL,
   f_event_id INTEGER NOT NULL,
-  f_seq INTEGER NOT NULL,
-  FOREIGN KEY (f_student_id) REFERENCES m_students(f_student_id),
-  FOREIGN KEY (f_event_id) REFERENCES t_events(f_event_id)
+  f_seq INTEGER NOT NULL
 );
 
 -- 出場グループテーブル
