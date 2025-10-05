@@ -2,33 +2,35 @@ import { D1Database } from '@cloudflare/workers-types';
 
 export function createChangeLogRepository(db: D1Database) {
   return {
+    // 🔍 全変更履歴を取得（オプション条件付き）
     async findAll(options: {
-      f_student_id?: number;
-      f_type?: string;
+      f_event_id?: number;
+      f_updated_item?: string;
       limit?: number;
       offset?: number;
     }): Promise<{ changeLogs: any[]; total: number }> {
       const conditions = [];
       const params: any[] = [];
 
-      if (options.f_student_id) {
-        conditions.push('f_student_id = ?');
-        params.push(options.f_student_id);
+      if (options.f_event_id) {
+        conditions.push('f_event_id = ?');
+        params.push(options.f_event_id);
       }
 
-      if (options.f_type) {
-        conditions.push('f_type = ?');
-        params.push(options.f_type);
+      if (options.f_updated_item) {
+        conditions.push('f_updated_item = ?');
+        params.push(options.f_updated_item);
       }
 
       const whereClause =
         conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
-      let query = `SELECT * FROM t_update ${whereClause} ORDER BY f_update_id`;
+      // ✅ 실제 테이블명 수정
+      let query = `SELECT * FROM t_change_logs ${whereClause} ORDER BY f_update_id DESC`;
       if (options.limit) query += ` LIMIT ${options.limit}`;
       if (options.offset) query += ` OFFSET ${options.offset}`;
 
-      const countQuery = `SELECT COUNT(*) as total FROM t_update ${whereClause}`;
+      const countQuery = `SELECT COUNT(*) as total FROM t_change_logs ${whereClause}`;
 
       const [rows, count] = await Promise.all([
         db
@@ -47,41 +49,46 @@ export function createChangeLogRepository(db: D1Database) {
       };
     },
 
+    // 🔍 ID指定で履歴を取得
     async findById(id: number): Promise<any | null> {
       const row = await db
-        .prepare('SELECT * FROM t_update WHERE f_update_id = ?')
+        .prepare('SELECT * FROM t_change_logs WHERE f_update_id = ?')
         .bind(id)
         .first();
-
       return row || null;
     },
 
-    async findByStudentId(studentId: number): Promise<any[]> {
+    // 🔍 イベントID指定で履歴を取得
+    async findByEventId(eventId: number): Promise<any[]> {
       const rows = await db
-        .prepare('SELECT * FROM t_update WHERE f_student_id = ?')
-        .bind(studentId)
+        .prepare('SELECT * FROM t_change_logs WHERE f_event_id = ?')
+        .bind(eventId)
         .all();
-
       return rows.results || [];
     },
 
+    // 🆕 新しい変更履歴を追加
     async create(data: {
-      student_id: number;
-      type: string;
-      description: string;
-      old_value?: string;
-      new_value?: string;
+      f_event_id: number;
+      f_updated_item: string;
+      f_before?: string;
+      f_after?: string;
+      f_updated_at?: string;
+      f_reason?: string;
     }): Promise<any> {
       const result = await db
         .prepare(
-          'INSERT INTO t_update (f_student_id, f_type, f_description, f_old_value, f_new_value) VALUES (?, ?, ?, ?, ?)'
+          `INSERT INTO t_change_logs 
+            (f_event_id, f_updated_item, f_before, f_after, f_updated_at, f_reason)
+           VALUES (?, ?, ?, ?, ?, ?)`
         )
         .bind(
-          data.student_id,
-          data.type,
-          data.description,
-          data.old_value || null,
-          data.new_value || null
+          data.f_event_id,
+          data.f_updated_item,
+          data.f_before || null,
+          data.f_after || null,
+          data.f_updated_at || new Date().toISOString(),
+          data.f_reason || null
         )
         .run();
 
@@ -91,7 +98,10 @@ export function createChangeLogRepository(db: D1Database) {
     // 🔍 데이터 업데이트 통계 조회
     async getUpdateStats(): Promise<{ recordCount: number }> {
       try {
-        const countResult = await db.prepare('SELECT COUNT(*) as recordCount FROM t_update').first();
+        // ✅ 테이블명 변경 완료
+        const countResult = await db
+          .prepare('SELECT COUNT(*) as recordCount FROM t_change_logs')
+          .first();
 
         return {
           recordCount: (countResult as any)?.recordCount ?? 0,

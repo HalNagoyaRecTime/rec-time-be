@@ -3,11 +3,17 @@ import { D1Database } from '@cloudflare/workers-types';
 import { Bindings } from './types';
 import { ControllerMap } from './types/context';
 import { getDIContainer } from './di/container';
+import { cors } from 'hono/cors'; // ✅ 추가
 
 const app = new Hono<{
   Bindings: Bindings;
   Variables: ControllerMap & { db: D1Database };
 }>();
+
+// ================================
+// 🌐 CORS (프론트/백 분리 환경 대응)
+// ================================
+app.use('*', cors({ origin: '*' }));
 
 // ================================
 // 공통 미들웨어
@@ -51,7 +57,7 @@ api.get('/health', c =>
 api.get('/students/by-student-num/:studentNum', c =>
   c.get('studentController').getStudentByStudentNum(c)
 );
-// 🔒 보안 강화: 학번 + 생년월일로 학생 조회
+// 🔒 학번 + 생년월일 검증용
 api.get('/students/by-student-num/:studentNum/birthday/:birthday', c =>
   c.get('studentController').getStudentByStudentNumAndBirthday(c)
 );
@@ -98,10 +104,51 @@ api.get('/notifications', c => c.get('notificationController').getAll(c));
 api.get('/change-logs', c => c.get('changeLogController').getAll(c));
 
 // ================================
-// Data Update Check
+// Data Update Check & Test Insert
 // ================================
-api.get('/data-update/info', c => c.get('dataUpdateController').getUpdateInfo(c));
-api.get('/data-update/check', c => c.get('dataUpdateController').checkDataChanged(c));
+api.get('/data-update/info', c =>
+  c.get('dataUpdateController').getUpdateInfo(c)
+);
+api.get('/data-update/check', c =>
+  c.get('dataUpdateController').checkDataChanged(c)
+);
+
+// 🧪 테스트 데이터 추가용 (프론트의 “테스트데이터추가” 버튼 대응)
+api.post('/data-update/insert-test-data', async c => {
+  const db = c.get('db');
+
+  try {
+    // 더미 학생 추가
+    await db
+      .prepare(
+        `
+        INSERT INTO m_students (f_student_num, f_class, f_number, f_name, f_note, f_birthday)
+        VALUES ('99999', 'TEST', '1', 'テスト 太郎', 'テスト用', '20000101');
+      `
+      )
+      .run();
+
+    // update_count 증가
+    await db
+      .prepare(
+        `
+        INSERT INTO t_meta (f_key, f_value)
+        VALUES ('update_count', '1')
+        ON CONFLICT(f_key)
+        DO UPDATE SET f_value = CAST(f_value AS INTEGER) + 1;
+      `
+      )
+      .run();
+
+    return c.json({
+      success: true,
+      message: '🧪 Test data inserted & update_count incremented',
+    });
+  } catch (err) {
+    console.error('Error inserting test data:', err);
+    return c.json({ success: false, error: String(err) }, 500);
+  }
+});
 
 export default {
   fetch: app.fetch,
