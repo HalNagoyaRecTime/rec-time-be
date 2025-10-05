@@ -16,13 +16,13 @@ export function createErrorController(
     reportError: async (c: Context) => {
       try {
         const body = await c.req.json();
-        const { 
-          studentNum, 
-          errorType, 
-          errorMessage, 
-          stackTrace, 
-          userAgent, 
-          url 
+        const {
+          studentNum,
+          errorType,
+          errorMessage,
+          stackTrace,
+          userAgent,
+          url,
         } = body;
 
         // 에러 정보를 메일로 전송
@@ -36,15 +36,18 @@ export function createErrorController(
           url: url || c.req.url,
         });
 
-        return c.json({ 
-          success: true, 
-          message: '에러 리포트가 전송되었습니다.' 
+        return c.json({
+          success: true,
+          message: 'エラーレポートが送信されました.',
         });
       } catch (error) {
         console.error('[reportError] error =', error);
-        return c.json({ 
-          error: '에러 리포트 전송에 실패했습니다.' 
-        }, 500);
+        return c.json(
+          {
+            error: 'エラーレポートの転送に失敗しました.',
+          },
+          500
+        );
       }
     },
   };
