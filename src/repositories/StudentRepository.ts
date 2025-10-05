@@ -97,14 +97,14 @@ export function createStudentRepository(db: D1Database) {
 
       try {
         const stmt = db.prepare(
-          'SELECT * FROM m_students WHERE CAST(f_student_num AS TEXT) = ? AND f_birthday = ?'
+          'SELECT * FROM m_students WHERE f_student_num = ? AND f_birthday = ?'
         );
         console.log(
           '[DEBUG] prepared statement (findByStudentNumAndBirthday):',
           stmt.toString()
         );
 
-        const result = await stmt.bind(value, birthday).first();
+        const result = await stmt.bind(studentNum, birthday).first();
         console.log('[DEBUG] query result (findByStudentNumAndBirthday):', result);
 
         if (!result) {

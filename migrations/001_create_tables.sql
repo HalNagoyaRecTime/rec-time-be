@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS t_entries (
   f_student_id INTEGER NOT NULL,
   f_event_id INTEGER NOT NULL,
   f_seq INTEGER NOT NULL
+  -- Foreign Key 제거: 데이터 입력 유연성을 위해 제거
+  -- 데이터 무결성은 애플리케이션 레벨에서 검증
 );
 
 -- 出場グループテーブル
@@ -59,3 +61,46 @@ CREATE TABLE IF NOT EXISTS t_update (
   f_updated_at TEXT,
   f_reason TEXT
 );
+
+-- ダウンロードログテーブル
+CREATE TABLE IF NOT EXISTS download_logs (
+  f_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  f_student_num TEXT NOT NULL,
+  f_datetime TEXT NOT NULL,
+  f_function TEXT NOT NULL,
+  f_success TEXT NOT NULL,
+  f_count INTEGER
+);
+
+-- ========================================
+-- 데이터 무결성 검증용 쿼리들
+-- ========================================
+
+-- 1. 존재하지 않는 학생 ID로 등록된 출전 찾기
+-- SELECT
+--   te.f_entry_id,
+--   te.f_student_id,
+--   te.f_event_id,
+--   te.f_seq
+-- FROM t_entries te
+-- LEFT JOIN m_students ms ON te.f_student_id = ms.f_student_id
+-- WHERE ms.f_student_id IS NULL;
+
+-- 2. 존재하지 않는 이벤트 ID로 등록된 출전 찾기
+-- SELECT
+--   te.f_entry_id,
+--   te.f_student_id,
+--   te.f_event_id,
+--   te.f_seq
+-- FROM t_entries te
+-- LEFT JOIN t_events ev ON te.f_event_id = ev.f_event_id
+-- WHERE ev.f_event_id IS NULL;
+
+-- 3. 중복된 출전 등록 찾기 (같은 학생이 같은 이벤트에 중복 등록)
+-- SELECT
+--   f_student_id,
+--   f_event_id,
+--   COUNT(*) as duplicate_count
+-- FROM t_entries
+-- GROUP BY f_student_id, f_event_id
+-- HAVING COUNT(*) > 1;

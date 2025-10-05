@@ -1,9 +1,11 @@
 import { Context } from 'hono';
 import { StudentServiceFunctions } from '../types/services';
 import { StudentControllerFunctions } from '../types/controllers';
+import { DownloadLogServiceFunctions } from '../services/DownloadLogService';
 
 export function createStudentController(
-  studentService: StudentServiceFunctions
+  studentService: StudentServiceFunctions,
+  downloadLogService: DownloadLogServiceFunctions
 ): StudentControllerFunctions {
   return {
     // 🔹 학생 ID로 조회
@@ -41,14 +43,59 @@ export function createStudentController(
       try {
         const studentNum = c.req.param('studentNum');
         const birthday = c.req.param('birthday');
+        
+        // 학번 형식 검증 / 学籍番号形式検証
+        if (!studentNum || !/^\d+$/.test(studentNum)) {
+          // 로그 등록: 실패 / ログ登録: 失敗
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+          return c.json({ 
+            error: '学籍番号が間違っています。数字のみ入力してください。', 
+            code: 'INVALID_STUDENT_NUM',
+            details: '学籍番号は数字のみで構成されている必要があります。'
+          }, 400);
+        }
+        
+        // 생년월일 형식 검증 / 生年月日形式検証
+        if (!birthday || !/^\d{8}$/.test(birthday)) {
+          // 로그 등록: 실패 / ログ登録: 失敗
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+          return c.json({ 
+            error: '生年月日が間違っています。8桁の数字で入力してください。', 
+            code: 'INVALID_BIRTHDAY',
+            details: '生年月日はYYYYMMDD形式の8桁数字である必要があります。'
+          }, 400);
+        }
+        
         const student = await studentService.getStudentByStudentNumAndBirthday(studentNum, birthday);
+        
+        if (!student) {
+          // 로그 등록: 실패 / ログ登録: 失敗
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+          return c.json({ 
+            error: '学籍番号または生年月日が間違っています。', 
+            code: 'STUDENT_NOT_FOUND',
+            details: '入力された学籍番号と生年月日が一致する学生が見つかりません。'
+          }, 404);
+        }
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logStudentDataDownload(studentNum, true);
+        
         return c.json(student);
       } catch (error) {
         console.error('[getStudentByStudentNumAndBirthday] error =', error);
-        if (error instanceof Error && error.message === 'Student not found or invalid birthday') {
-          return c.json({ error: 'Student not found or invalid birthday' }, 404);
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
         }
-        return c.json({ error: 'Failed to fetch student' }, 500);
+        return c.json({ 
+          error: '学生情報の取得中にエラーが発生しました。', 
+          code: 'INTERNAL_ERROR',
+          details: 'サーバー内部エラーが発生しました。しばらくしてから再度お試しください。'
+        }, 500);
       }
     },
 
