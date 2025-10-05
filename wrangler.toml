@@ -24,4 +24,4 @@ HOST = "0.0.0.0"
 [[d1_databases]]
 binding = "DB"                  # c.env.DB 로 접근 가능
 database_name = "rec_time_stg"  # D1 DB 이름
-database_id = "3e6426ce-7b75-4b24-8634-5e9c3063689f"
+database_id = "bfeaaad9-57c2-4081-9520-5c176cefc1c0"

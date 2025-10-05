@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS m_students (
   f_class TEXT NOT NULL,
   f_number TEXT NOT NULL,
   f_name TEXT NOT NULL,
-  f_note TEXT
+  f_note TEXT,
+  f_birthday TEXT          -- ✅ 생년월일 컬럼 추가
 );
 
 -- イベントテーブル
@@ -15,8 +16,8 @@ CREATE TABLE IF NOT EXISTS t_events (
   f_event_name TEXT NOT NULL,
   f_time TEXT NOT NULL,
   f_duration INTEGER,
-  f_place TEXT,         -- ✅ 追加: 開催場所
-  f_gather_time TEXT,   -- ✅ 追加: 集合時間
+  f_place TEXT,         -- 開催場所
+  f_gather_time TEXT,   -- 集合時間
   f_summary TEXT
 );
 
