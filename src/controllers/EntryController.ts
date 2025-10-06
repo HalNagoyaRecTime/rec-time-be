@@ -47,17 +47,36 @@ export function createEntryController(
     getEntriesByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
-        if (!studentNum)
+        if (!studentNum) {
           return c.json({ error: 'studentNum is required' }, 400);
+        }
 
         const student = await studentService.getStudentByStudentNum(studentNum);
-        if (!student) return c.json({ error: 'Student not found' }, 404);
+        if (!student) {
+          // 로그 등록: 실패 (학생 없음) / ログ登録: 失敗（学生なし）
+          await downloadLogService.logEntryDataDownload(studentNum, false);
+          return c.json({ error: 'Student not found' }, 404);
+        }
 
         const { entries } = await entryService.getAllEntries({
           f_student_id: student.f_student_id,
         });
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logEntryDataDownload(studentNum, true, entries.length);
+        
         return c.json(entries);
-      } catch {
+      } catch (error) {
+        console.error('[getEntriesByStudentNum] error =', error);
+        
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logEntryDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
+        }
+        
         return c.json({ error: 'Failed to fetch entries' }, 500);
       }
     },

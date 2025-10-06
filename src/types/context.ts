@@ -9,6 +9,8 @@ import type {
   EntryGroupControllerFunctions,
   NotificationControllerFunctions,
   ChangeLogControllerFunctions,
+  DownloadLogControllerFunctions,
+  ErrorControllerFunctions,
 } from './controllers';
 import type { DataUpdateControllerFunctions } from '../controllers/DataUpdateController';
 
@@ -19,6 +21,8 @@ export type ControllerMap = {
   entryGroupController: EntryGroupControllerFunctions;
   notificationController: NotificationControllerFunctions;
   changeLogController: ChangeLogControllerFunctions;
+  downloadLogController: DownloadLogControllerFunctions;
+  errorController: ErrorControllerFunctions;
   dataUpdateController: DataUpdateControllerFunctions;
 };
 

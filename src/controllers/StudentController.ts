@@ -103,14 +103,28 @@ export function createStudentController(
     getStudentPayloadByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
-        if (!studentNum)
+        if (!studentNum) {
           return c.json({ error: 'studentNum is required' }, 400);
+        }
 
         const payload =
           await studentService.getStudentPayloadByStudentNum(studentNum);
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logStudentDataDownload(studentNum, true);
+        
         return c.json(payload);
       } catch (error) {
         console.error('[getStudentPayloadByStudentNum] error =', error);
+        
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
+        }
+        
         if (error instanceof Error && error.message === 'Student not found') {
           return c.json({ error: 'Student not found' }, 404);
         }
@@ -122,13 +136,27 @@ export function createStudentController(
     getStudentFullPayload: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
-        if (!studentNum)
+        if (!studentNum) {
           return c.json({ error: 'studentNum is required' }, 400);
+        }
 
         const payload = await studentService.getStudentFullPayload(studentNum);
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logStudentDataDownload(studentNum, true);
+        
         return c.json(payload);
       } catch (error) {
         console.error('[getStudentFullPayload] error =', error);
+        
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logStudentDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
+        }
+        
         if (error instanceof Error && error.message === 'Student not found') {
           return c.json({ error: 'Student not found' }, 404);
         }

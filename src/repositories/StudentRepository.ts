@@ -108,7 +108,7 @@ export function createStudentRepository(db: D1Database) {
         console.log('[DEBUG] query result (findByStudentNumAndBirthday):', result);
 
         if (!result) {
-          console.log('[DEBUG] No student found for:', value, 'with birthday:', birthday);
+          console.log('[DEBUG] No student found for:', studentNum, 'with birthday:', birthday);
           return null;
         }
 

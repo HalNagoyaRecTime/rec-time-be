@@ -3,11 +3,31 @@ import { D1Database } from '@cloudflare/workers-types';
 import { DownloadLogEntity, CreateDownloadLogData } from '../types/domains/DownloadLog';
 
 export function createDownloadLogRepository(db: D1Database) {
+  // 테이블 자동 생성 / テーブル自動作成
+  const ensureTableExists = async () => {
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS download_logs (
+          f_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          f_student_num TEXT NOT NULL,
+          f_datetime TEXT NOT NULL,
+          f_function TEXT NOT NULL,
+          f_success TEXT NOT NULL,
+          f_count INTEGER
+        )
+      `).run();
+    } catch (error) {
+      console.error('[DownloadLogRepository] 테이블 생성 실패:', error);
+    }
+  };
+
   return {
     // -------------------------
     // create
     // -------------------------
     async create(data: CreateDownloadLogData): Promise<DownloadLogEntity> {
+      // 테이블 존재 확인 및 생성 / テーブル存在確認と作成
+      await ensureTableExists();
       const now = new Date().toISOString();
       
       const result = await db
@@ -82,7 +102,7 @@ export function createDownloadLogRepository(db: D1Database) {
       ]);
 
       return {
-        logs: (rows.results || []) as DownloadLogEntity[],
+        logs: (rows.results || []) as unknown as DownloadLogEntity[],
         total: (count as any)?.total ?? 0,
       };
     },
@@ -96,7 +116,7 @@ export function createDownloadLogRepository(db: D1Database) {
         .bind(studentNum)
         .all();
 
-      return (rows.results || []) as DownloadLogEntity[];
+      return (rows.results || []) as unknown as DownloadLogEntity[];
     },
 
     // -------------------------

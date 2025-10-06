@@ -1,9 +1,10 @@
+// src/index.ts
 import { Hono } from 'hono';
 import { D1Database } from '@cloudflare/workers-types';
 import { Bindings } from './types';
 import { ControllerMap } from './types/context';
 import { getDIContainer } from './di/container';
-import { cors } from 'hono/cors'; // ✅ 추가
+import { cors } from 'hono/cors';
 
 const app = new Hono<{
   Bindings: Bindings;
@@ -11,7 +12,7 @@ const app = new Hono<{
 }>();
 
 // ================================
-// 🌐 CORS (프론트/백 분리 환경 대응)
+// 🌐 CORS 설정 (프론트/백 분리 환경 대응)
 // ================================
 app.use('*', cors({ origin: '*' }));
 
@@ -27,13 +28,12 @@ app.use('*', async (c, next) => {
 
   c.set('db', db);
 
+  // 공통 헤더 설정
   c.header('Access-Control-Allow-Origin', '*');
   c.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (c.req.method === 'OPTIONS') {
-    return c.body(null, 204);
-  }
+  if (c.req.method === 'OPTIONS') return c.body(null, 204);
 
   await next();
 });
@@ -43,21 +43,20 @@ app.use('*', async (c, next) => {
 // ================================
 const api = app.basePath('/api');
 
-// Root
+// ================================
+// ✅ 기본 라우트
+// ================================
 api.get('/', c => c.text('Hello from Cloudflare Worker 🚀'));
-
-// Health check
 api.get('/health', c =>
   c.json({ status: 'ok', time: new Date().toISOString() })
 );
 
 // ================================
-// Students
+// ✅ Students
 // ================================
 api.get('/students/by-student-num/:studentNum', c =>
   c.get('studentController').getStudentByStudentNum(c)
 );
-// 🔒 학번 + 생년월일 검증용
 api.get('/students/by-student-num/:studentNum/birthday/:birthday', c =>
   c.get('studentController').getStudentByStudentNumAndBirthday(c)
 );
@@ -69,42 +68,51 @@ api.get('/students/full/:studentNum', c =>
 );
 
 // ================================
-// Events
+// ✅ Events
 // ================================
 api.get('/events', c => c.get('eventController').getAllEvents(c));
 api.get('/events/:eventId', c => c.get('eventController').getEventById(c));
 
 // ================================
-// Entries
+// ✅ Entries
 // ================================
 api.get('/entries', c => c.get('entryController').getAllEntries(c));
 api.get('/entries/:entryId', c => c.get('entryController').getEntryById(c));
 api.get('/entries/by-student/:studentNum', c =>
   c.get('entryController').getEntriesByStudentNum(c)
 );
-
-// ✅ 알람용 엔트리 라우트
 api.get('/entries/alarm/:studentNum', c =>
   c.get('entryController').getAlarmEntriesByStudentNum(c)
 );
 
 // ================================
-// Entry Groups
+// ✅ Entry Groups
 // ================================
 api.get('/entry-groups', c => c.get('entryGroupController').getAll(c));
 
 // ================================
-// Notifications
+// ✅ Notifications
 // ================================
 api.get('/notifications', c => c.get('notificationController').getAll(c));
 
 // ================================
-// Change Logs
+// ✅ Change Logs
 // ================================
 api.get('/change-logs', c => c.get('changeLogController').getAll(c));
 
 // ================================
-// Data Update Check & Test Insert
+// ✅ Download Logs
+// ================================
+api.get('/download-logs', c => c.get('downloadLogController').getAllLogs(c));
+api.get('/download-logs/student/:studentNum', c =>
+  c.get('downloadLogController').getLogsByStudentNum(c)
+);
+api.get('/download-logs/stats', c =>
+  c.get('downloadLogController').getDownloadStats(c)
+);
+
+// ================================
+// ✅ Data Update Check
 // ================================
 api.get('/data-update/info', c =>
   c.get('dataUpdateController').getUpdateInfo(c)
@@ -113,42 +121,10 @@ api.get('/data-update/check', c =>
   c.get('dataUpdateController').checkDataChanged(c)
 );
 
-// 🧪 테스트 데이터 추가용 (프론트의 “테스트데이터추가” 버튼 대응)
-api.post('/data-update/insert-test-data', async c => {
-  const db = c.get('db');
-
-  try {
-    // 더미 학생 추가
-    await db
-      .prepare(
-        `
-        INSERT INTO m_students (f_student_num, f_class, f_number, f_name, f_note, f_birthday)
-        VALUES ('99999', 'TEST', '1', 'テスト 太郎', 'テスト用', '20000101');
-      `
-      )
-      .run();
-
-    // update_count 증가
-    await db
-      .prepare(
-        `
-        INSERT INTO t_meta (f_key, f_value)
-        VALUES ('update_count', '1')
-        ON CONFLICT(f_key)
-        DO UPDATE SET f_value = CAST(f_value AS INTEGER) + 1;
-      `
-      )
-      .run();
-
-    return c.json({
-      success: true,
-      message: '🧪 Test data inserted & update_count incremented',
-    });
-  } catch (err) {
-    console.error('Error inserting test data:', err);
-    return c.json({ success: false, error: String(err) }, 500);
-  }
-});
+// ================================
+// ✅ Error Report (메일 전송용)
+// ================================
+api.post('/error/report', c => c.get('errorController').reportError(c));
 
 export default {
   fetch: app.fetch,

@@ -26,10 +26,10 @@ export function createEmailService(): EmailServiceFunctions {
       url?: string;
     }): Promise<void> {
       try {
-        // Cloudflare Workers에서 메일 전송 (예: Resend, SendGrid 등)
-        // Cloudflare Workersでメールを送信（例: Resend, SendGridなど）
+        // Cloudflare Workers에서 메일 전송 (Resend API 사용)
+        // Cloudflare Workersでメールを送信（Resend APIを使用）
         const emailData = {
-          to: 'admin@example.com', // 관리자 이메일 / 管理者メールアドレス
+          to: 'ellan1223@naver.com', // 📨 너의 메일 주소 / あなたのメールアドレス
           subject: `🚨 PWA エラー発生 - ${error.errorType}`, // 메일 제목 / メール件名
           html: `
             <h2>🚨 PWA エラーレポート</h2>
@@ -72,12 +72,12 @@ export function createEmailService(): EmailServiceFunctions {
           `,
         };
 
-        // 실제 메일 전송 구현 (Resend 예시)
-        // 実際のメール送信処理（Resendの例）
+        // 실제 메일 전송 (Resend API 사용 예시)
+        // 実際のメール送信処理（Resend APIの例）
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${process.env.RESEND_API_KEY}`, // Resend APIキー / Resend APIキー
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`, // Resend API 키 / Resend APIキー
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(emailData),
@@ -92,7 +92,7 @@ export function createEmailService(): EmailServiceFunctions {
         console.log('📧 エラーメール送信完了 / 에러 메일 전송 완료');
       } catch (error) {
         console.error('📧 メール送信エラー / 메일 전송 실패:', error);
-        // 메일 전송 실패해도 앱이 중단되지 않도록 / メール送信に失敗してもアプリが停止しないように
+        // 메일 전송 실패 시 앱 중단 방지 / メール送信失敗時もアプリが停止しないように
       }
     },
   };

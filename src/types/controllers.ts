@@ -34,3 +34,13 @@ export interface NotificationControllerFunctions {
 export interface ChangeLogControllerFunctions {
   getAll: ControllerFunction;
 }
+
+export interface DownloadLogControllerFunctions {
+  getAllLogs: ControllerFunction;
+  getLogsByStudentNum: ControllerFunction;
+  getDownloadStats: ControllerFunction;
+}
+
+export interface ErrorControllerFunctions {
+  reportError: ControllerFunction;
+}

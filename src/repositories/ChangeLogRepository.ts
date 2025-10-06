@@ -4,22 +4,22 @@ export function createChangeLogRepository(db: D1Database) {
   return {
     // 🔍 全変更履歴を取得（オプション条件付き）
     async findAll(options: {
-      f_event_id?: number;
-      f_updated_item?: string;
+      f_student_id?: number;
+      f_type?: string;
       limit?: number;
       offset?: number;
     }): Promise<{ changeLogs: any[]; total: number }> {
       const conditions = [];
       const params: any[] = [];
 
-      if (options.f_event_id) {
-        conditions.push('f_event_id = ?');
-        params.push(options.f_event_id);
+      if (options.f_student_id) {
+        conditions.push('f_student_id = ?');
+        params.push(options.f_student_id);
       }
 
-      if (options.f_updated_item) {
-        conditions.push('f_updated_item = ?');
-        params.push(options.f_updated_item);
+      if (options.f_type) {
+        conditions.push('f_type = ?');
+        params.push(options.f_type);
       }
 
       const whereClause =
@@ -58,37 +58,36 @@ export function createChangeLogRepository(db: D1Database) {
       return row || null;
     },
 
-    // 🔍 イベントID指定で履歴を取得
-    async findByEventId(eventId: number): Promise<any[]> {
+    // 🔍 学生ID指定で履歴を取得
+    async findByStudentId(studentId: number): Promise<any[]> {
       const rows = await db
-        .prepare('SELECT * FROM t_change_logs WHERE f_event_id = ?')
-        .bind(eventId)
+        .prepare('SELECT * FROM t_change_logs WHERE f_student_id = ?')
+        .bind(studentId)
         .all();
       return rows.results || [];
     },
 
     // 🆕 新しい変更履歴を追加
     async create(data: {
-      f_event_id: number;
-      f_updated_item: string;
-      f_before?: string;
-      f_after?: string;
-      f_updated_at?: string;
-      f_reason?: string;
+      student_id: number;
+      type: string;
+      description: string;
+      old_value?: string;
+      new_value?: string;
     }): Promise<any> {
       const result = await db
         .prepare(
           `INSERT INTO t_change_logs 
-            (f_event_id, f_updated_item, f_before, f_after, f_updated_at, f_reason)
+            (f_student_id, f_type, f_description, f_old_value, f_new_value, f_updated_at)
            VALUES (?, ?, ?, ?, ?, ?)`
         )
         .bind(
-          data.f_event_id,
-          data.f_updated_item,
-          data.f_before || null,
-          data.f_after || null,
-          data.f_updated_at || new Date().toISOString(),
-          data.f_reason || null
+          data.student_id,
+          data.type,
+          data.description,
+          data.old_value || null,
+          data.new_value || null,
+          new Date().toISOString()
         )
         .run();
 

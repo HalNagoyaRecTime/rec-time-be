@@ -1,6 +1,9 @@
 // src/services/DownloadLogService.ts
 import { createDownloadLogRepository } from '../repositories/DownloadLogRepository';
-import { DownloadLogEntity, CreateDownloadLogData } from '../types/domains/DownloadLog';
+import {
+  DownloadLogEntity,
+  CreateDownloadLogData,
+} from '../types/domains/DownloadLog';
 
 export interface DownloadLogServiceFunctions {
   createLog: (data: CreateDownloadLogData) => Promise<DownloadLogEntity>;
@@ -18,8 +21,16 @@ export interface DownloadLogServiceFunctions {
     failedDownloads: number;
     studentsWithEntries: number;
   }>;
-  logStudentDataDownload: (studentNum: string, success: boolean, count?: number) => Promise<void>;
-  logEntryDataDownload: (studentNum: string, success: boolean, count?: number) => Promise<void>;
+  logStudentDataDownload: (
+    studentNum: string,
+    success: boolean,
+    count?: number
+  ) => Promise<void>;
+  logEntryDataDownload: (
+    studentNum: string,
+    success: boolean,
+    count?: number
+  ) => Promise<void>;
 }
 
 export function createDownloadLogService(
@@ -49,7 +60,9 @@ export function createDownloadLogService(
     // -------------------------
     // getLogsByStudentNum
     // -------------------------
-    async getLogsByStudentNum(studentNum: string): Promise<DownloadLogEntity[]> {
+    async getLogsByStudentNum(
+      studentNum: string
+    ): Promise<DownloadLogEntity[]> {
       return await downloadLogRepository.findByStudentNum(studentNum);
     },
 
@@ -68,7 +81,11 @@ export function createDownloadLogService(
     // -------------------------
     // logStudentDataDownload
     // -------------------------
-    async logStudentDataDownload(studentNum: string, success: boolean, count?: number): Promise<void> {
+    async logStudentDataDownload(
+      studentNum: string,
+      success: boolean,
+      count?: number
+    ): Promise<void> {
       await downloadLogRepository.create({
         student_num: studentNum,
         function: '学生情報取得',
@@ -80,7 +97,11 @@ export function createDownloadLogService(
     // -------------------------
     // logEntryDataDownload
     // -------------------------
-    async logEntryDataDownload(studentNum: string, success: boolean, count?: number): Promise<void> {
+    async logEntryDataDownload(
+      studentNum: string,
+      success: boolean,
+      count?: number
+    ): Promise<void> {
       await downloadLogRepository.create({
         student_num: studentNum,
         function: '出場情報取得',
