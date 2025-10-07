@@ -19,9 +19,10 @@ PORT = "8787"
 HOST = "0.0.0.0"
 
 # ----------------------------
-# D1 Database 연결
+# ✅ D1 Database 연결 (최신 버전)
 # ----------------------------
 [[d1_databases]]
-binding = "DB"                  # c.env.DB 로 접근 가능
-database_name = "rec_time_stg"  # D1 DB 이름
-database_id = "bfeaaad9-57c2-4081-9520-5c176cefc1c0"
+binding = "DB"
+database_name = "rectime"
+database_id = "682cebd7-ca35-4e20-a4c8-639a093be76b"
+
