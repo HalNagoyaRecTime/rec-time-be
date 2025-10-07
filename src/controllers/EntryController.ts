@@ -5,10 +5,12 @@ import {
   StudentServiceFunctions,
 } from '../types/services';
 import { EntryControllerFunctions } from '../types/controllers';
+import { DownloadLogServiceFunctions } from '../services/DownloadLogService';
 
 export function createEntryController(
   entryService: EntryServiceFunctions,
-  studentService: StudentServiceFunctions
+  studentService: StudentServiceFunctions,
+  downloadLogService: DownloadLogServiceFunctions
 ): EntryControllerFunctions {
   return {
     getAllEntries: async (c: Context) => {
@@ -45,17 +47,36 @@ export function createEntryController(
     getEntriesByStudentNum: async (c: Context) => {
       try {
         const studentNum = c.req.param('studentNum');
-        if (!studentNum)
+        if (!studentNum) {
           return c.json({ error: 'studentNum is required' }, 400);
+        }
 
         const student = await studentService.getStudentByStudentNum(studentNum);
-        if (!student) return c.json({ error: 'Student not found' }, 404);
+        if (!student) {
+          // 로그 등록: 실패 (학생 없음) / ログ登録: 失敗（学生なし）
+          await downloadLogService.logEntryDataDownload(studentNum, false);
+          return c.json({ error: 'Student not found' }, 404);
+        }
 
         const { entries } = await entryService.getAllEntries({
           f_student_id: student.f_student_id,
         });
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logEntryDataDownload(studentNum, true, entries.length);
+        
         return c.json(entries);
-      } catch {
+      } catch (error) {
+        console.error('[getEntriesByStudentNum] error =', error);
+        
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logEntryDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
+        }
+        
         return c.json({ error: 'Failed to fetch entries' }, 500);
       }
     },
@@ -68,8 +89,31 @@ export function createEntryController(
 
         const entries =
           await entryService.findAlarmEntriesByStudentNum(studentNum);
+        
+        // 엔트리 데이터 0건 에러 처리 / エントリーデータ0件エラー処理
+        if (!entries || entries.length === 0) {
+          // 로그 등록: 실패 (0건) / ログ登録: 失敗（0件）
+          await downloadLogService.logEntryDataDownload(studentNum, false, 0);
+          return c.json({ 
+            error: '出場情報が見つかりません。', 
+            code: 'NO_ENTRIES_FOUND',
+            details: 'この学籍番号の出場情報がありません。'
+          }, 404);
+        }
+        
+        // 로그 등록: 성공 / ログ登録: 成功
+        await downloadLogService.logEntryDataDownload(studentNum, true, entries.length);
+        
         return c.json(entries);
-      } catch {
+      } catch (error) {
+        console.error('[getAlarmEntriesByStudentNum] error =', error);
+        // 로그 등록: 실패 / ログ登録: 失敗
+        try {
+          const studentNum = c.req.param('studentNum');
+          await downloadLogService.logEntryDataDownload(studentNum, false);
+        } catch (logError) {
+          console.error('[log error] error =', logError);
+        }
         return c.json({ error: 'Failed to fetch alarm entries' }, 500);
       }
     },

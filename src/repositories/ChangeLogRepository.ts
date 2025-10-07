@@ -2,6 +2,7 @@ import { D1Database } from '@cloudflare/workers-types';
 
 export function createChangeLogRepository(db: D1Database) {
   return {
+    // 🔍 全変更履歴を取得（オプション条件付き）
     async findAll(options: {
       f_student_id?: number;
       f_type?: string;
@@ -24,11 +25,12 @@ export function createChangeLogRepository(db: D1Database) {
       const whereClause =
         conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
-      let query = `SELECT * FROM t_update ${whereClause} ORDER BY f_update_id`;
+      // ✅ 실제 테이블명 수정
+      let query = `SELECT * FROM t_change_logs ${whereClause} ORDER BY f_update_id DESC`;
       if (options.limit) query += ` LIMIT ${options.limit}`;
       if (options.offset) query += ` OFFSET ${options.offset}`;
 
-      const countQuery = `SELECT COUNT(*) as total FROM t_update ${whereClause}`;
+      const countQuery = `SELECT COUNT(*) as total FROM t_change_logs ${whereClause}`;
 
       const [rows, count] = await Promise.all([
         db
@@ -47,24 +49,25 @@ export function createChangeLogRepository(db: D1Database) {
       };
     },
 
+    // 🔍 ID指定で履歴を取得
     async findById(id: number): Promise<any | null> {
       const row = await db
-        .prepare('SELECT * FROM t_update WHERE f_update_id = ?')
+        .prepare('SELECT * FROM t_change_logs WHERE f_update_id = ?')
         .bind(id)
         .first();
-
       return row || null;
     },
 
+    // 🔍 学生ID指定で履歴を取得
     async findByStudentId(studentId: number): Promise<any[]> {
       const rows = await db
-        .prepare('SELECT * FROM t_update WHERE f_student_id = ?')
+        .prepare('SELECT * FROM t_change_logs WHERE f_student_id = ?')
         .bind(studentId)
         .all();
-
       return rows.results || [];
     },
 
+    // 🆕 新しい変更履歴を追加
     async create(data: {
       student_id: number;
       type: string;
@@ -74,14 +77,17 @@ export function createChangeLogRepository(db: D1Database) {
     }): Promise<any> {
       const result = await db
         .prepare(
-          'INSERT INTO t_update (f_student_id, f_type, f_description, f_old_value, f_new_value) VALUES (?, ?, ?, ?, ?)'
+          `INSERT INTO t_change_logs 
+            (f_student_id, f_type, f_description, f_old_value, f_new_value, f_updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`
         )
         .bind(
           data.student_id,
           data.type,
           data.description,
           data.old_value || null,
-          data.new_value || null
+          data.new_value || null,
+          new Date().toISOString()
         )
         .run();
 
@@ -91,7 +97,10 @@ export function createChangeLogRepository(db: D1Database) {
     // 🔍 데이터 업데이트 통계 조회
     async getUpdateStats(): Promise<{ recordCount: number }> {
       try {
-        const countResult = await db.prepare('SELECT COUNT(*) as recordCount FROM t_update').first();
+        // ✅ 테이블명 변경 완료
+        const countResult = await db
+          .prepare('SELECT COUNT(*) as recordCount FROM t_change_logs')
+          .first();
 
         return {
           recordCount: (countResult as any)?.recordCount ?? 0,

@@ -1,4 +1,5 @@
 export * from './ChangeLogRepository';
+export * from './DownloadLogRepository';
 export * from './EntryGroupRepository';
 export * from './EntryRepository';
 export * from './EventRepository';
