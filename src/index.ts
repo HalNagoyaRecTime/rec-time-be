@@ -52,19 +52,22 @@ api.get('/health', c =>
 );
 
 // ================================
-// ✅ Students
+// ✅ Students (보안 강화: 학번 + 생년월일 인증만 허용)
 // ================================
-api.get('/students/by-student-num/:studentNum', c =>
-  c.get('studentController').getStudentByStudentNum(c)
-);
+// 🔒 보안상 비활성화: 학번만으로 접근 가능한 API들
+// api.get('/students/by-student-num/:studentNum', c =>
+//   c.get('studentController').getStudentByStudentNum(c)
+// );
+// api.get('/students/payload/:studentNum', c =>
+//   c.get('studentController').getStudentPayloadByStudentNum(c)
+// );
+// api.get('/students/full/:studentNum', c =>
+//   c.get('studentController').getStudentFullPayload(c)
+// );
+
+// ✅ 보안 인증된 API: 학번 + 생년월일로만 접근 가능
 api.get('/students/by-student-num/:studentNum/birthday/:birthday', c =>
   c.get('studentController').getStudentByStudentNumAndBirthday(c)
-);
-api.get('/students/payload/:studentNum', c =>
-  c.get('studentController').getStudentPayloadByStudentNum(c)
-);
-api.get('/students/full/:studentNum', c =>
-  c.get('studentController').getStudentFullPayload(c)
 );
 
 // ================================
@@ -74,16 +77,18 @@ api.get('/events', c => c.get('eventController').getAllEvents(c));
 api.get('/events/:eventId', c => c.get('eventController').getEventById(c));
 
 // ================================
-// ✅ Entries
+// ✅ Entries (보안 강화: 학번만으로 접근 불가)
 // ================================
 api.get('/entries', c => c.get('entryController').getAllEntries(c));
 api.get('/entries/:entryId', c => c.get('entryController').getEntryById(c));
-api.get('/entries/by-student/:studentNum', c =>
-  c.get('entryController').getEntriesByStudentNum(c)
-);
-api.get('/entries/alarm/:studentNum', c =>
-  c.get('entryController').getAlarmEntriesByStudentNum(c)
-);
+
+// 🔒 보안상 비활성화: 학번만으로 접근 가능한 출전 정보 API들
+// api.get('/entries/by-student/:studentNum', c =>
+//   c.get('entryController').getEntriesByStudentNum(c)
+// );
+// api.get('/entries/alarm/:studentNum', c =>
+//   c.get('entryController').getAlarmEntriesByStudentNum(c)
+// );
 
 // ================================
 // ✅ Entry Groups

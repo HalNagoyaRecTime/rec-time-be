@@ -51,21 +51,26 @@ app.use('*', cors({ origin: '*' }));
 // ================================
 app.get('/', c => c.text('Hello (local) 🚀'));
 
-// ✅ 학생 정보
-app.get('/students/by-student-num/:studentNum', studentController.getStudentByStudentNum);
+// ✅ 학생 정보 (보안 강화: 학번 + 생년월일 인증만 허용)
+// 🔒 보안상 비활성화: 학번만으로 접근 가능한 API들
+// app.get('/students/by-student-num/:studentNum', studentController.getStudentByStudentNum);
+// app.get('/students/payload/:studentNum', studentController.getStudentPayloadByStudentNum);
+// app.get('/students/full/:studentNum', studentController.getStudentFullPayload);
+
+// ✅ 보안 인증된 API: 학번 + 생년월일로만 접근 가능
 app.get('/students/by-student-num/:studentNum/birthday/:birthday', studentController.getStudentByStudentNumAndBirthday);
-app.get('/students/payload/:studentNum', studentController.getStudentPayloadByStudentNum);
-app.get('/students/full/:studentNum', studentController.getStudentFullPayload);
 
 // ✅ 이벤트
 app.get('/events', eventController.getAllEvents);
 app.get('/events/:eventId', eventController.getEventById);
 
-// ✅ 출전 정보
+// ✅ 출전 정보 (보안 강화: 학번만으로 접근 불가)
 app.get('/entries', entryController.getAllEntries);
 app.get('/entries/:entryId', entryController.getEntryById);
-app.get('/entries/by-student/:studentNum', entryController.getEntriesByStudentNum);
-app.get('/entries/alarm/:studentNum', entryController.getAlarmEntriesByStudentNum);
+
+// 🔒 보안상 비활성화: 학번만으로 접근 가능한 출전 정보 API들
+// app.get('/entries/by-student/:studentNum', entryController.getEntriesByStudentNum);
+// app.get('/entries/alarm/:studentNum', entryController.getAlarmEntriesByStudentNum);
 
 // ✅ 그룹 / 알림 / 변경로그
 app.get('/entry-groups', entryGroupController.getAll);
