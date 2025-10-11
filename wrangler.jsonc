@@ -1,0 +1,25 @@
+{
+  "name": "rec-time-be",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "vars": {
+    "NODE_ENV": "production"
+  },
+  "env": {
+    "development": {
+      "vars": {
+        "NODE_ENV": "development",
+        "PORT": "8787",
+        "HOST": "0.0.0.0"
+      }
+    }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rec-time-be",
+      "database_id": "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
+    }
+  ]
+}

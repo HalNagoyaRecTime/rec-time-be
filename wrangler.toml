@@ -22,7 +22,6 @@ HOST = "0.0.0.0"
 # ✅ D1 Database 연결 (최신 버전)
 # ----------------------------
 [[d1_databases]]
-binding = "DB"
-database_name = "rectime"
-database_id = "682cebd7-ca35-4e20-a4c8-639a093be76b"
-
+binding = "DB"                      
+database_name = "rec-time-be"
+database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
