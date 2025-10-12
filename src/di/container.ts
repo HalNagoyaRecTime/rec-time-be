@@ -20,7 +20,6 @@ import {
   createDownloadLogService,
 } from '../services';
 import { createDataUpdateService } from '../services/DataUpdateService';
-import { createEmailService } from '../services/EmailService';
 
 import {
   createStudentController,
@@ -79,18 +78,17 @@ export function createDIContainer(env?: Env) {
   const changeLogService = createChangeLogService(changeLogRepository);
   const downloadLogService = createDownloadLogService(downloadLogRepository);
   const dataUpdateService = createDataUpdateService(changeLogRepository);
-  const emailService = createEmailService();
 
   // Controller
   const studentController = createStudentController(studentService, downloadLogService);
-  const eventController = createEventController(eventService);
+  const eventController = createEventController(eventService, downloadLogService);
   const entryController = createEntryController(entryService, studentService, downloadLogService);
   const entryGroupController = createEntryGroupController(entryGroupService);
   const notificationController = createNotificationController(notificationService);
   const changeLogController = createChangeLogController(changeLogService);
   const downloadLogController = createDownloadLogController(downloadLogService);
   const dataUpdateController = createDataUpdateController(dataUpdateService);
-  const errorController = createErrorController(emailService);
+  const errorController = createErrorController();
 
   // ------------------------------------------------------------
   // 반환 (컨트롤러 + DB)

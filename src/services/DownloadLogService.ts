@@ -21,12 +21,35 @@ export interface DownloadLogServiceFunctions {
     failedDownloads: number;
     studentsWithEntries: number;
   }>;
+  getStudentDownloadComparison: (studentNum: string) => Promise<{
+    studentNum: string;
+    actualEntryCount: number;
+    downloadedEntryCount: number;
+    downloadedEventCount: number;
+    downloadStatus: {
+      entryDownloadSuccess: boolean;
+      eventDownloadSuccess: boolean;
+      entryDownloadCount: number;
+      eventDownloadCount: number;
+      lastEntryDownload: string | null;
+      lastEventDownload: string | null;
+    };
+    missingDownloads: {
+      entryCount: number;
+      eventCount: number;
+    };
+  }>;
   logStudentDataDownload: (
     studentNum: string,
     success: boolean,
     count?: number
   ) => Promise<void>;
   logEntryDataDownload: (
+    studentNum: string,
+    success: boolean,
+    count?: number
+  ) => Promise<void>;
+  logEventDataDownload: (
     studentNum: string,
     success: boolean,
     count?: number
@@ -79,6 +102,30 @@ export function createDownloadLogService(
     },
 
     // -------------------------
+    // getStudentDownloadComparison
+    // -------------------------
+    async getStudentDownloadComparison(studentNum: string): Promise<{
+      studentNum: string;
+      actualEntryCount: number;
+      downloadedEntryCount: number;
+      downloadedEventCount: number;
+      downloadStatus: {
+        entryDownloadSuccess: boolean;
+        eventDownloadSuccess: boolean;
+        entryDownloadCount: number;
+        eventDownloadCount: number;
+        lastEntryDownload: string | null;
+        lastEventDownload: string | null;
+      };
+      missingDownloads: {
+        entryCount: number;
+        eventCount: number;
+      };
+    }> {
+      return await downloadLogRepository.getStudentDownloadComparison(studentNum);
+    },
+
+    // -------------------------
     // logStudentDataDownload
     // -------------------------
     async logStudentDataDownload(
@@ -105,6 +152,22 @@ export function createDownloadLogService(
       await downloadLogRepository.create({
         student_num: studentNum,
         function: '出場情報取得',
+        success: success ? '成功' : '失敗',
+        count: count || null,
+      });
+    },
+
+    // -------------------------
+    // logEventDataDownload
+    // -------------------------
+    async logEventDataDownload(
+      studentNum: string,
+      success: boolean,
+      count?: number
+    ): Promise<void> {
+      await downloadLogRepository.create({
+        student_num: studentNum,
+        function: 'イベント情報取得',
         success: success ? '成功' : '失敗',
         count: count || null,
       });

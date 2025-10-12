@@ -9,6 +9,10 @@ import {
   ChangeLogEntity,
   EntryAlarmRow,
 } from './domains';
+import { DownloadLogServiceFunctions } from '../services/DownloadLogService';
+
+// Re-export for convenience
+export { DownloadLogServiceFunctions };
 
 // -------------------------
 // StudentService

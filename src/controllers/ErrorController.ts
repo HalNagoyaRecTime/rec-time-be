@@ -1,6 +1,6 @@
 // src/controllers/ErrorController.ts
 import { Context } from 'hono';
-import { EmailServiceFunctions } from '../services/EmailService';
+// import { EmailServiceFunctions } from '../services/EmailService'; // 메일 기능 제거됨
 
 /**
  * 🔧 ErrorControllerFunctions インターフェース
@@ -18,9 +18,7 @@ export interface ErrorControllerFunctions {
  *   API経由でエラーレポートを送信。
  * - EmailService를 통해 백엔드에서 메일을 전송하는 컨트롤러.
  */
-export function createErrorController(
-  emailService: EmailServiceFunctions
-): ErrorControllerFunctions {
+export function createErrorController(): ErrorControllerFunctions {
   return {
     /**
      * ---------------------------------------------------------
@@ -55,14 +53,13 @@ export function createErrorController(
           url,
         } = body;
 
-        // 📧 メール送信（エラーメール送信処理）
-        // 📧 에러 메일 전송 처리
-        await emailService.sendErrorEmail({
+        // 📧 메일 전송 기능 제거됨 (나중에 구현 예정 / 後で実装予定)
+        // 📧 メール送信機能削除（後で実装予定）
+        console.log('Error report received (메일 전송 기능 제거됨):', {
           studentNum,
           errorType: errorType || 'Unknown Error',
           errorMessage: errorMessage || 'No error message provided',
           stackTrace,
-          timestamp: new Date().toISOString(),
           userAgent: userAgent || c.req.header('User-Agent'),
           url: url || c.req.url,
         });

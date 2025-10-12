@@ -39,6 +39,7 @@ export interface DownloadLogControllerFunctions {
   getAllLogs: ControllerFunction;
   getLogsByStudentNum: ControllerFunction;
   getDownloadStats: ControllerFunction;
+  getStudentDownloadComparison: ControllerFunction;
 }
 
 export interface ErrorControllerFunctions {

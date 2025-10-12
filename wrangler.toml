@@ -9,6 +9,8 @@ account_id = "a6d1a427beffc5898641e90e99cdb49b"
 # ----------------------------
 [vars]
 NODE_ENV = "production"
+# 빌드 정보 / ビルド情報
+BUILD_VERSION = "1.0.0"
 
 # ----------------------------
 # 개발 환경 (wrangler dev 시 사용)

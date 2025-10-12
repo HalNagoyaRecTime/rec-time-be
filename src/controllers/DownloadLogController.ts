@@ -6,6 +6,7 @@ export interface DownloadLogControllerFunctions {
   getAllLogs: (c: Context) => Promise<Response>;
   getLogsByStudentNum: (c: Context) => Promise<Response>;
   getDownloadStats: (c: Context) => Promise<Response>;
+  getStudentDownloadComparison: (c: Context) => Promise<Response>;
   createLog: (c: Context) => Promise<Response>;
 }
 
@@ -67,6 +68,24 @@ export function createDownloadLogController(
       } catch (error) {
         console.error('[getDownloadStats] error =', error);
         return c.json({ error: 'Failed to fetch download statistics' }, 500);
+      }
+    },
+
+    // -------------------------
+    // getStudentDownloadComparison
+    // -------------------------
+    getStudentDownloadComparison: async (c: Context) => {
+      try {
+        const studentNum = c.req.query('student_num');
+        if (!studentNum) {
+          return c.json({ error: 'student_num parameter is required' }, 400);
+        }
+
+        const comparison = await downloadLogService.getStudentDownloadComparison(studentNum);
+        return c.json(comparison);
+      } catch (error) {
+        console.error('[getStudentDownloadComparison] error =', error);
+        return c.json({ error: 'Failed to fetch student download comparison' }, 500);
       }
     },
 

@@ -1,9 +1,10 @@
 import { Context } from 'hono';
 import { EventControllerFunctions } from '../types/controllers';
-import { EventServiceFunctions } from '../types/services';
+import { EventServiceFunctions, DownloadLogServiceFunctions } from '../types/services';
 
 export function createEventController(
-  eventService: EventServiceFunctions
+  eventService: EventServiceFunctions,
+  downloadLogService: DownloadLogServiceFunctions
 ): EventControllerFunctions {
   return {
     getAllEvents: async (c: Context) => {
@@ -12,6 +13,7 @@ export function createEventController(
         const f_time = c.req.query('f_time');
         const limit = c.req.query('limit');
         const offset = c.req.query('offset');
+        const studentNum = c.req.query('student_num'); // 학생 번호 (로그용)
 
         const result = await eventService.getAllEvents({
           f_event_code,
@@ -20,6 +22,15 @@ export function createEventController(
           offset: offset ? parseInt(offset) : undefined,
         });
 
+        // 이벤트 다운로드 로그 기록 (학생 번호가 있는 경우만)
+        if (studentNum) {
+          try {
+            await downloadLogService.logEventDataDownload(studentNum, true, result.events.length);
+          } catch (logError) {
+            console.error('[Event download log error]', logError);
+          }
+        }
+
         return c.json({
           events: result.events,
           total: result.total,
@@ -27,6 +38,16 @@ export function createEventController(
           offset: offset ? parseInt(offset) : 0,
         });
       } catch (error) {
+        // 에러 발생 시에도 로그 기록
+        const studentNum = c.req.query('student_num');
+        if (studentNum) {
+          try {
+            await downloadLogService.logEventDataDownload(studentNum, false);
+          } catch (logError) {
+            console.error('[Event download log error]', logError);
+          }
+        }
+
         return c.json(
           {
             error: 'Failed to fetch events',

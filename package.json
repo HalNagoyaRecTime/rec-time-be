@@ -6,14 +6,18 @@
   "scripts": {
     "dev:http": "wrangler dev --local-protocol http --ip 0.0.0.0 --port 8787",
     "dev:https": "wrangler dev --local-protocol https --ip 0.0.0.0 --port 8787",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "npm run inject-git && wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --ext .ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "inject-git": "node scripts/injectGitInfo.js",
+    "build": "npm run inject-git && tsc --noEmit",
+    "logs:view": "echo 'Cloudflare Workers logs are available in the dashboard'",
+    "logs:error": "echo 'Error logs are available in the Cloudflare Workers dashboard'"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.2",

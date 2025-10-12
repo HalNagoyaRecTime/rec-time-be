@@ -5,6 +5,10 @@ import { Bindings } from './types';
 import { ControllerMap } from './types/context';
 import { getDIContainer } from './di/container';
 import { cors } from 'hono/cors';
+import { requestLogger, errorHandler } from './middleware/logging';
+import { logger } from './utils/logger';
+import { logGitInfo, getGitInfo } from './utils/gitInfo';
+import { ENV } from 'config/env';
 
 const app = new Hono<{
   Bindings: Bindings;
@@ -15,6 +19,11 @@ const app = new Hono<{
 // 🌐 CORS 설정 (프론트/백 분리 환경 대응)
 // ================================
 app.use('*', cors({ origin: '*' }));
+
+// ================================
+// 📝 로깅 미들웨어 설정
+// ================================
+app.use('*', requestLogger());
 
 // ================================
 // 공통 미들웨어
@@ -46,10 +55,51 @@ const api = app.basePath('/api');
 // ================================
 // ✅ 기본 라우트
 // ================================
-api.get('/', c => c.text('Hello from Cloudflare Worker 🚀'));
-api.get('/health', c =>
-  c.json({ status: 'ok', time: new Date().toISOString() })
-);
+api.get('/', c => {
+  logger.info('Root endpoint accessed', 'API');
+  return c.text('Hello from Cloudflare Worker 🚀');
+});
+
+api.get('/health', c => {
+  const gitInfo = getGitInfo();
+  logger.info('Health check endpoint accessed', 'API');
+  return c.json({ 
+    status: 'ok', 
+    time: new Date().toISOString(),
+    gitInfo: {
+      commitHash: gitInfo.commitHash,
+      commitAuthor: gitInfo.commitAuthor,
+      branch: gitInfo.branch,
+      buildTime: gitInfo.buildTime,
+    }
+  });
+});
+
+// Git 정보 조회 엔드포인트 / Git情報照会エンドポイント
+api.get('/git-info', c => {
+  const gitInfo = getGitInfo();
+  logger.info('Git info endpoint accessed', 'API');
+  return c.json(gitInfo);
+});
+
+// 디버그 정보 조회 엔드포인트 / デバッグ情報照会エンドポイント
+api.get('/debug/info', c => {
+  const gitInfo = getGitInfo();
+  logger.debug('Debug info endpoint accessed', 'API');
+  
+  return c.json({
+    environment: ENV.NODE_ENV,
+    logLevel: ENV.NODE_ENV === 'production' ? 'WARN' : 'DEBUG',
+    isDebugMode: ENV.NODE_ENV !== 'production',
+    gitInfo: {
+      commitHash: gitInfo.commitHash,
+      commitAuthor: gitInfo.commitAuthor,
+      branch: gitInfo.branch,
+      buildTime: gitInfo.buildTime,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ================================
 // ✅ Students (보안 강화: 학번 + 생년월일 인증만 허용)
@@ -115,6 +165,9 @@ api.get('/download-logs/student/:studentNum', c =>
 api.get('/download-logs/stats', c =>
   c.get('downloadLogController').getDownloadStats(c)
 );
+api.get('/download-logs/comparison', c =>
+  c.get('downloadLogController').getStudentDownloadComparison(c)
+);
 
 // ================================
 // ✅ Data Update Check
@@ -127,9 +180,25 @@ api.get('/data-update/check', c =>
 );
 
 // ================================
-// ✅ Error Report (메일 전송용)
+// ✅ Error Report (메일 전송용) (나중에 구현 예정 / 後で実装予定)
 // ================================
-api.post('/error/report', c => c.get('errorController').reportError(c));
+// api.post('/error/report', c => c.get('errorController').reportError(c));
+
+// ================================
+// 📝 에러 핸들링 미들웨어 (라우트 이후에 설정)
+// ================================
+app.onError(errorHandler());
+
+// ================================
+// 🚀 서버 시작 시 Git 정보 로깅
+// ================================
+const gitInfo = getGitInfo();
+logGitInfo(gitInfo);
+logger.info('RecTime Backend Server started / RecTime 백엔드 서버 시작', 'Server', {
+  environment: process.env.NODE_ENV || 'development',
+  version: gitInfo.buildVersion,
+  commitHash: gitInfo.commitHash,
+});
 
 export default {
   fetch: app.fetch,

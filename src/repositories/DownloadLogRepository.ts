@@ -142,5 +142,85 @@ export function createDownloadLogRepository(db: D1Database) {
         studentsWithEntries: (studentsWithEntries as any)?.count ?? 0,
       };
     },
+
+    // -------------------------
+    // getStudentDownloadComparison
+    // -------------------------
+    async getStudentDownloadComparison(studentNum: string): Promise<{
+      studentNum: string;
+      actualEntryCount: number;
+      downloadedEntryCount: number;
+      downloadedEventCount: number;
+      downloadStatus: {
+        entryDownloadSuccess: boolean;
+        eventDownloadSuccess: boolean;
+        entryDownloadCount: number;
+        eventDownloadCount: number;
+        lastEntryDownload: string | null;
+        lastEventDownload: string | null;
+      };
+      missingDownloads: {
+        entryCount: number;
+        eventCount: number;
+      };
+    }> {
+      // 1. 실제 출전 수 조회
+      const actualEntries = await db
+        .prepare(`
+          SELECT COUNT(*) as count 
+          FROM t_entries te 
+          JOIN m_students ms ON te.f_student_id = ms.f_student_id 
+          WHERE ms.f_student_num = ?
+        `)
+        .bind(studentNum)
+        .first();
+
+      // 2. 다운로드된 출전 정보 수 조회
+      const entryDownload = await db
+        .prepare(`
+          SELECT f_count, f_success, f_datetime 
+          FROM download_logs 
+          WHERE f_student_num = ? AND f_function = "出場情報取得" 
+          ORDER BY f_log_id DESC 
+          LIMIT 1
+        `)
+        .bind(studentNum)
+        .first();
+
+      // 3. 다운로드된 이벤트 정보 수 조회
+      const eventDownload = await db
+        .prepare(`
+          SELECT f_count, f_success, f_datetime 
+          FROM download_logs 
+          WHERE f_student_num = ? AND f_function = "イベント情報取得" 
+          ORDER BY f_log_id DESC 
+          LIMIT 1
+        `)
+        .bind(studentNum)
+        .first();
+
+      const actualEntryCount = (actualEntries as any)?.count ?? 0;
+      const downloadedEntryCount = (entryDownload as any)?.f_count ?? 0;
+      const downloadedEventCount = (eventDownload as any)?.f_count ?? 0;
+
+      return {
+        studentNum,
+        actualEntryCount,
+        downloadedEntryCount,
+        downloadedEventCount,
+        downloadStatus: {
+          entryDownloadSuccess: (entryDownload as any)?.f_success === '成功',
+          eventDownloadSuccess: (eventDownload as any)?.f_success === '成功',
+          entryDownloadCount: downloadedEntryCount,
+          eventDownloadCount: downloadedEventCount,
+          lastEntryDownload: (entryDownload as any)?.f_datetime ?? null,
+          lastEventDownload: (eventDownload as any)?.f_datetime ?? null,
+        },
+        missingDownloads: {
+          entryCount: Math.max(0, actualEntryCount - downloadedEntryCount),
+          eventCount: Math.max(0, downloadedEventCount), // 이벤트는 전체 이벤트 수와 비교
+        },
+      };
+    },
   };
 }
