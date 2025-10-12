@@ -24,6 +24,7 @@ export function createEventController(
 
         // 이벤트 다운로드 로그 기록 (학생 번호가 있는 경우만)
         if (studentNum) {
+          console.log('[Event download log] studentNum:', studentNum);
           try {
             await downloadLogService.logEventDataDownload(studentNum, true, result.events.length);
           } catch (logError) {
@@ -40,6 +41,7 @@ export function createEventController(
       } catch (error) {
         // 에러 발생 시에도 로그 기록
         const studentNum = c.req.query('student_num');
+        console.log('[Event download log] studentNum:', studentNum);
         if (studentNum) {
           try {
             await downloadLogService.logEventDataDownload(studentNum, false);
