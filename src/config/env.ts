@@ -23,14 +23,3 @@ export const ENV = {
   ],
 };
 
-// 設定値をログ出力（開発環境のみ）
-if (ENV.NODE_ENV === 'development') {
-  console.log(`   Environment Variables Loaded:`);
-  console.log(`   NODE_ENV: ${ENV.NODE_ENV}`);
-  console.log(`   PORT: ${ENV.PORT}`);
-  console.log(`   HOST: ${ENV.HOST}`);
-  console.log(`   DATABASE_URL: ${ENV.DATABASE_URL}`);
-  console.log(`   HTTPS_KEY_PATH: ${ENV.HTTPS_KEY_PATH}`);
-  console.log(`   HTTPS_CERT_PATH: ${ENV.HTTPS_CERT_PATH}`);
-  console.log(`   CORS_ORIGINS: ${ENV.CORS_ORIGINS.join(', ')}`);
-}

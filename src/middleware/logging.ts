@@ -1,7 +1,6 @@
 // src/middleware/logging.ts
 import { Context, Next } from 'hono';
 import { logger } from '../utils/logger';
-import { getGitInfo } from '../utils/gitInfo';
 
 // 요청 로깅 미들웨어 / リクエストロギングミドルウェア
 export function requestLogger() {
@@ -68,8 +67,6 @@ export function requestLogger() {
 // 에러 핸들링 미들웨어 / エラーハンドリングミドルウェア
 export function errorHandler() {
   return async (error: Error, c: Context) => {
-    const gitInfo = getGitInfo();
-    
     logger.critical('Unhandled error occurred / 미처리 에러가 발생했습니다', 'ErrorHandler', {
       error: {
         message: error.message,
@@ -80,11 +77,6 @@ export function errorHandler() {
         method: c.req.method,
         url: c.req.url,
         headers: Object.fromEntries(c.req.raw.headers.entries()),
-      },
-      gitInfo: {
-        commitHash: gitInfo.commitHash,
-        commitAuthor: gitInfo.commitAuthor,
-        branch: gitInfo.branch,
       },
     }, error);
     

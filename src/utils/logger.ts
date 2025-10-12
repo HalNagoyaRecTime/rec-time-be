@@ -34,11 +34,6 @@ interface LogEntry {
   service: string;
   environment: string;
   version?: string;
-  gitInfo?: {
-    commitHash?: string;
-    commitAuthor?: string;
-    branch?: string;
-  };
 }
 
 // 현재 로그 레벨 설정 / 現在のログレベル設定
@@ -92,10 +87,6 @@ const logToConsole = (entry: LogEntry): void => {
   }
 };
 
-// 메일 전송 기능 제거됨 (나중에 구현 예정 / 後で実装予定)
-// const sendErrorEmail = async (entry: LogEntry): Promise<void> => {
-//   // 메일 전송 로직 (나중에 구현 예정 / 後で実装予定)
-// };
 
 // 메인 로깅 함수 / メインロギング関数
 const log = (level: LogLevel, message: string, context?: string, data?: any, error?: Error): void => {
@@ -122,13 +113,6 @@ const log = (level: LogLevel, message: string, context?: string, data?: any, err
   
   // 콘솔에 로그 출력 / コンソールにログ出力
   logToConsole(entry);
-  
-  // CRITICAL 에러 메일 전송 기능 제거됨 (나중에 구현 예정 / 後で実装予定)
-  // if (level === LogLevel.CRITICAL) {
-  //   sendErrorEmail(entry).catch(err => 
-  //     console.error('Failed to send critical error email:', err)
-  //   );
-  // }
 };
 
 // 로깅 함수들 export / ロギング関数をexport

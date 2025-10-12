@@ -7,8 +7,6 @@ import { getDIContainer } from './di/container';
 import { cors } from 'hono/cors';
 import { requestLogger, errorHandler } from './middleware/logging';
 import { logger } from './utils/logger';
-import { logGitInfo, getGitInfo } from './utils/gitInfo';
-import { ENV } from 'config/env';
 
 const app = new Hono<{
   Bindings: Bindings;
@@ -61,45 +59,13 @@ api.get('/', c => {
 });
 
 api.get('/health', c => {
-  const gitInfo = getGitInfo();
   logger.info('Health check endpoint accessed', 'API');
   return c.json({ 
     status: 'ok', 
-    time: new Date().toISOString(),
-    gitInfo: {
-      commitHash: gitInfo.commitHash,
-      commitAuthor: gitInfo.commitAuthor,
-      branch: gitInfo.branch,
-      buildTime: gitInfo.buildTime,
-    }
+    time: new Date().toISOString()
   });
 });
 
-// Git 정보 조회 엔드포인트 / Git情報照会エンドポイント
-api.get('/git-info', c => {
-  const gitInfo = getGitInfo();
-  logger.info('Git info endpoint accessed', 'API');
-  return c.json(gitInfo);
-});
-
-// 디버그 정보 조회 엔드포인트 / デバッグ情報照会エンドポイント
-api.get('/debug/info', c => {
-  const gitInfo = getGitInfo();
-  logger.debug('Debug info endpoint accessed', 'API');
-  
-  return c.json({
-    environment: ENV.NODE_ENV,
-    logLevel: ENV.NODE_ENV === 'production' ? 'WARN' : 'DEBUG',
-    isDebugMode: ENV.NODE_ENV !== 'production',
-    gitInfo: {
-      commitHash: gitInfo.commitHash,
-      commitAuthor: gitInfo.commitAuthor,
-      branch: gitInfo.branch,
-      buildTime: gitInfo.buildTime,
-    },
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // ================================
 // ✅ Students (보안 강화: 학번 + 생년월일 인증만 허용)
@@ -190,14 +156,10 @@ api.get('/data-update/check', c =>
 app.onError(errorHandler());
 
 // ================================
-// 🚀 서버 시작 시 Git 정보 로깅
+// 🚀 서버 시작 로깅
 // ================================
-const gitInfo = getGitInfo();
-logGitInfo(gitInfo);
 logger.info('RecTime Backend Server started / RecTime 백엔드 서버 시작', 'Server', {
   environment: process.env.NODE_ENV || 'development',
-  version: gitInfo.buildVersion,
-  commitHash: gitInfo.commitHash,
 });
 
 export default {
