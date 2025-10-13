@@ -1,6 +1,9 @@
 import { Context } from 'hono';
 import { EventControllerFunctions } from '../types/controllers';
-import { EventServiceFunctions, DownloadLogServiceFunctions } from '../types/services';
+import {
+  EventServiceFunctions,
+  DownloadLogServiceFunctions,
+} from '../types/services';
 
 export function createEventController(
   eventService: EventServiceFunctions,
@@ -9,6 +12,7 @@ export function createEventController(
   return {
     getAllEvents: async (c: Context) => {
       try {
+        console.log('Received getAllEvents request with query:');
         const f_event_code = c.req.query('f_event_code');
         const f_time = c.req.query('f_time');
         const limit = c.req.query('limit');
@@ -26,7 +30,11 @@ export function createEventController(
         if (studentNum) {
           console.log('[Event download log] studentNum:', studentNum);
           try {
-            await downloadLogService.logEventDataDownload(studentNum, true, result.events.length);
+            await downloadLogService.logEventDataDownload(
+              studentNum,
+              true,
+              result.events.length
+            );
           } catch (logError) {
             console.error('[Event download log error]', logError);
           }
