@@ -20,6 +20,7 @@
     "@prisma/adapter-d1": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "crypto": "^1.0.1",
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.2.2",
     "hono": "^4.9.6",
     "zod": "^3.22.4"
