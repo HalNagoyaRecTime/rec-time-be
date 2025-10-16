@@ -70,7 +70,9 @@ app.get('/entries/:entryId', entryController.getEntryById);
 
 // 🔒 보안상 비활성화: 학번만으로 접근 가능한 출전 정보 API들
 // app.get('/entries/by-student/:studentNum', entryController.getEntriesByStudentNum);
-// app.get('/entries/alarm/:studentNum', entryController.getAlarmEntriesByStudentNum);
+
+// ✅ 알람용 엔드포인트 복구 / アラーム用エンドポイント復旧
+app.get('/entries/alarm/:studentNum', entryController.getAlarmEntriesByStudentNum);
 
 // ✅ 그룹 / 알림 / 변경로그
 app.get('/entry-groups', entryGroupController.getAll);

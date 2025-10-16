@@ -102,9 +102,11 @@ api.get('/entries/:entryId', c => c.get('entryController').getEntryById(c));
 // api.get('/entries/by-student/:studentNum', c =>
 //   c.get('entryController').getEntriesByStudentNum(c)
 // );
-// api.get('/entries/alarm/:studentNum', c =>
-//   c.get('entryController').getAlarmEntriesByStudentNum(c)
-// );
+
+// ✅ 알람용 엔드포인트 복구 / アラーム用エンドポイント復旧
+api.get('/entries/alarm/:studentNum', c =>
+  c.get('entryController').getAlarmEntriesByStudentNum(c)
+);
 
 // ================================
 // ✅ Entry Groups
