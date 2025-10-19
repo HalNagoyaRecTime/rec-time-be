@@ -132,20 +132,21 @@ export interface NotificationRepositoryFunctions {
 
 export interface ChangeLogRepositoryFunctions {
   findAll(options: {
-    f_student_id?: number;
-    f_type?: string;
+    f_event_id?: number;
+    f_updated_item?: string;
     limit?: number;
     offset?: number;
   }): Promise<{ changeLogs: any[]; total: number }>;
 
   findById(id: number): Promise<any | null>;
-  findByStudentId(studentId: number): Promise<any[]>;
+  findByEventId(eventId: number): Promise<any[]>;
   create(data: {
-    student_id: number;
-    type: string;
-    description: string;
-    old_value?: string;
-    new_value?: string;
+    f_event_id: number;
+    f_updated_item: string;
+    f_before?: string;
+    f_after?: string;
+    f_updated_at?: string;
+    f_reason?: string;
   }): Promise<any>;
 
   getUpdateStats(): Promise<{ recordCount: number }>;

@@ -3,7 +3,7 @@ import Database from 'better-sqlite3'
 import { parse } from 'csv-parse/sync'
 
 // === CSVファイルを読み込む ===
-let csvText = fs.readFileSync('./entries.csv', 'utf-8')
+let csvText = fs.readFileSync('./entries_mock_valid_10000.csv', 'utf-8')
 
 // BOM（Excel特有の文字）を削除
 if (csvText.charCodeAt(0) === 0xfeff) {
@@ -69,8 +69,16 @@ const insertMany = db.transaction((rows: any[]) => {
 
 // ===  実行 ===
 if (records.length > 0) {
-  insertMany(records)
+  const start = Date.now() // ⏱️ 処理開始時間を記録
+
+  insertMany(records) // ← CSVデータをDBに登録する処理
+
+  const end = Date.now() // ⏱️ 処理終了時間を記録
+  const seconds = ((end - start) / 1000).toFixed(2)
+
   console.log(`🏁 全${records.length}件の出場者登録が完了しました！`)
+  console.log(`🕒 所要時間: ${seconds} 秒`)
 } else {
   console.log('⚠️ CSVに有効なデータがありません。')
 }
+
