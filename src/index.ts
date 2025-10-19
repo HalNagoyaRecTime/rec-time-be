@@ -20,13 +20,19 @@ const app = new Hono<{
 const ALLOWED_ORIGINS = [
   'https://develop.rec-time-fe.pages.dev',
   'https://rec-time-fe.pages.dev',
+  'https://ded22f03.rec-time-fe.pages.dev', // ⚠️ 실제 배포 프론트엔드 도메인
   'http://localhost:5173',
 ];
 
 app.use(
   '/*',
   cors({
-    origin: origin => (ALLOWED_ORIGINS.includes(origin) ? origin : ''),
+    origin: origin => {
+      if (!origin) return '*'; // 서버 내부 호출 시
+      if (ALLOWED_ORIGINS.includes(origin)) return origin;
+      if (origin.endsWith('.pages.dev')) return origin; // preview 환경 대응
+      return '*';
+    },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
