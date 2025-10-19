@@ -2,6 +2,17 @@ import fs from 'fs'
 import Database from 'better-sqlite3'
 import { parse } from 'csv-parse/sync'
 
+// === 共通関数 ===
+function makeTimestampedFilename(baseName: string): string {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  const hh = String(now.getHours()).padStart(2, '0')
+  const mi = String(now.getMinutes()).padStart(2, '0')
+  return `${baseName}_${yyyy}-${mm}-${dd}_${hh}-${mi}.csv`
+}
+
 // === CSVファイルを読み込む ===
 let csvText = fs.readFileSync('./entries_group.csv', 'utf-8')
 if (csvText.charCodeAt(0) === 0xfeff) {
@@ -35,10 +46,8 @@ function normalizeTime(v: string | null): string {
     .trim()
 
   if (/^\d{1,2}:\d{2}$/.test(s)) {
-    // 9:00 → 0900
     return s.replace(/^(\d{1,2}):(\d{2})$/, (_, h, m) => `${h.padStart(2, '0')}${m}`)
   } else if (/^\d{3,4}$/.test(s)) {
-    // 900 → 0900
     return s.padStart(4, '0')
   }
   return s
@@ -53,9 +62,36 @@ const records = parse(csvText, {
 
 console.log(`📄 CSVから ${records.length} 件のデータを読み込みました`)
 
-// === DB接続 ===
+// === SQLite接続 ===
 const db = new Database('./mydb.sqlite')
 db.pragma('foreign_keys = OFF')
+
+// === 既存データをバックアップ ===
+const BACKUP_DIR = './backup'
+const existingRows = db.prepare(`SELECT * FROM t_entries_group`).all() as Record<string, any>[]
+
+if (existingRows.length > 0) {
+  if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR)
+
+  const header = Object.keys(existingRows[0]).join(',')
+  const body = existingRows
+    .map(row =>
+      Object.values(row)
+        .map(v => (v == null ? '' : `"${String(v).replace(/"/g, '""')}"`))
+        .join(',')
+    )
+    .join('\n')
+
+  const content = [header, body].join('\n')
+  const backupPath = `${BACKUP_DIR}/${makeTimestampedFilename('entries_group_backup')}`
+  fs.writeFileSync(backupPath, content, 'utf-8')
+  console.log(`✅ バックアップ作成: ${backupPath}`)
+}
+
+// === 既存データ削除 + AUTOINCREMENTリセット ===
+db.prepare(`DELETE FROM t_entries_group`).run()
+db.prepare(`DELETE FROM sqlite_sequence WHERE name = 't_entries_group'`).run()
+console.log('🗑️ 既存データ削除 & AUTOINCREMENTリセット完了')
 
 // === SQL定義 ===
 const selectGroup = db.prepare(`
@@ -80,14 +116,13 @@ const insertLog = db.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `)
 
-// === トランザクション ===
+// === 登録処理 ===
 const upsertMany = db.transaction((rows: any[]) => {
   for (const row of rows) {
     const eventName = row[COLUMN_EVENT_NAME]
     const groupSeq = parseInt(row[COLUMN_GROUP_SEQ], 10)
     const placeRaw = row[COLUMN_PLACE]
     const timeRaw = row[COLUMN_GATHER_TIME]
-
     const place = normalizePlace(placeRaw)
     const time = normalizeTime(timeRaw)
 
@@ -96,7 +131,6 @@ const upsertMany = db.transaction((rows: any[]) => {
       continue
     }
 
-    // === イベントID取得 ===
     const event = db
       .prepare('SELECT f_event_id FROM t_events WHERE f_event_name = ?')
       .get(eventName) as { f_event_id: number } | undefined
@@ -106,17 +140,15 @@ const upsertMany = db.transaction((rows: any[]) => {
       continue
     }
 
-    // === 既存データ取得 ===
     const existing = selectGroup.get(event.f_event_id, groupSeq) as
       | { f_place: string | null; f_gather_time: string | null }
       | undefined
 
-    // === 差分チェック ===
     if (existing) {
       const dbPlace = normalizePlace(existing.f_place)
       const dbTime = normalizeTime(existing.f_gather_time)
-
       const isSame = dbPlace === place && dbTime === time
+
       if (isSame) {
         console.log(`⏩ スキップ: ${eventName}（グループ${groupSeq}）変更なし`)
         continue
@@ -148,7 +180,7 @@ const upsertMany = db.transaction((rows: any[]) => {
 // === 実行 ===
 if (records.length > 0) {
   upsertMany(records)
-  console.log(`\n🏁 全${records.length}件の集合情報を登録・更新しました！`)
+  console.log(`🏁 全${records.length}件の集合情報を登録・更新しました！`)
 } else {
   console.log('⚠️ CSVに有効なデータがありません（空または形式が違う可能性）')
 }
