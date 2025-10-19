@@ -43,49 +43,80 @@ const {
 // ================================
 const app = new Hono();
 
-// 🌐 CORS (모든 요청 허용)
-app.use('*', cors({ origin: '*' }));
+// 🌐 CORS (프로덕션과 동일 정책 권장)
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  // 필요시 프론트 프리뷰 도메인도 추가
+  'https://develop.rec-time-fe.pages.dev',
+  'https://rec-time-fe.pages.dev',
+];
+
+app.use(
+  '/*',
+  cors({
+    origin: origin => (ALLOWED_ORIGINS.includes(origin) ? origin : ''),
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true, // 쿠키/세션을 안 쓰면 false로 바꿔도 됨
+    maxAge: 86400,
+  })
+);
+
+// ✅ 프리플라이트 명시 허용
+app.options('/*', c => c.body(null, 204));
 
 // ================================
-// 📡 라우트 정의 (index.ts와 동일한 구조)
+// 📡 라우트 정의 (프로덕션과 같은 /api prefix)
 // ================================
-app.get('/', c => c.text('Hello (local) 🚀'));
+const api = app.basePath('/api');
+
+api.get('/', c => c.text('Hello (local) 🚀'));
 
 // ✅ 학생 정보 (보안 강화: 학번 + 생년월일 인증만 허용)
 // 🔒 보안상 비활성화: 학번만으로 접근 가능한 API들
-// app.get('/students/by-student-num/:studentNum', studentController.getStudentByStudentNum);
-// app.get('/students/payload/:studentNum', studentController.getStudentPayloadByStudentNum);
-// app.get('/students/full/:studentNum', studentController.getStudentFullPayload);
+// api.get('/students/by-student-num/:studentNum', studentController.getStudentByStudentNum);
+// api.get('/students/payload/:studentNum', studentController.getStudentPayloadByStudentNum);
+// api.get('/students/full/:studentNum', studentController.getStudentFullPayload);
 
 // ✅ 보안 인증된 API: 학번 + 생년월일로만 접근 가능
-app.get('/students/by-student-num/:studentNum/birthday/:birthday', studentController.getStudentByStudentNumAndBirthday);
+api.get(
+  '/students/by-student-num/:studentNum/birthday/:birthday',
+  studentController.getStudentByStudentNumAndBirthday
+);
 
 // ✅ 이벤트
-app.get('/events', eventController.getAllEvents);
-app.get('/events/:eventId', eventController.getEventById);
+api.get('/events', eventController.getAllEvents);
+api.get('/events/:eventId', eventController.getEventById);
 
 // ✅ 출전 정보 (보안 강화: 학번만으로 접근 불가)
-app.get('/entries', entryController.getAllEntries);
-app.get('/entries/:entryId', entryController.getEntryById);
+api.get('/entries', entryController.getAllEntries);
+api.get('/entries/:entryId', entryController.getEntryById);
 
 // 🔒 보안상 비활성화: 학번만으로 접근 가능한 출전 정보 API들
-// app.get('/entries/by-student/:studentNum', entryController.getEntriesByStudentNum);
+// api.get('/entries/by-student/:studentNum', entryController.getEntriesByStudentNum);
 
 // ✅ 알람용 엔드포인트 복구 / アラーム用エンドポイント復旧
-app.get('/entries/alarm/:studentNum', entryController.getAlarmEntriesByStudentNum);
+api.get(
+  '/entries/alarm/:studentNum',
+  entryController.getAlarmEntriesByStudentNum
+);
 
 // ✅ 그룹 / 알림 / 변경로그
-app.get('/entry-groups', entryGroupController.getAll);
-app.get('/notifications', notificationController.getAll);
-app.get('/change-logs', changeLogController.getAll);
+api.get('/entry-groups', entryGroupController.getAll);
+api.get('/notifications', notificationController.getAll);
+api.get('/change-logs', changeLogController.getAll);
 
 // ✅ 다운로드 로그
-app.get('/download-logs', downloadLogController.getAllLogs);
-app.get('/download-logs/student/:studentNum', downloadLogController.getLogsByStudentNum);
-app.get('/download-logs/stats', downloadLogController.getDownloadStats);
+api.get('/download-logs', downloadLogController.getAllLogs);
+api.get(
+  '/download-logs/student/:studentNum',
+  downloadLogController.getLogsByStudentNum
+);
+api.get('/download-logs/stats', downloadLogController.getDownloadStats);
 
 // ✅ 에러 리포트 (메일 전송)
-app.post('/error/report', errorController.reportError);
+api.post('/error/report', errorController.reportError);
 
 // ================================
 // 🧩 로컬 서버 실행

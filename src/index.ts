@@ -1,10 +1,11 @@
 // src/index.ts
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { D1Database } from '@cloudflare/workers-types';
+
 import { Bindings } from './types';
 import { ControllerMap } from './types/context';
 import { getDIContainer } from './di/container';
-import { cors } from 'hono/cors';
 import { requestLogger, errorHandler } from './middleware/logging';
 import { logger } from './utils/logger';
 
@@ -16,15 +17,33 @@ const app = new Hono<{
 // ================================
 // 🌐 CORS 설정 (프론트/백 분리 환경 대응)
 // ================================
-app.use('*', cors({ origin: '*' }));
+const ALLOWED_ORIGINS = [
+  'https://develop.rec-time-fe.pages.dev',
+  'https://rec-time-fe.pages.dev',
+  'http://localhost:5173',
+];
+
+app.use(
+  '/*',
+  cors({
+    origin: origin => (ALLOWED_ORIGINS.includes(origin) ? origin : ''),
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400,
+  })
+);
+
+// ✅ 명시적으로 OPTIONS 프리플라이트 허용
+app.options('/*', c => c.body(null, 204));
 
 // ================================
-// 📝 로깅 미들웨어 설정
+// 📝 로깅 미들웨어
 // ================================
 app.use('*', requestLogger());
 
 // ================================
-// 공통 미들웨어
+// 공통 DI 주입 미들웨어
 // ================================
 app.use('*', async (c, next) => {
   const { db, ...controllers } = getDIContainer(c.env);
@@ -32,21 +51,13 @@ app.use('*', async (c, next) => {
   Object.entries(controllers).forEach(([key, value]) => {
     c.set(key as keyof ControllerMap, value);
   });
-
   c.set('db', db);
-
-  // 공통 헤더 설정
-  c.header('Access-Control-Allow-Origin', '*');
-  c.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (c.req.method === 'OPTIONS') return c.body(null, 204);
 
   await next();
 });
 
 // ================================
-// API prefix 붙이기
+// API prefix
 // ================================
 const api = app.basePath('/api');
 
@@ -60,28 +71,27 @@ api.get('/', c => {
 
 api.get('/health', c => {
   logger.info('Health check endpoint accessed', 'API');
-  return c.json({ 
-    status: 'ok', 
-    time: new Date().toISOString()
+  return c.json({
+    status: 'ok',
+    time: new Date().toISOString(),
   });
 });
-
 
 // ================================
 // ✅ Students (보안 강화: 학번 + 생년월일 인증만 허용)
 // ================================
-// 🔒 보안상 비활성화: 학번만으로 접근 가능한 API들
-// api.get('/students/by-student-num/:studentNum', c =>
+// 🔒 비활성화된 공개 엔드포인트 (필요시만 복구)
+// api.get('/students/by-student-num/:studentNum', (c) =>
 //   c.get('studentController').getStudentByStudentNum(c)
-// );
-// api.get('/students/payload/:studentNum', c =>
+// )
+// api.get('/students/payload/:studentNum', (c) =>
 //   c.get('studentController').getStudentPayloadByStudentNum(c)
-// );
-// api.get('/students/full/:studentNum', c =>
+// )
+// api.get('/students/full/:studentNum', (c) =>
 //   c.get('studentController').getStudentFullPayload(c)
-// );
+// )
 
-// ✅ 보안 인증된 API: 학번 + 생년월일로만 접근 가능
+// ✅ 인증 필요 엔드포인트
 api.get('/students/by-student-num/:studentNum/birthday/:birthday', c =>
   c.get('studentController').getStudentByStudentNumAndBirthday(c)
 );
@@ -98,10 +108,10 @@ api.get('/events/:eventId', c => c.get('eventController').getEventById(c));
 api.get('/entries', c => c.get('entryController').getAllEntries(c));
 api.get('/entries/:entryId', c => c.get('entryController').getEntryById(c));
 
-// 🔒 보안상 비활성화: 학번만으로 접근 가능한 출전 정보 API들
-// api.get('/entries/by-student/:studentNum', c =>
+// 🔒 공개 학번 조회 엔드포인트 비활성화
+// api.get('/entries/by-student/:studentNum', (c) =>
 //   c.get('entryController').getEntriesByStudentNum(c)
-// );
+// )
 
 // ✅ 알람용 엔드포인트 복구 / アラーム用エンドポイント復旧
 api.get('/entries/alarm/:studentNum', c =>
@@ -148,21 +158,18 @@ api.get('/data-update/check', c =>
 );
 
 // ================================
-// ✅ Error Report (메일 전송용) (나중에 구현 예정 / 後で実装予定)
-// ================================
-// api.post('/error/report', c => c.get('errorController').reportError(c));
-
-// ================================
-// 📝 에러 핸들링 미들웨어 (라우트 이후에 설정)
+// 📝 에러 핸들링 (라우트 이후)
 // ================================
 app.onError(errorHandler());
 
 // ================================
 // 🚀 서버 시작 로깅
 // ================================
-logger.info('RecTime Backend Server started / RecTime 백엔드 서버 시작', 'Server', {
-  environment: process.env.NODE_ENV || 'development',
-});
+logger.info(
+  'RecTime Backend Server started / RecTime 백엔드 서버 시작',
+  'Server',
+  { environment: process.env.NODE_ENV || 'development' }
+);
 
 export default {
   fetch: app.fetch,
