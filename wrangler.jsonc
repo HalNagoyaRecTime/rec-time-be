@@ -1,5 +1,5 @@
 {
-  "name": "rec-time-be",
+  "name": "rec-time-maintenance",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/index.ts",
