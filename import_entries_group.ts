@@ -4,8 +4,6 @@ import { parse } from 'csv-parse/sync'
 
 // === CSVファイルを読み込む ===
 let csvText = fs.readFileSync('./entries_group.csv', 'utf-8')
-
-// BOM除去
 if (csvText.charCodeAt(0) === 0xfeff) {
   csvText = csvText.slice(1)
   console.log('⚙️ BOMを検出したので削除しました')
@@ -13,6 +11,7 @@ if (csvText.charCodeAt(0) === 0xfeff) {
 
 // === カラム名 ===
 const COLUMN_EVENT_NAME = 'イベント名'
+const COLUMN_GROUP_SEQ = 'グループ番号'
 const COLUMN_PLACE = '集合場所'
 const COLUMN_GATHER_TIME = '集合時刻'
 
@@ -21,11 +20,11 @@ function normalizePlace(v: string | null): string {
   if (!v) return ''
   return v
     .toString()
-    .replace(/\r?\n/g, '') // 改行除去
-    .replace(/[\u200B-\u200D\uFEFF\u00A0\u202A-\u202C]/g, '') // ゼロ幅/BOM/ノーブレーク/RTL除去
-    .replace(/\u3000/g, ' ') // 全角スペース→半角
-    .replace(/\s+/g, ' ') // 連続スペース統一
-    .normalize('NFKC') // 全角半角統一
+    .replace(/\r?\n/g, '')
+    .replace(/[\u200B-\u200D\uFEFF\u00A0\u202A-\u202C]/g, '')
+    .replace(/\u3000/g, ' ')
+    .replace(/\s+/g, ' ')
+    .normalize('NFKC')
     .trim()
 }
 
@@ -50,7 +49,7 @@ const records = parse(csvText, {
   columns: true,
   skip_empty_lines: true,
   trim: true
-}).filter((row: any) => row[COLUMN_EVENT_NAME] && row[COLUMN_PLACE])
+}).filter((row: any) => row[COLUMN_EVENT_NAME] && row[COLUMN_GROUP_SEQ])
 
 console.log(`📄 CSVから ${records.length} 件のデータを読み込みました`)
 
@@ -60,17 +59,22 @@ db.pragma('foreign_keys = OFF')
 
 // === SQL定義 ===
 const selectGroup = db.prepare(`
-  SELECT f_place, f_gather_time FROM t_entries_group WHERE f_event_id = ?
+  SELECT f_place, f_gather_time
+  FROM t_entries_group
+  WHERE f_event_id = ? AND f_seq = ?
 `)
+
 const insertGroup = db.prepare(`
-  INSERT INTO t_entries_group (f_event_id, f_place, f_gather_time)
-  VALUES (?, ?, ?)
+  INSERT INTO t_entries_group (f_event_id, f_seq, f_place, f_gather_time)
+  VALUES (?, ?, ?, ?)
 `)
+
 const updateGroup = db.prepare(`
   UPDATE t_entries_group
   SET f_place = ?, f_gather_time = ?
-  WHERE f_event_id = ?
+  WHERE f_event_id = ? AND f_seq = ?
 `)
+
 const insertLog = db.prepare(`
   INSERT INTO t_update (f_event_id, f_updated_item, f_before, f_after, f_reason)
   VALUES (?, ?, ?, ?, ?)
@@ -80,10 +84,17 @@ const insertLog = db.prepare(`
 const upsertMany = db.transaction((rows: any[]) => {
   for (const row of rows) {
     const eventName = row[COLUMN_EVENT_NAME]
+    const groupSeq = parseInt(row[COLUMN_GROUP_SEQ], 10)
     const placeRaw = row[COLUMN_PLACE]
     const timeRaw = row[COLUMN_GATHER_TIME]
+
     const place = normalizePlace(placeRaw)
     const time = normalizeTime(timeRaw)
+
+    if (!eventName || isNaN(groupSeq)) {
+      console.log(`⚠️ スキップ: イベント名またはグループ番号が不正 → ${JSON.stringify(row)}`)
+      continue
+    }
 
     // === イベントID取得 ===
     const event = db
@@ -95,60 +106,41 @@ const upsertMany = db.transaction((rows: any[]) => {
       continue
     }
 
-    // === 既存データを取得 ===
-    const existing = selectGroup.get(event.f_event_id) as
+    // === 既存データ取得 ===
+    const existing = selectGroup.get(event.f_event_id, groupSeq) as
       | { f_place: string | null; f_gather_time: string | null }
       | undefined
 
-    // === 比較処理 ===
+    // === 差分チェック ===
     if (existing) {
       const dbPlace = normalizePlace(existing.f_place)
       const dbTime = normalizeTime(existing.f_gather_time)
 
-      // === 🔍 デバッグログ ===
-      console.log('\n==============================')
-      console.log(`🔎 差分チェック開始: ${eventName}`)
-      console.log('🗃 DB Raw:', existing)
-      console.log('📄 CSV Raw:', row)
-      console.log('🧩 Normalize結果:')
-      console.table({
-        'DB_集合場所': dbPlace,
-        'CSV_集合場所': place,
-        'DB_集合時刻': dbTime,
-        'CSV_集合時刻': time
-      })
-
       const isSame = dbPlace === place && dbTime === time
-      console.log(`✅ 判定: ${isSame ? '完全一致 → スキップ' : '差分あり → 更新'}`)
-
       if (isSame) {
-        console.log(`⏩ スキップ: ${eventName}（変更なし）`)
+        console.log(`⏩ スキップ: ${eventName}（グループ${groupSeq}）変更なし`)
         continue
       }
 
-      // === 差分特定 ===
       const changedItems: string[] = []
       if (dbPlace !== place) changedItems.push('集合場所')
       if (dbTime !== time) changedItems.push('集合時刻')
 
-      // === 更新処理 ===
-      updateGroup.run(place, time, event.f_event_id)
-      console.log(`🔁 更新: ${eventName} → ${changedItems.join(', ')}`)
+      updateGroup.run(place, time, event.f_event_id, groupSeq)
+      console.log(`🔁 更新: ${eventName}（グループ${groupSeq}） → ${changedItems.join(', ')}`)
 
-      // === 履歴登録 ===
       for (const item of changedItems) {
         insertLog.run(
           event.f_event_id,
           item,
-          item === '集合場所' ? existing.f_place : existing.f_gather_time,
-          item === '集合場所' ? place : time,
-          'CSV取込により自動更新'
+          String(item === '集合場所' ? existing.f_place : existing.f_gather_time),
+          String(item === '集合場所' ? place : time),
+          `CSV取込により自動更新（グループ${groupSeq}）`
         )
       }
     } else {
-      // === 新規登録 ===
-      insertGroup.run(event.f_event_id, place, time)
-      console.log(`🆕 追加: ${eventName} → ${place} / ${time}`)
+      insertGroup.run(event.f_event_id, groupSeq, place, time)
+      console.log(`🆕 追加: ${eventName}（グループ${groupSeq}） → ${place} / ${time}`)
     }
   }
 })
