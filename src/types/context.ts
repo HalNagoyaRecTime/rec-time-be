@@ -13,6 +13,7 @@ import type {
   ErrorControllerFunctions,
 } from './controllers';
 import type { DataUpdateControllerFunctions } from '../controllers/DataUpdateController';
+import type { FCMControllerFunctions } from '../controllers/FCMController';
 
 export type ControllerMap = {
   studentController: StudentControllerFunctions;
@@ -22,8 +23,9 @@ export type ControllerMap = {
   notificationController: NotificationControllerFunctions;
   changeLogController: ChangeLogControllerFunctions;
   downloadLogController: DownloadLogControllerFunctions;
-  errorController: ErrorControllerFunctions;
   dataUpdateController: DataUpdateControllerFunctions;
+  fcmController: FCMControllerFunctions;
+  errorController: ErrorControllerFunctions;
 };
 
 export type CustomContext = Context<{

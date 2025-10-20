@@ -1,0 +1,15 @@
+{
+  "commitHash": "dd67b7fae21d78ee5896357a66610e6f5f15bfef",
+  "commitMessage": "CORS設定",
+  "commitAuthor": "kim020613",
+  "commitDate": "2025-10-19 23:57:09 +0900",
+  "branch": "feature/#kimu_test",
+  "lastMergeCommit": {
+    "hash": "50447ce0bbffbb301623b873f63bd167266f5872",
+    "message": "Merge branch 'develop' of https://github.com/HalNagoyaRecTime/rec-time-be into develop",
+    "author": "kim020613",
+    "date": "2025-10-11 22:47:25 +0900"
+  },
+  "buildTime": "2025-10-20T15:54:00.449Z",
+  "buildVersion": "unknown"
+}

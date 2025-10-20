@@ -135,6 +135,13 @@ api.get('/entry-groups', c => c.get('entryGroupController').getAll(c));
 api.get('/notifications', c => c.get('notificationController').getAll(c));
 
 // ================================
+// 🔥 FCM Push Notifications
+// ================================
+api.post('/fcm/register', c => c.get('fcmController').registerToken(c));
+api.post('/fcm/push', c => c.get('fcmController').sendPush(c));
+api.get('/fcm/tokens', c => c.get('fcmController').getTokens(c));
+
+// ================================
 // ✅ Change Logs
 // ================================
 api.get('/change-logs', c => c.get('changeLogController').getAll(c));
@@ -172,10 +179,15 @@ app.onError(errorHandler());
 // 🚀 서버 시작 로깅
 // ================================
 logger.info(
-  'RecTime Backend Server started / RecTime 백엔드 서버 시작',
+  'RecTime Backend Server started / RecTime バックエンドサーバー開始',
   'Server',
   { environment: process.env.NODE_ENV || 'development' }
 );
+
+// ================================
+// ⏰ Cron Trigger 핸들러
+// ================================
+export { scheduled } from './cron';
 
 export default {
   fetch: app.fetch,

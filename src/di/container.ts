@@ -20,6 +20,7 @@ import {
   createDownloadLogService,
 } from '../services';
 import { createDataUpdateService } from '../services/DataUpdateService';
+import { createFCMService } from '../services/FCMService';
 
 import {
   createStudentController,
@@ -32,6 +33,7 @@ import {
   createErrorController,
 } from '../controllers';
 import { createDataUpdateController } from '../controllers/DataUpdateController';
+import { createFCMController } from '../controllers/FCMController';
 
 import { D1Database } from '@cloudflare/workers-types';
 
@@ -41,6 +43,9 @@ import { D1Database } from '@cloudflare/workers-types';
 type Env = {
   DB: D1Database;
   RESEND_API_KEY?: string;
+  FCM_PROJECT_ID?: string;
+  FCM_PRIVATE_KEY?: string;
+  FCM_CLIENT_EMAIL?: string;
 };
 
 // ------------------------------------------------------------
@@ -62,6 +67,13 @@ export function createDIContainer(env?: Env) {
   const changeLogRepository = createChangeLogRepository(db);
   const downloadLogRepository = createDownloadLogRepository(db);
 
+  // FCM Service
+  const fcmService = createFCMService(db, {
+    FCM_PROJECT_ID: env?.FCM_PROJECT_ID || '',
+    FCM_PRIVATE_KEY: env?.FCM_PRIVATE_KEY || '',
+    FCM_CLIENT_EMAIL: env?.FCM_CLIENT_EMAIL || '',
+  });
+
   // Service
   const studentService = createStudentService(
     studentRepository,
@@ -74,7 +86,7 @@ export function createDIContainer(env?: Env) {
   const eventService = createEventService(eventRepository);
   const entryService = createEntryService(entryRepository);
   const entryGroupService = createEntryGroupService(entryGroupRepository);
-  const notificationService = createNotificationService(notificationRepository);
+  const notificationService = createNotificationService(notificationRepository, fcmService);
   const changeLogService = createChangeLogService(changeLogRepository);
   const downloadLogService = createDownloadLogService(downloadLogRepository);
   const dataUpdateService = createDataUpdateService(changeLogRepository);
@@ -88,6 +100,7 @@ export function createDIContainer(env?: Env) {
   const changeLogController = createChangeLogController(changeLogService);
   const downloadLogController = createDownloadLogController(downloadLogService);
   const dataUpdateController = createDataUpdateController(dataUpdateService);
+  const fcmController = createFCMController(fcmService);
   const errorController = createErrorController();
 
   // ------------------------------------------------------------
@@ -103,6 +116,7 @@ export function createDIContainer(env?: Env) {
     changeLogController,
     downloadLogController,
     dataUpdateController,
+    fcmController,
     errorController,
   };
 }

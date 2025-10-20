@@ -11,6 +11,16 @@ account_id = "a6d1a427beffc5898641e90e99cdb49b"
 NODE_ENV = "production"
 
 # ----------------------------
+# 🔥 Firebase Cloud Messaging 설정
+# ----------------------------
+FCM_PROJECT_ID = "rec-time-593b0"
+FCM_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCb11GIY0AHoNrq
+BHKdIah174r2Aeuy8z0ESY+kLSijRLklg9
+-----END PRIVATE KEY-----"""
+FCM_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@rec-time-593b0.iam.gserviceaccount.com"
+
+# ----------------------------
 # 개발 환경 (wrangler dev 시 사용)
 # ----------------------------
 [env.development]
@@ -26,3 +36,9 @@ HOST = "0.0.0.0"
 binding = "DB"                      
 database_name = "rec-time-be"
 database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
+
+# ----------------------------
+# ⏰ Cron Trigger 설정 (5분마다 알림 체크)
+# ----------------------------
+[[triggers]]
+crons = ["*/5 * * * *"]

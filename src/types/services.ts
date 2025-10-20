@@ -81,6 +81,14 @@ export interface EntryGroupServiceFunctions {
 // -------------------------
 export interface NotificationServiceFunctions {
   findAll: () => Promise<NotificationEntity[]>;
+  createAndSendPush(data: {
+    student_id?: number;
+    type: string;
+    title: string;
+    message: string;
+    event_id?: number;
+  }): Promise<{ notification: any; pushResult: { success: number; failed: number } }>;
+  sendEventNotification(event: any, label: string): Promise<{ success: number; failed: number }>;
 }
 
 // -------------------------
