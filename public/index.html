@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>importスクリプト実行ツール</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <main class="tool-wrapper">
+    <div class="tool-panel">
+      <h1>🪶 importスクリプト実行ツール</h1>
+
+      <label>実行するスクリプトを選択:</label>
+      <select id="script">
+        <option value="import_students.ts">import_students.ts（学生マスタ登録）</option>
+        <option value="import_events.ts">import_events.ts（イベント登録・更新）</option>
+        <option value="import_entries.ts">import_entries.ts（出場者登録）</option>
+        <option value="import_entries_group.ts">import_entries_group.ts（集合情報登録）</option>
+      </select>
+
+      <label>CSVファイルを選択:</label>
+      <input id="fileInput" type="file" accept=".csv" />
+
+      <button id="runBtn">実行</button>
+    </div>
+
+    <pre id="console" class="console"></pre>
+  </main>
+
+  <script>
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      const script = document.getElementById('script').value;
+      const fileInput = document.getElementById('fileInput');
+      const consoleBox = document.getElementById('console');
+
+      if (!fileInput.files.length) {
+        alert('CSVファイルを選択してください');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('script', script);
+
+      consoleBox.innerText = '⏳ 実行中です...';
+      consoleBox.classList.add('visible');
+
+      try {
+        const res = await fetch('/run-script', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success === false) {
+          consoleBox.classList.add('error');
+          consoleBox.innerText = '❌ エラー:\n' + (data.output || data.error);
+        } else {
+          consoleBox.classList.remove('error');
+          consoleBox.innerText = '✅ 実行完了:\n' + (data.output || '');
+        }
+      } catch (err) {
+        consoleBox.classList.add('error');
+        consoleBox.innerText = '❌ 通信エラー: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
