@@ -135,13 +135,6 @@ api.get('/entry-groups', c => c.get('entryGroupController').getAll(c));
 api.get('/notifications', c => c.get('notificationController').getAll(c));
 
 // ================================
-// 🔥 FCM Push Notifications
-// ================================
-api.post('/fcm/register', c => c.get('fcmController').registerToken(c));
-api.post('/fcm/push', c => c.get('fcmController').sendNotificationToAll(c));
-api.get('/fcm/tokens', c => c.get('fcmController').getNotificationLogs(c));
-
-// ================================
 // ✅ Change Logs
 // ================================
 api.get('/change-logs', c => c.get('changeLogController').getAll(c));

@@ -6,4 +6,7 @@ export type Bindings = {
   DB: D1Database;
   NODE_ENV: string;
   RESEND_API_KEY?: string;
+  FCM_PROJECT_ID: string;
+  FCM_PRIVATE_KEY: string;
+  FCM_CLIENT_EMAIL: string;
 };
