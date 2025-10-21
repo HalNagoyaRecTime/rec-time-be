@@ -77,17 +77,15 @@ export function createFCMService(
         // 새 토큰 등록
         await db
           .prepare(`
-            INSERT INTO fcm_tokens (student_num, token, device_info, registered_at, last_used, is_active, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+            INSERT INTO fcm_tokens (student_num, token, device_info, registered_at, last_used, is_active)
+            VALUES (?, ?, ?, ?, ?, 1)
           `)
           .bind(
             data.studentNum,
             data.token,
             deviceInfoJson,
             data.timestamp,
-            data.timestamp,
-            now,
-            now
+            data.timestamp
           )
           .run();
 
