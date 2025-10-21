@@ -68,31 +68,61 @@ export function createFCMService(
         const now = new Date().toISOString();
         const deviceInfoJson = data.deviceInfo ? JSON.stringify(data.deviceInfo) : null;
 
-        // 기존 토큰 비활성화
-        await db
-          .prepare('UPDATE fcm_tokens SET is_active = 0, updated_at = ? WHERE student_num = ?')
-          .bind(now, data.studentNum)
-          .run();
+        // 기존 토큰이 있는지 확인
+        const existingToken = await db
+          .prepare('SELECT * FROM fcm_tokens WHERE token = ?')
+          .bind(data.token)
+          .first();
 
-        // 새 토큰 등록
-        await db
-          .prepare(`
-            INSERT INTO fcm_tokens (student_num, token, device_info, registered_at, last_used, is_active)
-            VALUES (?, ?, ?, ?, ?, 1)
-          `)
-          .bind(
-            data.studentNum,
-            data.token,
-            deviceInfoJson,
-            data.timestamp,
-            data.timestamp
-          )
-          .run();
+        if (existingToken) {
+          // 기존 토큰이 있으면 갱신
+          await db
+            .prepare(`
+              UPDATE fcm_tokens 
+              SET student_num = ?, device_info = ?, last_used = ?, is_active = 1, updated_at = ?
+              WHERE token = ?
+            `)
+            .bind(
+              data.studentNum,
+              deviceInfoJson,
+              data.timestamp,
+              now,
+              data.token
+            )
+            .run();
 
-        return {
-          success: true,
-          message: `FCM 토큰이 성공적으로 등록되었습니다 (학번: ${data.studentNum})`
-        };
+          return {
+            success: true,
+            message: `기존 FCM 토큰을 갱신했습니다 (학번: ${data.studentNum})`
+          };
+        } else {
+          // 기존 토큰이 없으면 새로 등록
+          // 먼저 해당 학번의 기존 토큰들을 비활성화
+          await db
+            .prepare('UPDATE fcm_tokens SET is_active = 0, updated_at = ? WHERE student_num = ?')
+            .bind(now, data.studentNum)
+            .run();
+
+          // 새 토큰 등록
+          await db
+            .prepare(`
+              INSERT INTO fcm_tokens (student_num, token, device_info, registered_at, last_used, is_active)
+              VALUES (?, ?, ?, ?, ?, 1)
+            `)
+            .bind(
+              data.studentNum,
+              data.token,
+              deviceInfoJson,
+              data.timestamp,
+              data.timestamp
+            )
+            .run();
+
+          return {
+            success: true,
+            message: `FCM 토큰이 새로 등록되었습니다 (학번: ${data.studentNum})`
+          };
+        }
       } catch (error) {
         console.error('[FCM] 토큰 등록 오류:', error);
         return {
