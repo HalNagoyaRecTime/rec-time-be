@@ -21,6 +21,7 @@ import {
 } from '../services';
 import { createDataUpdateService } from '../services/DataUpdateService';
 import { createFCMService } from '../services/FCMService';
+import { createFCMController } from '../controllers/FCMController';
 
 import {
   createStudentController,
