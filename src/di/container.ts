@@ -1,25 +1,6 @@
-// src/di/container.ts
-import { getDb } from '../lib/db';
-import {
-  createStudentRepository,
-  createEventRepository,
-  createEntryRepository,
-  createEntryGroupRepository,
-  createNotificationRepository,
-  createChangeLogRepository,
-  createDownloadLogRepository,
-} from '../repositories';
-
-import {
-  createStudentService,
-  createEventService,
-  createEntryService,
-  createEntryGroupService,
-  createNotificationService,
-  createChangeLogService,
-  createDownloadLogService,
-} from '../services';
-import { createDataUpdateService } from '../services/DataUpdateService';
+import { Context } from 'hono';
+import { D1Database } from '@cloudflare/workers-types';
+import { Bindings } from '../types';
 import { createFCMService } from '../services/FCMService';
 import { createFCMController } from '../controllers/FCMController';
 
