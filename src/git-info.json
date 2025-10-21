@@ -1,8 +1,8 @@
 {
-  "commitHash": "dd67b7fae21d78ee5896357a66610e6f5f15bfef",
-  "commitMessage": "CORS設定",
+  "commitHash": "443b7de8f8b7f67ecc676e7ec3fc419b380a63d6",
+  "commitMessage": "/",
   "commitAuthor": "kim020613",
-  "commitDate": "2025-10-19 23:57:09 +0900",
+  "commitDate": "2025-10-21 23:33:29 +0900",
   "branch": "feature/#kimu_test",
   "lastMergeCommit": {
     "hash": "50447ce0bbffbb301623b873f63bd167266f5872",
@@ -10,6 +10,6 @@
     "author": "kim020613",
     "date": "2025-10-11 22:47:25 +0900"
   },
-  "buildTime": "2025-10-20T15:54:00.449Z",
+  "buildTime": "2025-10-21T14:39:11.308Z",
   "buildVersion": "unknown"
 }
