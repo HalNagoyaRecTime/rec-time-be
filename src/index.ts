@@ -138,8 +138,8 @@ api.get('/notifications', c => c.get('notificationController').getAll(c));
 // 🔥 FCM Push Notifications
 // ================================
 api.post('/fcm/register', c => c.get('fcmController').registerToken(c));
-api.post('/fcm/push', c => c.get('fcmController').sendPush(c));
-api.get('/fcm/tokens', c => c.get('fcmController').getTokens(c));
+api.post('/fcm/push', c => c.get('fcmController').sendNotificationToAll(c));
+api.get('/fcm/tokens', c => c.get('fcmController').getNotificationLogs(c));
 
 // ================================
 // ✅ Change Logs
