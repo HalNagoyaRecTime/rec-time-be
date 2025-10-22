@@ -212,10 +212,11 @@ async function sendNotification(
 }
 
 // =============================
-// 🔑 JWT & Access Token
+// 🔑 JWT & Access Token 생성
 // =============================
 
 async function getFirebaseAccessToken(env: any): Promise<string> {
+  console.log('[JWT] Firebase Access Token 요청 시작');
   const jwt = await createJWT(env);
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -225,11 +226,17 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
       assertion: jwt,
     }),
   });
-  const data = (await res.json()) as { access_token: string };
+
+  const text = await res.text();
+  console.log('[JWT] Access Token 응답:', text);
+
+  const data = JSON.parse(text) as { access_token: string };
+  if (!data.access_token) throw new Error('Access Token 발급 실패');
   return data.access_token;
 }
 
 async function createJWT(env: any): Promise<string> {
+  console.log('[JWT] JWT 생성 시작');
   const header = { alg: 'RS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -243,26 +250,40 @@ async function createJWT(env: any): Promise<string> {
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
 
-  const keyData = decodePEM(env.FCM_PRIVATE_KEY);
+  const keyBytes = decodePEM(env.FCM_PRIVATE_KEY);
+  const keyBuffer = keyBytes.buffer.slice(
+    keyBytes.byteOffset,
+    keyBytes.byteOffset + keyBytes.byteLength
+  );
+
+  console.log('[JWT] PEM → Key 변환 완료, 바이트 길이:', keyBytes.byteLength);
+
   const key = await crypto.subtle.importKey(
     'pkcs8',
-    keyData as unknown as BufferSource, // ✅ 강제 캐스팅으로 타입 경고 제거
+    keyBuffer as ArrayBuffer,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['sign']
   );
 
+  console.log('[JWT] Private Key Import 성공');
+
+  const dataToSign = new TextEncoder().encode(
+    `${encodedHeader}.${encodedPayload}`
+  );
   const signature = await crypto.subtle.sign(
     'RSASSA-PKCS1-v1_5',
     key,
-    new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`)
+    dataToSign
   );
+
+  console.log('[JWT] 서명 완료, 길이:', (signature as ArrayBuffer).byteLength);
 
   return `${encodedHeader}.${encodedPayload}.${base64UrlEncodeBinary(signature)}`;
 }
 
 // =============================
-// 🔧 유틸
+// 🔧 유틸 함수
 // =============================
 
 function decodePEM(pem: string): Uint8Array {
