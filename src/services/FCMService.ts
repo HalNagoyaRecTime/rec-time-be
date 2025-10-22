@@ -42,6 +42,11 @@ export function createFCMService(
     FCM_CLIENT_EMAIL: string;
   }
 ) {
+  // 환경 변수 검증
+  if (!env.FCM_PROJECT_ID || !env.FCM_PRIVATE_KEY || !env.FCM_CLIENT_EMAIL) {
+    throw new Error('FCM 환경 변수가 누락되었습니다. FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.');
+  }
+
   return {
     // ✅ FCM 토큰 등록
     async registerToken(data: FCMTokenData) {
@@ -173,6 +178,12 @@ async function sendNotification(token: string, payload: NotificationPayload, env
 
 async function getFirebaseAccessToken(env: any): Promise<string> {
   console.log('[JWT] Firebase Access Token 요청 시작');
+  console.log('[JWT] 환경 변수 확인:', {
+    FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
+    FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락',
+    FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락'
+  });
+  
   const jwt = await createJWT(env);
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -184,7 +195,12 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
   });
 
   const text = await res.text();
+  console.log('[JWT] Access Token 응답 상태:', res.status);
   console.log('[JWT] Access Token 응답:', text);
+
+  if (!res.ok) {
+    throw new Error(`Firebase Access Token 요청 실패: ${res.status} - ${text}`);
+  }
 
   const data = JSON.parse(text) as { access_token: string };
   if (!data.access_token) throw new Error('Access Token 발급 실패');
