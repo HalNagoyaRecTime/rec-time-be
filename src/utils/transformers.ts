@@ -1,5 +1,5 @@
 // src/utils/transformers.ts
-import { EntryAlarmRow } from '../types/domains/Entry';
+import { EntryDTO, EntryEntity, EntryAlarmRow } from '../types/domains/Entry';
 
 export function toEntryAlarmRow(row: any): EntryAlarmRow {
   // ✅ 이 함수는 EntryRepository에서 사용 중
@@ -12,5 +12,13 @@ export function toEntryAlarmRow(row: any): EntryAlarmRow {
     f_gather_time: row.f_gather_time,
     f_summary: row.f_summary,
     f_is_my_entry: true,
+  };
+}
+
+export function toEntryRow(entry: EntryEntity): EntryDTO {
+  return {
+    f_entry_id: entry.f_entry_id,
+    f_student_id: entry.f_student_id,
+    f_event_id: entry.f_event_id,
   };
 }
