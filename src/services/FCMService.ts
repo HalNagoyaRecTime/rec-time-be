@@ -50,35 +50,20 @@ export function createFCMService(
         const info = data.deviceInfo ? JSON.stringify(data.deviceInfo) : null;
 
         await db
-          .prepare(
-            `UPDATE fcm_tokens SET is_active = 0, updated_at = ? WHERE student_num = ?`
-          )
+          .prepare(`UPDATE fcm_tokens SET is_active = 0, updated_at = ? WHERE student_num = ?`)
           .bind(now, data.studentNum)
           .run();
 
         await db
-          .prepare(
-            `
+          .prepare(`
             INSERT OR REPLACE INTO fcm_tokens 
             (student_num, token, device_info, registered_at, last_used, is_active, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-          `
-          )
-          .bind(
-            data.studentNum,
-            data.token,
-            info,
-            data.timestamp,
-            data.timestamp,
-            now,
-            now
-          )
+          `)
+          .bind(data.studentNum, data.token, info, data.timestamp, data.timestamp, now, now)
           .run();
 
-        return {
-          success: true,
-          message: `FCM 토큰 등록 완료 (학번: ${data.studentNum})`,
-        };
+        return { success: true, message: `FCM 토큰 등록 완료 (학번: ${data.studentNum})` };
       } catch (err: any) {
         console.error('[FCM] registerToken error:', err);
         return { success: false, message: `토큰 등록 실패: ${err.message}` };
@@ -86,15 +71,10 @@ export function createFCMService(
     },
 
     // ✅ 개별 전송
-    async sendNotificationToStudent(
-      studentNum: string,
-      payload: NotificationPayload
-    ) {
+    async sendNotificationToStudent(studentNum: string, payload: NotificationPayload) {
       try {
         const tokenRow = await db
-          .prepare(
-            `SELECT token FROM fcm_tokens WHERE student_num = ? AND is_active = 1 LIMIT 1`
-          )
+          .prepare(`SELECT token FROM fcm_tokens WHERE student_num = ? AND is_active = 1 LIMIT 1`)
           .bind(studentNum)
           .first<{ token: string }>();
 
@@ -115,14 +95,9 @@ export function createFCMService(
     // ✅ 전체 발송
     async sendNotificationToAll(payload: NotificationPayload) {
       try {
-        const rows = await db
-          .prepare(
-            `SELECT token, student_num FROM fcm_tokens WHERE is_active = 1`
-          )
-          .all();
+        const rows = await db.prepare(`SELECT token, student_num FROM fcm_tokens WHERE is_active = 1`).all();
         const list = rows.results as { token: string; student_num: string }[];
-        let success = 0,
-          failed = 0;
+        let success = 0, failed = 0;
 
         for (const r of list) {
           const ok = await sendNotification(r.token, payload, env);
@@ -139,30 +114,15 @@ export function createFCMService(
     },
 
     // ✅ 로그 기록
-    async logNotification(
-      studentNum: string,
-      token: string,
-      payload: NotificationPayload,
-      ok: boolean
-    ) {
+    async logNotification(studentNum: string, token: string, payload: NotificationPayload, ok: boolean) {
       try {
         const now = new Date().toISOString();
         await db
-          .prepare(
-            `
+          .prepare(`
             INSERT INTO notification_logs (student_num, token, title, body, sent_at, success, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-          `
-          )
-          .bind(
-            studentNum,
-            token,
-            payload.title,
-            payload.body,
-            now,
-            ok ? 1 : 0,
-            now
-          )
+          `)
+          .bind(studentNum, token, payload.title, payload.body, now, ok ? 1 : 0, now)
           .run();
       } catch (err) {
         console.error('[FCM] logNotification error:', err);
@@ -175,11 +135,7 @@ export function createFCMService(
 // 🔥 공통 함수
 // =============================
 
-async function sendNotification(
-  token: string,
-  payload: NotificationPayload,
-  env: any
-) {
+async function sendNotification(token: string, payload: NotificationPayload, env: any) {
   try {
     const accessToken = await getFirebaseAccessToken(env);
     const res = await fetch(
@@ -251,10 +207,7 @@ async function createJWT(env: any): Promise<string> {
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
 
   const keyBytes = decodePEM(env.FCM_PRIVATE_KEY);
-  const keyBuffer = keyBytes.buffer.slice(
-    keyBytes.byteOffset,
-    keyBytes.byteOffset + keyBytes.byteLength
-  );
+  const keyBuffer = keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength);
 
   console.log('[JWT] PEM → Key 변환 완료, 바이트 길이:', keyBytes.byteLength);
 
@@ -268,14 +221,8 @@ async function createJWT(env: any): Promise<string> {
 
   console.log('[JWT] Private Key Import 성공');
 
-  const dataToSign = new TextEncoder().encode(
-    `${encodedHeader}.${encodedPayload}`
-  );
-  const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    key,
-    dataToSign
-  );
+  const dataToSign = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, dataToSign);
 
   console.log('[JWT] 서명 완료, 길이:', (signature as ArrayBuffer).byteLength);
 
@@ -301,7 +248,6 @@ function base64UrlEncode(str: string) {
 function base64UrlEncodeBinary(buffer: ArrayBuffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
-  for (let i = 0; i < bytes.length; i++)
-    binary += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
   return base64UrlEncode(btoa(binary));
 }
