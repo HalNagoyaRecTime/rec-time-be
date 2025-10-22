@@ -1,8 +1,9 @@
-// src/controllers/FCMController.ts
 import { Context } from 'hono';
 import { createFCMService } from '../services/FCMService';
 
-export function createFCMController(fcmService: ReturnType<typeof createFCMService>) {
+export function createFCMController(
+  fcmService: ReturnType<typeof createFCMService>
+) {
   return {
     // 🎯 FCM 토큰 등록
     async registerToken(c: Context) {
@@ -10,9 +11,12 @@ export function createFCMController(fcmService: ReturnType<typeof createFCMServi
         const data = await c.req.json();
         const result = await fcmService.registerToken(data);
         return c.json(result);
-      } catch (error) {
+      } catch (error: any) {
         console.error('[FCM] registerToken error:', error);
-        return c.json({ success: false, message: '토큰 등록에 실패했습니다.' }, 500);
+        return c.json(
+          { success: false, message: '토큰 등록에 실패했습니다.' },
+          500
+        );
       }
     },
 
@@ -26,14 +30,26 @@ export function createFCMController(fcmService: ReturnType<typeof createFCMServi
           body: body.body || '테스트 알림이 도착했습니다.',
         };
 
-        const success = await fcmService.sendNotificationToStudent(studentNum, payload);
-        if (!success)
-          return c.json({ success: false, message: '테스트 푸시 전송에 실패했습니다' }, 500);
+        const ok = await fcmService.sendNotificationToStudent(
+          studentNum,
+          payload
+        );
+        if (!ok)
+          return c.json(
+            { success: false, message: '테스트 푸시 전송에 실패했습니다' },
+            500
+          );
 
         return c.json({ success: true, message: '테스트 푸시 전송 성공!' });
-      } catch (error) {
-        console.error('[FCM] sendTestPush error:', error);
-        return c.json({ success: false, message: '테스트 푸시 전송 중 오류 발생' }, 500);
+      } catch (e: any) {
+        console.error('[FCM] sendTestPush error:', e);
+        return c.json(
+          {
+            success: false,
+            message: `테스트 푸시 전송 중 오류: ${e.message ?? 'unknown'}`,
+          },
+          500
+        );
       }
     },
 
@@ -52,7 +68,7 @@ export function createFCMController(fcmService: ReturnType<typeof createFCMServi
           message: `전체 알림 전송 완료: 성공 ${result.success}, 실패 ${result.failed}`,
           result,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('[FCM] sendNotificationToAll error:', error);
         return c.json({ success: false, message: '전체 알림 전송 실패' }, 500);
       }
@@ -62,9 +78,13 @@ export function createFCMController(fcmService: ReturnType<typeof createFCMServi
     async getNotificationLogs(c: Context) {
       try {
         const db = c.get('db');
-        const logs = await db.prepare('SELECT * FROM notification_logs ORDER BY sent_at DESC LIMIT 50').all();
+        const logs = await db
+          .prepare(
+            'SELECT * FROM notification_logs ORDER BY sent_at DESC LIMIT 50'
+          )
+          .all();
         return c.json({ success: true, logs: logs.results });
-      } catch (error) {
+      } catch (error: any) {
         console.error('[FCM] getNotificationLogs error:', error);
         return c.json({ success: false, message: '로그 조회 실패' }, 500);
       }
