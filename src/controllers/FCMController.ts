@@ -164,6 +164,7 @@ export function createFCMController(
             FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
             FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락',
             FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락',
+            FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY ? '설정됨' : '누락',
             NODE_ENV: env.NODE_ENV,
           },
         });
