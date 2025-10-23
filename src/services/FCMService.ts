@@ -37,14 +37,18 @@ export interface FCMTokenRecord {
 export function createFCMService(
   db: D1Database,
   env: {
-    FCM_PROJECT_ID: string;
-    FCM_PRIVATE_KEY: string;
-    FCM_CLIENT_EMAIL: string;
+    FCM_PROJECT_ID?: string;
+    FCM_PRIVATE_KEY?: string;
+    FCM_CLIENT_EMAIL?: string;
+    FIREBASE_SERVICE_ACCOUNT_KEY?: string;
   }
 ) {
-  // 환경 변수 검증
-  if (!env.FCM_PROJECT_ID || !env.FCM_PRIVATE_KEY || !env.FCM_CLIENT_EMAIL) {
-    throw new Error('FCM 환경 변수가 누락되었습니다. FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.');
+  // 환경 변수 검증 - FIREBASE_SERVICE_ACCOUNT_KEY 또는 개별 키들 확인
+  const hasServiceAccountKey = !!env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  const hasIndividualKeys = !!(env.FCM_PROJECT_ID && env.FCM_PRIVATE_KEY && env.FCM_CLIENT_EMAIL);
+  
+  if (!hasServiceAccountKey && !hasIndividualKeys) {
+    throw new Error('FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY 또는 FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.');
   }
 
   return {
@@ -143,8 +147,18 @@ export function createFCMService(
 async function sendNotification(token: string, payload: NotificationPayload, env: any) {
   try {
     const accessToken = await getFirebaseAccessToken(env);
+    
+    // 프로젝트 ID 결정
+    let projectId: string;
+    if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+      const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      projectId = serviceAccount.project_id;
+    } else {
+      projectId = env.FCM_PROJECT_ID;
+    }
+    
     const res = await fetch(
-      `https://fcm.googleapis.com/v1/projects/${env.FCM_PROJECT_ID}/messages:send`,
+      `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
       {
         method: 'POST',
         headers: {
@@ -181,7 +195,8 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
   console.log('[JWT] 환경 변수 확인:', {
     FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
     FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락',
-    FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락'
+    FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락',
+    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY ? '설정됨' : '누락'
   });
   
   const jwt = await createJWT(env);
@@ -209,10 +224,30 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
 
 async function createJWT(env: any): Promise<string> {
   console.log('[JWT] JWT 생성 시작');
+  
+  // FIREBASE_SERVICE_ACCOUNT_KEY가 있으면 사용, 없으면 개별 키들 사용
+  let serviceAccount: any;
+  let projectId: string;
+  let clientEmail: string;
+  let privateKey: string;
+  
+  if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    console.log('[JWT] FIREBASE_SERVICE_ACCOUNT_KEY 사용');
+    serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    projectId = serviceAccount.project_id;
+    clientEmail = serviceAccount.client_email;
+    privateKey = serviceAccount.private_key;
+  } else {
+    console.log('[JWT] 개별 FCM 키들 사용');
+    projectId = env.FCM_PROJECT_ID;
+    clientEmail = env.FCM_CLIENT_EMAIL;
+    privateKey = env.FCM_PRIVATE_KEY;
+  }
+  
   const header = { alg: 'RS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
-    iss: env.FCM_CLIENT_EMAIL,
+    iss: clientEmail,
     scope: 'https://www.googleapis.com/auth/firebase.messaging',
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
@@ -222,7 +257,7 @@ async function createJWT(env: any): Promise<string> {
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
 
-  const keyBytes = decodePEM(env.FCM_PRIVATE_KEY);
+  const keyBytes = decodePEM(privateKey);
   const keyBuffer = keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength);
 
   console.log('[JWT] PEM → Key 변환 완료, 바이트 길이:', keyBytes.byteLength);
