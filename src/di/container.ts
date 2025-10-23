@@ -89,11 +89,12 @@ export function getDIContainer(env: Env) {
   const changeLogRepository = createChangeLogRepository(db);
   const downloadLogRepository = createDownloadLogRepository(db);
 
-  // ✅ FCM Service 생성
+  // ✅ FCM Service 생성 (파싱된 키들 전달)
   const fcmService = createFCMService(db, {
     FCM_PROJECT_ID: projectId,
     FCM_PRIVATE_KEY: privateKey,
     FCM_CLIENT_EMAIL: clientEmail,
+    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY, // 원본도 전달
   });
 
   // Service
