@@ -128,78 +128,79 @@ export function createFCMController(
     },
 
     // 🔍 FCM 환경 변수 디버그
-async debugFCMConfig(c: Context) {
-  try {
-    const env = c.env;
+    async debugFCMConfig(c: Context) {
+      try {
+        const env = c.env;
 
-    // 로그 출력 (Cloudflare Tail 로그에서 확인 가능)
-    console.log('[FCM] debugFCMConfig 호출됨');
-    console.log('[FCM] env 상태:', {
-      hasServiceAccountKey: !!env.FIREBASE_SERVICE_ACCOUNT_KEY,
-      nodeEnv: env.NODE_ENV,
-    });
+        // 로그 출력 (Cloudflare Tail 로그에서 확인 가능)
+        console.log('[FCM] debugFCMConfig 호출됨');
+        console.log('[FCM] env 상태:', {
+          hasServiceAccountKey: !!env.FIREBASE_SERVICE_ACCOUNT_KEY,
+          nodeEnv: env.NODE_ENV,
+        });
 
-    // secret이 존재하는지 확인
-    if (!env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      console.error('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 누락됨');
+        // secret 존재 여부 확인
+        if (!env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+          console.error('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 누락됨');
 
-      return c.json(
-        {
-          success: false,
-          error: 'Internal Server Error',
-          message:
-            '⚠️ FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY가 설정되지 않았습니다.',
-          timestamp: new Date().toISOString(),
-        },
-        500
-      );
-    }
+          return c.json(
+            {
+              success: false,
+              error: 'Internal Server Error',
+              message:
+                '⚠️ FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY가 설정되지 않았습니다.',
+              timestamp: new Date().toISOString(),
+            },
+            500
+          );
+        }
 
-    // JSON 파싱 시도
-    let parsedKey: any = null;
-    try {
-      parsedKey = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    } catch (err) {
-      console.error('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 실패:', err);
-      return c.json(
-        {
-          success: false,
-          message:
-            '⚠️ FIREBASE_SERVICE_ACCOUNT_KEY가 올바른 JSON 형식이 아닙니다. Cloudflare secret 등록 형식을 확인하세요.',
-        },
-        500
-      );
-    }
+        // JSON 파싱 시도
+        let parsedKey: any = null;
+        try {
+          parsedKey = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        } catch (err) {
+          console.error('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 실패:', err);
+          return c.json(
+            {
+              success: false,
+              message:
+                '⚠️ FIREBASE_SERVICE_ACCOUNT_KEY가 올바른 JSON 형식이 아닙니다. Cloudflare secret 등록 형식을 확인하세요.',
+            },
+            500
+          );
+        }
 
-    // 파싱 결과 로깅
-    console.log('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 성공:', {
-      hasProjectId: !!parsedKey.project_id,
-      hasClientEmail: !!parsedKey.client_email,
-      hasPrivateKey: !!parsedKey.private_key,
-    });
+        // 파싱 결과 로깅
+        console.log('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 성공:', {
+          hasProjectId: !!parsedKey.project_id,
+          hasClientEmail: !!parsedKey.client_email,
+          hasPrivateKey: !!parsedKey.private_key,
+        });
 
-    return c.json({
-      success: true,
-      message: '✅ FCM 환경변수 정상 감지됨',
-      summary: {
-        NODE_ENV: env.NODE_ENV,
-        FIREBASE_SERVICE_ACCOUNT_KEY: '✅ 등록됨',
-        parsed: {
-          project_id: parsedKey.project_id || '(없음)',
-          client_email: parsedKey.client_email || '(없음)',
-          has_private_key: !!parsedKey.private_key,
-        },
-      },
-    });
-  } catch (error: any) {
-    console.error('[FCM] debugFCMConfig error:', error);
-    return c.json(
-      {
-        success: false,
-        message: `디버그 중 오류: ${error?.message || '알 수 없는 오류'}`,
-      },
-      500
-    );
-  }
-},
-} }
+        return c.json({
+          success: true,
+          message: '✅ FCM 환경변수 정상 감지됨',
+          summary: {
+            NODE_ENV: env.NODE_ENV,
+            FIREBASE_SERVICE_ACCOUNT_KEY: '✅ 등록됨',
+            parsed: {
+              project_id: parsedKey.project_id || '(없음)',
+              client_email: parsedKey.client_email || '(없음)',
+              has_private_key: !!parsedKey.private_key,
+            },
+          },
+        });
+      } catch (error: any) {
+        console.error('[FCM] debugFCMConfig error:', error);
+        return c.json(
+          {
+            success: false,
+            message: `디버그 중 오류: ${error?.message || '알 수 없는 오류'}`,
+          },
+          500
+        );
+      }
+    },
+  };
+}
