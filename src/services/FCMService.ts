@@ -43,7 +43,7 @@ export function createFCMService(
     FIREBASE_SERVICE_ACCOUNT_KEY?: string;
   }
 ) {
-  // ✅ 환경 변수 검증
+  // ✅ 환경 변수 검증 - FIREBASE_SERVICE_ACCOUNT_KEY 우선 사용
   const hasServiceAccountKey = !!env.FIREBASE_SERVICE_ACCOUNT_KEY;
   const hasIndividualKeys = !!(env.FCM_PROJECT_ID && env.FCM_PRIVATE_KEY && env.FCM_CLIENT_EMAIL);
 
@@ -60,6 +60,23 @@ export function createFCMService(
     throw new Error(
       'FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY 또는 FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.'
     );
+  }
+
+  // 🔥 FIREBASE_SERVICE_ACCOUNT_KEY가 있으면 우선적으로 사용
+  let finalEnv = env;
+  if (hasServiceAccountKey) {
+    try {
+      const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY!);
+      finalEnv = {
+        ...env,
+        FCM_PROJECT_ID: serviceAccount.project_id,
+        FCM_CLIENT_EMAIL: serviceAccount.client_email,
+        FCM_PRIVATE_KEY: serviceAccount.private_key
+      };
+      console.log('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 사용으로 전환');
+    } catch (err) {
+      console.error('[FCM] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 실패:', err);
+    }
   }
 
   return {
@@ -103,7 +120,7 @@ export function createFCMService(
           return false;
         }
 
-        const ok = await sendNotification(tokenRow.token, payload, env);
+        const ok = await sendNotification(tokenRow.token, payload, finalEnv);
         await this.logNotification(studentNum, tokenRow.token, payload, ok);
         return ok;
       } catch (err) {
