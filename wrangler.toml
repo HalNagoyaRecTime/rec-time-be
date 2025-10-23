@@ -10,10 +10,10 @@ account_id = "a6d1a427beffc5898641e90e99cdb49b"
 [vars]
 NODE_ENV = "production"
 
-# ----------------------------
-# 🔥 Firebase Cloud Messaging 설정 (시크릿으로 관리)
-# ----------------------------
-# FCM_PROJECT_ID, FCM_CLIENT_EMAIL, FCM_PRIVATE_KEY는 시크릿으로 설정됨
+# ⚡️ FCM 환경변수 키 선언 (실제 값은 wrangler secret에 저장됨)
+FCM_PROJECT_ID = ""
+FCM_CLIENT_EMAIL = ""
+FCM_PRIVATE_KEY = ""
 
 # ----------------------------
 # 개발 환경 (wrangler dev 시 사용)
