@@ -43,6 +43,7 @@ type Env = Bindings & {
   FCM_PROJECT_ID?: string;
   FCM_CLIENT_EMAIL?: string;
   FCM_PRIVATE_KEY?: string;
+  FIREBASE_SERVICE_ACCOUNT_KEY?: string; // 🔥 시크릿용
 };
 
 // ------------------------------------------------------------
@@ -52,14 +53,34 @@ export function getDIContainer(env: Env) {
   const db = env.DB;
   if (!db) throw new Error('❌ D1 Database 연결 실패: env.DB가 없습니다.');
 
-  // 🔍 FCM 환경 변수 체크 로그
+  // 🔍 FCM 환경 변수 상태 확인 (Cloudflare Tail 로그에서 확인)
   console.log('[DI] FCM 환경 변수 상태 확인:', {
     hasProjectId: !!env.FCM_PROJECT_ID,
     hasClientEmail: !!env.FCM_CLIENT_EMAIL,
     hasPrivateKey: !!env.FCM_PRIVATE_KEY,
+    hasServiceAccountKey: !!env.FIREBASE_SERVICE_ACCOUNT_KEY,
   });
 
-  // Repository 생성
+  // ------------------------------------------------------------
+  // ✅ FIREBASE_SERVICE_ACCOUNT_KEY가 있다면 우선적으로 JSON 파싱
+  // ------------------------------------------------------------
+  let projectId = env.FCM_PROJECT_ID || '';
+  let clientEmail = env.FCM_CLIENT_EMAIL || '';
+  let privateKey = env.FCM_PRIVATE_KEY || '';
+
+  if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    try {
+      const parsed = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      projectId = parsed.project_id || projectId;
+      clientEmail = parsed.client_email || clientEmail;
+      privateKey = parsed.private_key || privateKey;
+      console.log('[DI] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 성공');
+    } catch (err) {
+      console.error('[DI] FIREBASE_SERVICE_ACCOUNT_KEY 파싱 실패:', err);
+    }
+  }
+
+  // Repository
   const studentRepository = createStudentRepository(db);
   const eventRepository = createEventRepository(db);
   const entryRepository = createEntryRepository(db);
@@ -68,25 +89,15 @@ export function getDIContainer(env: Env) {
   const changeLogRepository = createChangeLogRepository(db);
   const downloadLogRepository = createDownloadLogRepository(db);
 
-  // ✅ FCM Service (환경변수 검증 포함)
-  const missingVars: string[] = [];
-  if (!env.FCM_PROJECT_ID) missingVars.push('FCM_PROJECT_ID');
-  if (!env.FCM_CLIENT_EMAIL) missingVars.push('FCM_CLIENT_EMAIL');
-  if (!env.FCM_PRIVATE_KEY) missingVars.push('FCM_PRIVATE_KEY');
-
-  if (missingVars.length > 0) {
-    console.error(
-      `⚠️ FCM 환경변수 누락: ${missingVars.join(', ')} — FCM 기능이 비활성화됩니다.`
-    );
-  }
-
+  // ✅ FCM Service 생성 (파싱된 키들 전달)
   const fcmService = createFCMService(db, {
-    FCM_PROJECT_ID: env.FCM_PROJECT_ID || '',
-    FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY || '',
-    FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL || '',
+    FCM_PROJECT_ID: projectId,
+    FCM_PRIVATE_KEY: privateKey,
+    FCM_CLIENT_EMAIL: clientEmail,
+    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY, // 원본도 전달
   });
 
-  // Service 생성
+  // Service
   const studentService = createStudentService(
     studentRepository,
     eventRepository,
@@ -98,25 +109,15 @@ export function getDIContainer(env: Env) {
   const eventService = createEventService(eventRepository);
   const entryService = createEntryService(entryRepository);
   const entryGroupService = createEntryGroupService(entryGroupRepository);
-  const notificationService = createNotificationService(
-    notificationRepository,
-    fcmService
-  );
+  const notificationService = createNotificationService(notificationRepository, fcmService);
   const changeLogService = createChangeLogService(changeLogRepository);
   const downloadLogService = createDownloadLogService(downloadLogRepository);
   const dataUpdateService = createDataUpdateService(changeLogRepository);
 
-  // Controller 생성
-  const studentController = createStudentController(
-    studentService,
-    downloadLogService
-  );
+  // Controller
+  const studentController = createStudentController(studentService, downloadLogService);
   const eventController = createEventController(eventService, downloadLogService);
-  const entryController = createEntryController(
-    entryService,
-    studentService,
-    downloadLogService
-  );
+  const entryController = createEntryController(entryService, studentService, downloadLogService);
   const entryGroupController = createEntryGroupController(entryGroupService);
   const notificationController = createNotificationController(notificationService);
   const changeLogController = createChangeLogController(changeLogService);
@@ -125,9 +126,7 @@ export function getDIContainer(env: Env) {
   const fcmController = createFCMController(fcmService);
   const errorController = createErrorController();
 
-  // ------------------------------------------------------------
-  // ✅ 반환
-  // ------------------------------------------------------------
+  // ✅ 모든 Controller 반환
   return {
     db,
     studentController,

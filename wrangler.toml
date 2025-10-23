@@ -5,16 +5,15 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "a6d1a427beffc5898641e90e99cdb49b"
 
 # ----------------------------
-# 공통 환경변수 (모든 환경에서 사용)
+# 🌍 공통 환경변수
 # ----------------------------
 [vars]
 NODE_ENV = "production"
-
-# ✅ 이 줄은 제거 (시크릿이 실제로 여기에 저장되는 게 아님)
-# FIREBASE_SERVICE_ACCOUNT_KEY = ""
+# ✅ Secret 값은 wrangler secret에 저장되지만, "키 이름"은 toml에 반드시 선언되어야 함
+FIREBASE_SERVICE_ACCOUNT_KEY = ""
 
 # ----------------------------
-# 개발 환경 (wrangler dev 시 사용)
+# 🧪 개발 환경
 # ----------------------------
 [env.development]
 [env.development.vars]
@@ -23,15 +22,15 @@ PORT = "8787"
 HOST = "0.0.0.0"
 
 # ----------------------------
-# ✅ D1 Database 연결 (최신 버전)
+# 💾 D1 Database 연결
 # ----------------------------
 [[d1_databases]]
-binding = "DB"                      
+binding = "DB"
 database_name = "rec-time-be"
 database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
 
 # ----------------------------
-# ⏰ Cron Trigger 설정 (1分ごとに通知チェック)
+# ⏰ Cron Trigger
 # ----------------------------
 [[triggers]]
 crons = ["* * * * *"]
