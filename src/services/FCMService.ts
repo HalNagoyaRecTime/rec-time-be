@@ -246,12 +246,19 @@ async function createJWT(env: any): Promise<string> {
 }
 
 // =============================
-// 🔧 유틸 함수
+// 🔧 유틸 함수 (💡 수정된 부분)
 // =============================
 
 function decodePEM(pem: string): Uint8Array {
-  const base64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
-  const binary = atob(base64);
+  // Cloudflare Secret은 \n이 실제 줄바꿈으로 변환됨 → 모두 제거
+  const cleaned = pem
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\r?\n|\r/g, '') // 실제 줄바꿈 제거
+    .replace(/\\n/g, '')      // 이스케이프된 \n 제거
+    .trim();
+
+  const binary = atob(cleaned);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
