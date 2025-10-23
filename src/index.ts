@@ -170,6 +170,7 @@ api.post('/fcm/register', c => c.get('fcmController').registerToken(c));
 api.post('/fcm/test-push/:studentNum', c => c.get('fcmController').sendTestPush(c));
 api.post('/fcm/push-all', c => c.get('fcmController').sendNotificationToAll(c));
 api.get('/fcm/logs', c => c.get('fcmController').getNotificationLogs(c));
+api.get('/fcm/debug', c => c.get('fcmController').debugFCMConfig(c));
 
 // ================================
 // 📝 에러 핸들링 (라우트 이후)

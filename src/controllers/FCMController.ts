@@ -89,5 +89,23 @@ export function createFCMController(
         return c.json({ success: false, message: '로그 조회 실패' }, 500);
       }
     },
+
+    // 🔍 FCM 환경 변수 디버그
+    async debugFCMConfig(c: Context) {
+      try {
+        const env = c.env;
+        return c.json({
+          success: true,
+          config: {
+            FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
+            FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락',
+            FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락',
+            NODE_ENV: env.NODE_ENV
+          }
+        });
+      } catch (error: any) {
+        return c.json({ success: false, message: error.message }, 500);
+      }
+    },
   };
 }
