@@ -31,7 +31,7 @@ database_name = "rec-time-be"
 database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
 
 # ----------------------------
-# ⏰ Cron Trigger 설정 (5분마다 알림 체크)
+# ⏰ Cron Trigger 설정 (1分ごとに通知チェック)
 # ----------------------------
 [[triggers]]
-crons = ["*/5 * * * *"]
+crons = ["* * * * *"]
