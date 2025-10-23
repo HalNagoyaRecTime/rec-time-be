@@ -43,12 +43,14 @@ export function createFCMService(
     FIREBASE_SERVICE_ACCOUNT_KEY?: string;
   }
 ) {
-  // 환경 변수 검증 - FIREBASE_SERVICE_ACCOUNT_KEY 또는 개별 키들 확인
+  // ✅ 환경 변수 검증
   const hasServiceAccountKey = !!env.FIREBASE_SERVICE_ACCOUNT_KEY;
   const hasIndividualKeys = !!(env.FCM_PROJECT_ID && env.FCM_PRIVATE_KEY && env.FCM_CLIENT_EMAIL);
-  
+
   if (!hasServiceAccountKey && !hasIndividualKeys) {
-    throw new Error('FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY 또는 FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.');
+    throw new Error(
+      'FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY 또는 FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.'
+    );
   }
 
   return {
@@ -106,7 +108,8 @@ export function createFCMService(
       try {
         const rows = await db.prepare(`SELECT token, student_num FROM fcm_tokens WHERE is_active = 1`).all();
         const list = rows.results as { token: string; student_num: string }[];
-        let success = 0, failed = 0;
+        let success = 0,
+          failed = 0;
 
         for (const r of list) {
           const ok = await sendNotification(r.token, payload, env);
@@ -147,8 +150,7 @@ export function createFCMService(
 async function sendNotification(token: string, payload: NotificationPayload, env: any) {
   try {
     const accessToken = await getFirebaseAccessToken(env);
-    
-    // 프로젝트 ID 결정
+
     let projectId: string;
     if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
       const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -156,7 +158,7 @@ async function sendNotification(token: string, payload: NotificationPayload, env
     } else {
       projectId = env.FCM_PROJECT_ID;
     }
-    
+
     const res = await fetch(
       `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
       {
@@ -196,9 +198,9 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
     FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
     FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락',
     FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락',
-    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY ? '설정됨' : '누락'
+    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY ? '설정됨' : '누락',
   });
-  
+
   const jwt = await createJWT(env);
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -224,16 +226,14 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
 
 async function createJWT(env: any): Promise<string> {
   console.log('[JWT] JWT 생성 시작');
-  
-  // FIREBASE_SERVICE_ACCOUNT_KEY가 있으면 사용, 없으면 개별 키들 사용
-  let serviceAccount: any;
+
   let projectId: string;
   let clientEmail: string;
   let privateKey: string;
-  
+
   if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     console.log('[JWT] FIREBASE_SERVICE_ACCOUNT_KEY 사용');
-    serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
     projectId = serviceAccount.project_id;
     clientEmail = serviceAccount.client_email;
     privateKey = serviceAccount.private_key;
@@ -243,7 +243,7 @@ async function createJWT(env: any): Promise<string> {
     clientEmail = env.FCM_CLIENT_EMAIL;
     privateKey = env.FCM_PRIVATE_KEY;
   }
-  
+
   const header = { alg: 'RS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -280,21 +280,20 @@ async function createJWT(env: any): Promise<string> {
   return `${encodedHeader}.${encodedPayload}.${base64UrlEncodeBinary(signature)}`;
 }
 
-
 // =============================
 // 🔧 유틸 함수 (💡 수정된 부분)
 // =============================
 
 function decodePEM(pem: string): Uint8Array {
-  // Cloudflare Secret은 \n이 실제 줄바꿈으로 변환됨 → 모두 제거
-  const cleaned = pem
+  // 🔥 Cloudflare secret은 "\n"이 이스케이프 상태로 저장됨 → 실제 줄바꿈으로 복원
+  const normalized = pem
+    .replace(/\\n/g, '\n') // 문자열 "\n"을 실제 줄바꿈으로 바꿈
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
     .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\r?\n|\r/g, '') // 실제 줄바꿈 제거
-    .replace(/\\n/g, '')      // 이스케이프된 \n 제거
+    .replace(/\r?\n|\r/g, '') // 모든 줄바꿈 제거
     .trim();
 
-  const binary = atob(cleaned);
+  const binary = atob(normalized);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
