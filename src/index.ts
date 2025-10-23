@@ -167,7 +167,15 @@ api.get('/data-update/check', c =>
 // 🔔 FCM Push Notifications (학번 연동)
 // ================================
 api.post('/fcm/register', c => c.get('fcmController').registerToken(c));
-api.post('/fcm/test-push/:studentNum', c => c.get('fcmController').sendTestPush(c));
+api.get('/fcm/status/:studentNum', c =>
+  c.get('fcmController').getTokenStatus(c)
+);
+api.delete('/fcm/unregister/:studentNum', c =>
+  c.get('fcmController').unregisterToken(c)
+);
+api.post('/fcm/test-push/:studentNum', c =>
+  c.get('fcmController').sendTestPush(c)
+);
 api.post('/fcm/push-all', c => c.get('fcmController').sendNotificationToAll(c));
 api.get('/fcm/logs', c => c.get('fcmController').getNotificationLogs(c));
 api.get('/fcm/debug', c => c.get('fcmController').debugFCMConfig(c));

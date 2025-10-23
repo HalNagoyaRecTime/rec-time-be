@@ -19,19 +19,7 @@ export interface NotificationPayload {
   body: string;
   icon?: string;
   badge?: string;
-  data?: any;
-}
-
-export interface FCMTokenRecord {
-  id: number;
-  studentNum: string;
-  token: string;
-  deviceInfo?: string;
-  registeredAt: string;
-  lastUsed?: string;
-  isActive: number;
-  createdAt: string;
-  updatedAt: string;
+  data?: Record<string, unknown>;
 }
 
 export function createFCMService(
@@ -101,9 +89,10 @@ export function createFCMService(
           .run();
 
         return { success: true, message: `FCM 토큰 등록 완료 (학번: ${data.studentNum})` };
-      } catch (err: any) {
+      } catch (err) {
         console.error('[FCM] registerToken error:', err);
-        return { success: false, message: `토큰 등록 실패: ${err.message}` };
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        return { success: false, message: `토큰 등록 실패: ${errorMessage}` };
       }
     },
 
@@ -166,6 +155,38 @@ export function createFCMService(
         console.error('[FCM] logNotification error:', err);
       }
     },
+
+    // ✅ 학번으로 토큰 조회
+    async getTokenByStudentNum(studentNum: string) {
+      try {
+        const tokenRow = await db
+          .prepare(`SELECT * FROM fcm_tokens WHERE student_num = ? AND is_active = 1 LIMIT 1`)
+          .bind(studentNum)
+          .first<{ token: string; created_at: string }>();
+        
+        return tokenRow || null;
+      } catch (err) {
+        console.error('[FCM] getTokenByStudentNum error:', err);
+        return null;
+      }
+    },
+
+    // ✅ 학번으로 토큰 삭제
+    async deleteTokenByStudentNum(studentNum: string) {
+      try {
+        const now = new Date().toISOString();
+        await db
+          .prepare(`UPDATE fcm_tokens SET is_active = 0, updated_at = ? WHERE student_num = ?`)
+          .bind(now, studentNum)
+          .run();
+        
+        console.log(`[FCM] 토큰 비활성화 완료 (학번: ${studentNum})`);
+        return true;
+      } catch (err) {
+        console.error('[FCM] deleteTokenByStudentNum error:', err);
+        return false;
+      }
+    },
   };
 }
 
@@ -173,52 +194,64 @@ export function createFCMService(
 // 🔥 공통 함수
 // =============================
 
-async function sendNotification(token: string, payload: NotificationPayload, env: any) {
-  try {
-    const accessToken = await getFirebaseAccessToken(env);
+async function sendNotification(
+  token: string,
+  payload: NotificationPayload,
+  env: {
+    FCM_PROJECT_ID?: string;
+    FCM_PRIVATE_KEY?: string;
+    FCM_CLIENT_EMAIL?: string;
+    FIREBASE_SERVICE_ACCOUNT_KEY?: string;
+  }
+) {
+  const accessToken = await getFirebaseAccessToken(env);
 
-    let projectId: string;
-    if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
-      projectId = serviceAccount.project_id;
-    } else {
-      projectId = env.FCM_PROJECT_ID;
+  let projectId: string;
+  if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    projectId = serviceAccount.project_id;
+  } else {
+    if (!env.FCM_PROJECT_ID) {
+      throw new Error('FCM_PROJECT_ID가 설정되지 않았습니다.');
     }
+    projectId = env.FCM_PROJECT_ID;
+  }
 
-    const res = await fetch(
-      `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+  const res = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: {
+          token,
+          notification: { title: payload.title, body: payload.body },
         },
-        body: JSON.stringify({
-          message: {
-            token,
-            notification: { title: payload.title, body: payload.body },
-          },
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('[FCM] Push Send Error:', errText);
-      return false;
+      }),
     }
-    return true;
-  } catch (err) {
-    console.error('[FCM] sendNotification() exception:', err);
+  );
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[FCM] Push Send Error:', errText);
     return false;
   }
+  return true;
 }
 
 // =============================
 // 🔑 JWT & Access Token 생성
 // =============================
 
-async function getFirebaseAccessToken(env: any): Promise<string> {
+async function getFirebaseAccessToken(env: {
+  FCM_PROJECT_ID?: string;
+  FCM_PRIVATE_KEY?: string;
+  FCM_CLIENT_EMAIL?: string;
+  FIREBASE_SERVICE_ACCOUNT_KEY?: string;
+}): Promise<string> {
   console.log('[JWT] Firebase Access Token 요청 시작');
   console.log('[JWT] 환경 변수 확인:', {
     FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
@@ -250,22 +283,27 @@ async function getFirebaseAccessToken(env: any): Promise<string> {
   return data.access_token;
 }
 
-async function createJWT(env: any): Promise<string> {
+async function createJWT(env: {
+  FCM_PROJECT_ID?: string;
+  FCM_PRIVATE_KEY?: string;
+  FCM_CLIENT_EMAIL?: string;
+  FIREBASE_SERVICE_ACCOUNT_KEY?: string;
+}): Promise<string> {
   console.log('[JWT] JWT 생성 시작');
 
-  let projectId: string;
   let clientEmail: string;
   let privateKey: string;
 
   if (env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     console.log('[JWT] FIREBASE_SERVICE_ACCOUNT_KEY 사용');
     const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    projectId = serviceAccount.project_id;
     clientEmail = serviceAccount.client_email;
     privateKey = serviceAccount.private_key;
   } else {
     console.log('[JWT] 개별 FCM 키들 사용');
-    projectId = env.FCM_PROJECT_ID;
+    if (!env.FCM_CLIENT_EMAIL || !env.FCM_PRIVATE_KEY) {
+      throw new Error('FCM_CLIENT_EMAIL 또는 FCM_PRIVATE_KEY가 설정되지 않았습니다.');
+    }
     clientEmail = env.FCM_CLIENT_EMAIL;
     privateKey = env.FCM_PRIVATE_KEY;
   }
@@ -319,19 +357,17 @@ function decodePEM(pem: string): Uint8Array {
     .replace(/\r?\n|\r/g, '') // 모든 줄바꿈 제거
     .trim();
 
-  const binary = atob(normalized);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  const buffer = Buffer.from(normalized, 'base64');
+  return new Uint8Array(buffer);
 }
 
 function base64UrlEncode(str: string) {
-  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const base64 = Buffer.from(str).toString('base64');
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function base64UrlEncodeBinary(buffer: ArrayBuffer) {
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return base64UrlEncode(btoa(binary));
+  const base64 = Buffer.from(bytes).toString('base64');
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }

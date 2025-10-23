@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { createFCMService } from '../services/FCMService';
+import { createFCMService } from '@services/FCMService';
 
 export function createFCMController(
   fcmService: ReturnType<typeof createFCMService>
@@ -15,14 +15,73 @@ export function createFCMController(
         console.log('[FCM] registerToken 처리 결과:', result);
 
         return c.json(result);
-      } catch (error: any) {
+      } catch (error) {
         console.error('[FCM] registerToken error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
         return c.json(
           {
             success: false,
-            message: `토큰 등록에 실패했습니다: ${
-              error?.message || '알 수 없는 오류'
-            }`,
+            message: `토큰 등록에 실패했습니다: ${errorMessage}`,
+          },
+          500
+        );
+      }
+    },
+
+    // 🔍 FCM 토큰 상태 조회
+    async getTokenStatus(c: Context) {
+      try {
+        const studentNum = c.req.param('studentNum');
+        console.log(`[FCM] getTokenStatus 요청 - 학번: ${studentNum}`);
+
+        const token = await fcmService.getTokenByStudentNum(studentNum);
+
+        if (!token) {
+          return c.json({ registered: false, studentNum });
+        }
+
+        return c.json({
+          registered: true,
+          studentNum,
+          timestamp: token.created_at,
+        });
+      } catch (error) {
+        console.error('[FCM] getTokenStatus error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
+        return c.json(
+          {
+            success: false,
+            message: `상태 조회 실패: ${errorMessage}`,
+          },
+          500
+        );
+      }
+    },
+
+    // 🗑️ FCM 토큰 등록 해제
+    async unregisterToken(c: Context) {
+      try {
+        const studentNum = c.req.param('studentNum');
+        console.log(`[FCM] unregisterToken 요청 - 학번: ${studentNum}`);
+
+        const success = await fcmService.deleteTokenByStudentNum(studentNum);
+
+        if (!success) {
+          return c.json({ success: false, message: '토큰 삭제 실패' }, 500);
+        }
+
+        console.log('[FCM] 토큰 등록 해제 성공 - 학번:', studentNum);
+        return c.json({ success: true, message: '토큰 삭제 완료' });
+      } catch (error) {
+        console.error('[FCM] unregisterToken error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
+        return c.json(
+          {
+            success: false,
+            message: `토큰 삭제 실패: ${errorMessage}`,
           },
           500
         );
@@ -56,14 +115,13 @@ export function createFCMController(
 
         console.log('[FCM] 테스트 푸시 전송 성공 - 학번:', studentNum);
         return c.json({ success: true, message: '테스트 푸시 전송 성공!' });
-      } catch (e: any) {
+      } catch (e) {
         console.error('[FCM] sendTestPush error:', e);
+        const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);
         return c.json(
           {
             success: false,
-            message: `테스트 푸시 전송 중 오류: ${
-              e?.message || JSON.stringify(e)
-            }`,
+            message: `테스트 푸시 전송 중 오류: ${errorMessage}`,
           },
           500
         );
@@ -89,12 +147,14 @@ export function createFCMController(
           message: `전체 알림 전송 완료: 성공 ${result.success}, 실패 ${result.failed}`,
           result,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error('[FCM] sendNotificationToAll error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
         return c.json(
           {
             success: false,
-            message: `전체 알림 전송 실패: ${error?.message || '알 수 없는 오류'}`,
+            message: `전체 알림 전송 실패: ${errorMessage}`,
           },
           500
         );
@@ -115,12 +175,14 @@ export function createFCMController(
 
         console.log(`[FCM] 로그 ${logs.results?.length ?? 0}건 조회됨`);
         return c.json({ success: true, logs: logs.results });
-      } catch (error: any) {
+      } catch (error) {
         console.error('[FCM] getNotificationLogs error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
         return c.json(
           {
             success: false,
-            message: `로그 조회 실패: ${error?.message || '알 수 없는 오류'}`,
+            message: `로그 조회 실패: ${errorMessage}`,
           },
           500
         );
@@ -156,7 +218,11 @@ export function createFCMController(
         }
 
         // JSON 파싱 시도
-        let parsedKey: any = null;
+        let parsedKey: {
+          project_id?: string;
+          client_email?: string;
+          private_key?: string;
+        };
         try {
           parsedKey = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
         } catch (err) {
@@ -191,12 +257,14 @@ export function createFCMController(
             },
           },
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error('[FCM] debugFCMConfig error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
         return c.json(
           {
             success: false,
-            message: `디버그 중 오류: ${error?.message || '알 수 없는 오류'}`,
+            message: `디버그 중 오류: ${errorMessage}`,
           },
           500
         );
