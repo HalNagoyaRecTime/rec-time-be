@@ -280,6 +280,7 @@ async function createJWT(env: any): Promise<string> {
   return `${encodedHeader}.${encodedPayload}.${base64UrlEncodeBinary(signature)}`;
 }
 
+
 // =============================
 // 🔧 유틸 함수 (💡 수정된 부분)
 // =============================
