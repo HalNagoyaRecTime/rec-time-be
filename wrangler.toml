@@ -5,16 +5,15 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "a6d1a427beffc5898641e90e99cdb49b"
 
 # ----------------------------
-# 🌐 공통 환경변수 (모든 환경 공통)
+# 🌍 공통 환경변수
 # ----------------------------
 [vars]
 NODE_ENV = "production"
-
-# ⚠️ 시크릿 키(FIREBASE_SERVICE_ACCOUNT_KEY)는 여기 넣지 않습니다.
-# → 반드시 `wrangler secret put FIREBASE_SERVICE_ACCOUNT_KEY --name rec-time-be --env=""` 로만 등록하세요.
+# ✅ Secret 값은 wrangler secret에 저장되지만, "키 이름"은 toml에 반드시 선언되어야 함
+FIREBASE_SERVICE_ACCOUNT_KEY = ""
 
 # ----------------------------
-# 🧩 개발 환경 설정 (로컬 개발용)
+# 🧪 개발 환경
 # ----------------------------
 [env.development]
 [env.development.vars]
@@ -23,23 +22,15 @@ PORT = "8787"
 HOST = "0.0.0.0"
 
 # ----------------------------
-# 💾 Cloudflare D1 Database 연결
+# 💾 D1 Database 연결
 # ----------------------------
 [[d1_databases]]
-binding = "DB"                      
+binding = "DB"
 database_name = "rec-time-be"
 database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
 
 # ----------------------------
-# ⏰ Cron Trigger 설정 (5분마다 알림 체크)
+# ⏰ Cron Trigger
 # ----------------------------
 [[triggers]]
 crons = ["*/5 * * * *"]
-
-# ----------------------------
-# 🚀 배포 관련 설정
-# ----------------------------
-[env.production]
-# 환경 경고 방지용 (기본값을 명시)
-[env.production.vars]
-NODE_ENV = "production"
