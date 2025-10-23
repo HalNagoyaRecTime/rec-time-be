@@ -47,6 +47,15 @@ export function createFCMService(
   const hasServiceAccountKey = !!env.FIREBASE_SERVICE_ACCOUNT_KEY;
   const hasIndividualKeys = !!(env.FCM_PROJECT_ID && env.FCM_PRIVATE_KEY && env.FCM_CLIENT_EMAIL);
 
+  console.log('[FCM] 환경 변수 검증:', {
+    hasServiceAccountKey,
+    hasIndividualKeys,
+    FIREBASE_SERVICE_ACCOUNT_KEY: env.FIREBASE_SERVICE_ACCOUNT_KEY ? '설정됨' : '누락',
+    FCM_PROJECT_ID: env.FCM_PROJECT_ID ? '설정됨' : '누락',
+    FCM_PRIVATE_KEY: env.FCM_PRIVATE_KEY ? '설정됨' : '누락',
+    FCM_CLIENT_EMAIL: env.FCM_CLIENT_EMAIL ? '설정됨' : '누락'
+  });
+
   if (!hasServiceAccountKey && !hasIndividualKeys) {
     throw new Error(
       'FCM 환경 변수가 누락되었습니다. FIREBASE_SERVICE_ACCOUNT_KEY 또는 FCM_PROJECT_ID, FCM_PRIVATE_KEY, FCM_CLIENT_EMAIL을 모두 설정해주세요.'
