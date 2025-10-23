@@ -10,10 +10,8 @@ account_id = "a6d1a427beffc5898641e90e99cdb49b"
 [vars]
 NODE_ENV = "production"
 
-# ⚡️ FCM 환경변수 키 선언 (실제 값은 wrangler secret에 저장됨)
-FCM_PROJECT_ID = ""
-FCM_CLIENT_EMAIL = ""
-FCM_PRIVATE_KEY = ""
+# ✅ 이 줄은 제거 (시크릿이 실제로 여기에 저장되는 게 아님)
+# FIREBASE_SERVICE_ACCOUNT_KEY = ""
 
 # ----------------------------
 # 개발 환경 (wrangler dev 시 사용)
