@@ -9,6 +9,17 @@ import { getDIContainer } from './di/container';
 import { requestLogger, errorHandler } from './middleware/logging';
 import { logger } from './utils/logger';
 
+// Cloudflare Workers型定義
+interface ScheduledEvent {
+  scheduledTime: number;
+  cron: string;
+}
+
+interface ExecutionContext {
+  waitUntil(promise: Promise<any>): void;
+  passThroughOnException(): void;
+}
+
 const app = new Hono<{
   Bindings: Bindings;
   Variables: ControllerMap & { db: D1Database };
@@ -82,6 +93,7 @@ api.get('/health', c => {
     time: new Date().toISOString(),
   });
 });
+
 
 // ================================
 // ✅ Students (보안 강화: 학번 + 생년월일 인증만 허용)
@@ -164,7 +176,51 @@ api.get('/data-update/check', c =>
 );
 
 // ================================
-// 📝 에러 핸들링 (라우트 이후)
+// 🔔 Push Notifications (Web Push API)
+// ================================
+api.post('/push/subscribe', c =>
+  c.get('pushNotificationController').subscribe(c)
+);
+api.post('/push/unsubscribe', c =>
+  c.get('pushNotificationController').unsubscribe(c)
+);
+api.post('/push/schedule', c =>
+  c.get('pushNotificationController').saveSchedule(c)
+);
+api.post('/push/test', c =>
+  c.get('pushNotificationController').sendTest(c)
+);
+
+// ================================
+// ⏰ Scheduled Tasks (Cron Jobs)
+// ================================
+export default {
+  ...app,
+  
+  // 1分ごとに実行される通知チェック
+  async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
+    const { db, ...controllers } = getDIContainer(env);
+    
+    try {
+      // 現在時刻取得（HHmm形式）
+      const now = new Date();
+      const currentTime = `${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
+      
+      console.log(`[Cron] 通知チェック開始: ${currentTime}`);
+      
+      // スケジュールサービスとプッシュサービスを取得
+      const scheduleService = getDIContainer(env).db; // TODO: サービスを正しく取得
+      
+      // 送信処理は別途実装が必要
+      console.log(`[Cron] 通知チェック完了`);
+    } catch (error) {
+      console.error('[Cron] エラー:', error);
+    }
+  }
+};
+
+// ================================
+// 📝 エラーハンドリング (ラウト이後)
 // ================================
 app.onError(errorHandler());
 

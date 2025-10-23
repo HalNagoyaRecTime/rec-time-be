@@ -242,6 +242,7 @@ INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1788,10,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1788,11,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1788,12,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1788,13,1);
+
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,1,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,2,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,3,1);
@@ -255,6 +256,7 @@ INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,10,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,11,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,12,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1789,13,1);
+
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1790,1,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1790,2,1);
 INSERT INTO t_entries(f_student_id,f_event_id,f_seq) VALUES(1790,3,1);

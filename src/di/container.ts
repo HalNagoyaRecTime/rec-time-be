@@ -20,6 +20,9 @@ import {
   createDownloadLogService,
 } from '../services';
 import { createDataUpdateService } from '../services/DataUpdateService';
+import { createPushSubscriptionService } from '../services/PushSubscriptionService';
+import { createNotificationScheduleService } from '../services/NotificationScheduleService';
+import { createFCMPushService } from '../services/FCMPushService';
 
 import {
   createStudentController,
@@ -32,6 +35,7 @@ import {
   createErrorController,
 } from '../controllers';
 import { createDataUpdateController } from '../controllers/DataUpdateController';
+import { createPushNotificationController } from '../controllers/PushNotificationController';
 
 import { D1Database } from '@cloudflare/workers-types';
 
@@ -41,6 +45,9 @@ import { D1Database } from '@cloudflare/workers-types';
 type Env = {
   DB: D1Database;
   RESEND_API_KEY?: string;
+  FCM_SERVER_KEY?: string;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
 };
 
 // ------------------------------------------------------------
@@ -78,6 +85,11 @@ export function createDIContainer(env?: Env) {
   const changeLogService = createChangeLogService(changeLogRepository);
   const downloadLogService = createDownloadLogService(downloadLogRepository);
   const dataUpdateService = createDataUpdateService(changeLogRepository);
+  
+  // Push Notification Services
+  const pushSubscriptionService = createPushSubscriptionService(db);
+  const notificationScheduleService = createNotificationScheduleService(db);
+  const fcmPushService = createFCMPushService(env as any);
 
   // Controller
   const studentController = createStudentController(studentService, downloadLogService);
@@ -89,6 +101,13 @@ export function createDIContainer(env?: Env) {
   const downloadLogController = createDownloadLogController(downloadLogService);
   const dataUpdateController = createDataUpdateController(dataUpdateService);
   const errorController = createErrorController();
+  
+  // Push Notification Controller
+  const pushNotificationController = createPushNotificationController(
+    pushSubscriptionService,
+    notificationScheduleService,
+    fcmPushService
+  );
 
   // ------------------------------------------------------------
   // 반환 (컨트롤러 + DB)
@@ -104,6 +123,7 @@ export function createDIContainer(env?: Env) {
     downloadLogController,
     dataUpdateController,
     errorController,
+    pushNotificationController,
   };
 }
 

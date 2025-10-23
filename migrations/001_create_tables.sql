@@ -62,6 +62,12 @@ CREATE TABLE IF NOT EXISTS t_update (
   f_reason TEXT
 );
 
+-- メタデータテーブル
+CREATE TABLE IF NOT EXISTS t_meta (
+  f_key TEXT PRIMARY KEY,
+  f_value TEXT NOT NULL
+);
+
 -- ダウンロードログテーブル
 CREATE TABLE IF NOT EXISTS download_logs (
   f_log_id INTEGER PRIMARY KEY AUTOINCREMENT,

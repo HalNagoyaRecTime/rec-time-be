@@ -9,6 +9,10 @@ account_id = "a6d1a427beffc5898641e90e99cdb49b"
 # ----------------------------
 [vars]
 NODE_ENV = "production"
+FCM_PROJECT_ID = "rec-time-593b0"
+
+# Secrets (wrangler secret put で設定):
+# - FCM_SERVICE_ACCOUNT_JSON: Firebaseサービスアカウント秘密鍵JSON
 
 # ----------------------------
 # 개발 환경 (wrangler dev 시 사용)
@@ -26,3 +30,9 @@ HOST = "0.0.0.0"
 binding = "DB"                      
 database_name = "rec-time-be"
 database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
+
+# ----------------------------
+# ⏰ Cron Triggers (通知チェック)
+# ----------------------------
+[triggers]
+crons = ["* * * * *"]  # 1分ごとに実行

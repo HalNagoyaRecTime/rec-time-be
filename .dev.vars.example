@@ -1,0 +1,9 @@
+# ローカル開発用環境変数のサンプル
+# .dev.vars にコピーして使用してください
+
+# FCM Firebase プロジェクトID
+FCM_PROJECT_ID=rec-time-593b0
+
+# FCM サービスアカウントJSON（1行の文字列として設定）
+# Firebaseコンソール > プロジェクト設定 > サービスアカウント > 新しい秘密鍵の生成
+FCM_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"rec-time-593b0",...}

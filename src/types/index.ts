@@ -6,4 +6,7 @@ export type Bindings = {
   DB: D1Database;
   NODE_ENV: string;
   RESEND_API_KEY?: string;
+  // FCM Push Notification
+  FCM_PROJECT_ID: string;
+  FCM_SERVICE_ACCOUNT_JSON: string; // JSON文字列
 };
