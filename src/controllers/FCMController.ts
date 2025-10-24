@@ -98,6 +98,7 @@ export function createFCMController(
         const payload = {
           title: body.title || '🎯 테스트 알림',
           body: body.body || '테스트 알림이 도착했습니다.',
+          data: { studentNum },
         };
 
         const ok = await fcmService.sendNotificationToStudent(
@@ -137,6 +138,7 @@ export function createFCMController(
         const payload = {
           title: body.title || '📢 공지사항',
           body: body.body || '새로운 알림이 도착했습니다.',
+          data: body.data || {},
         };
 
         const result = await fcmService.sendNotificationToAll(payload);

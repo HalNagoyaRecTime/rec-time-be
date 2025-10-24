@@ -127,7 +127,7 @@ export function createFCMService(
           failed = 0;
 
         for (const r of list) {
-          const ok = await sendNotification(r.token, payload, env);
+          const ok = await sendNotification(r.token, payload, finalEnv);
           await this.logNotification(r.student_num, r.token, payload, ok);
           if (ok) success++;
           else failed++;
@@ -217,28 +217,38 @@ async function sendNotification(
     projectId = env.FCM_PROJECT_ID;
   }
 
-  const res = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: {
-          token,
-          notification: { title: payload.title, body: payload.body },
-        },
-      }),
-    }
-  );
+  const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+  const messageBody = {
+    message: {
+      token,
+      notification: { title: payload.title, body: payload.body },
+      data: payload.data || { studentNum: 'unknown' },
+    },
+  };
+
+  console.log('[FCM] Firebase 메시지 전송 시작:', { projectId, token: token.substring(0, 20) + '...' });
+  console.log('[FCM] 요청 URL:', url);
+  console.log('[FCM] 메시지 본문:', JSON.stringify(messageBody));
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(messageBody),
+  });
 
   if (!res.ok) {
     const errText = await res.text();
-    console.error('[FCM] Push Send Error:', errText);
+    console.error(`[FCM] Push Send Error (${res.status}):`, errText);
+    console.error('[FCM] 실패한 토큰:', token.substring(0, 20) + '...');
     return false;
   }
+
+  const response = await res.text();
+  console.log('[FCM] 메시지 전송 성공 (상태:', res.status, ')');
+  console.log('[FCM] 응답:', response);
   return true;
 }
 
