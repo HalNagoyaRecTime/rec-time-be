@@ -28,22 +28,33 @@ export function createVersionController(): VersionControllerFunctions {
                 
                 if (!result) {
                     // 念のため初期値を返す
+                    const now = new Date();
+                    const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9
+                    const formatted = jst.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
                     return c.json({
                         version: "25.1.0",
-                        updated_at: new Date().toISOString(),
+                        updated_at: formatted,
                     });
                 }
                 
+                // ISO8601形式（UTC）を日本時間（JST = UTC+9）に変換
+                const utcDate = new Date(result.f_updated_at as string);
+                const jstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+                const formattedDate = jstDate.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
+                
                 return c.json({
                     version: result.f_version as string,
-                    updated_at: result.f_updated_at as string,
+                    updated_at: formattedDate, // 例: "2025-01-25 04:29:09 JST"
                 });
             } catch (error) {
                 console.error('[VersionController] getVersion error:', error);
                 // エラー時はフォールバック
+                const now = new Date();
+                const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9
+                const formatted = jst.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
                 return c.json({
                     version: "25.1.0",
-                    updated_at: new Date().toISOString(),
+                    updated_at: formatted,
                 }, 500);
             }
         },
