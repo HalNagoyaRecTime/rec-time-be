@@ -27,6 +27,7 @@
     "dotenv": "^17.2.2",
     "firebase": "^12.4.0",
     "hono": "^4.9.6",
+    "jose": "^6.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@
 // Firebase Cloud Messaging (FCM) 서비스 - Cloudflare Workers 호환 완전판
 
 import { D1Database } from '@cloudflare/workers-types';
+import { SignJWT } from 'jose';
 
 export interface FCMTokenData {
   token: string;
@@ -299,7 +300,7 @@ async function createJWT(env: {
   FCM_CLIENT_EMAIL?: string;
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;
 }): Promise<string> {
-  console.log('[JWT] JWT 생성 시작');
+  console.log('[JWT] JWT 생성 시작 (jose 사용)');
 
   let clientEmail: string;
   let privateKey: string;
@@ -318,87 +319,49 @@ async function createJWT(env: {
     privateKey = env.FCM_PRIVATE_KEY;
   }
 
-  const header = { alg: 'RS256', typ: 'JWT' };
-  const now = Math.floor(Date.now() / 1000);
-  const payload = {
-    iss: clientEmail,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600,
-  };
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    
+    const jwt = await new SignJWT({
+      iss: clientEmail,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: now,
+      exp: now + 3600,
+    })
+      .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+      .sign(await importPrivateKey(privateKey));
 
-  const encodedHeader = base64UrlEncode(JSON.stringify(header));
-  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+    console.log('[JWT] JWT 생성 성공');
+    return jwt;
+  } catch (err) {
+    console.error('[JWT] JWT 생성 실패:', err);
+    throw new Error(`JWT 생성 실패: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
 
-  const keyBytes = decodePEM(privateKey);
-  const keyBuffer = keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength);
+// Jose에서 사용할 수 있는 형식으로 Private Key를 변환
+async function importPrivateKey(pem: string) {
+  const keyString = pem
+    .replace(/\\n/g, '\n')
+    .replace(/\n/g, '')
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '');
 
-  console.log('[JWT] PEM → Key 변환 완료, 바이트 길이:', keyBytes.byteLength);
+  const binaryString = atob(keyString);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
 
-  const key = await crypto.subtle.importKey(
+  return await crypto.subtle.importKey(
     'pkcs8',
-    keyBuffer as ArrayBuffer,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    bytes.buffer,
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-256',
+    },
     false,
     ['sign']
   );
-
-  console.log('[JWT] Private Key Import 성공');
-
-  const dataToSign = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, dataToSign);
-
-  console.log('[JWT] 서명 완료, 길이:', (signature as ArrayBuffer).byteLength);
-
-  return `${encodedHeader}.${encodedPayload}.${base64UrlEncodeBinary(signature)}`;
-}
-
-// =============================
-// 🔧 유틸 함수 (💡 수정된 부분)
-// =============================
-
-function decodePEM(pem: string): Uint8Array {
-  console.log('[PEM] 원본 PEM 길이:', pem.length);
-  console.log('[PEM] 원본 PEM 처음 100자:', pem.substring(0, 100));
-  
-  // 🔥 다양한 이스케이프 패턴 처리
-  let normalized = pem
-    .replace(/\\n/g, '\n')           // 문자열 "\n"을 실제 줄바꿈으로
-    .replace(/\\r/g, '\r')           // 문자열 "\r"을 실제 캐리지 리턴으로
-    .replace(/\\t/g, '\t')           // 문자열 "\t"을 실제 탭으로
-    .replace(/-----BEGIN PRIVATE KEY-----\n?/, '')   // PEM 헤더 제거 (줄바꿈 포함 가능)
-    .replace(/-----END PRIVATE KEY-----\n?/, '')     // PEM 풋터 제거 (줄바꿈 포함 가능)
-    .replace(/-----BEGIN RSA PRIVATE KEY-----\n?/, '') // RSA 형식도 지원
-    .replace(/-----END RSA PRIVATE KEY-----\n?/, '')
-    .replace(/\r?\n|\r/g, '')        // 모든 줄바꿈 제거
-    .replace(/\s/g, '')              // 모든 공백 제거
-    .trim();
-
-  console.log('[PEM] 정규화 후 길이:', normalized.length);
-  console.log('[PEM] 정규화 후 처음 50자:', normalized.substring(0, 50));
-  
-  if (!normalized) {
-    throw new Error('[PEM] 정규화 후 내용이 비어있습니다');
-  }
-
-  try {
-    const buffer = Buffer.from(normalized, 'base64');
-    console.log('[PEM] Base64 디코딩 성공, 바이트 길이:', buffer.length);
-    return new Uint8Array(buffer);
-  } catch (err) {
-    console.error('[PEM] Base64 디코딩 실패:', err);
-    throw new Error(`PEM 디코딩 실패: ${err instanceof Error ? err.message : String(err)}`);
-  }
-}
-
-function base64UrlEncode(str: string) {
-  const base64 = Buffer.from(str).toString('base64');
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function base64UrlEncodeBinary(buffer: ArrayBuffer) {
-  const bytes = new Uint8Array(buffer);
-  const base64 = Buffer.from(bytes).toString('base64');
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
