@@ -33,4 +33,4 @@ database_id = "b93ec427-7cdb-4ad7-8944-ed807ba24b03"
 # ⏰ Cron Trigger
 # ----------------------------
 [[triggers]]
-crons = ["*/5 * * * *"]
+crons = ["* * * * *"]
