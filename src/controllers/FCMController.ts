@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { createFCMService } from '@services/FCMService';
+import { createFCMService } from '../services/FCMService';
 
 export function createFCMController(
   fcmService: ReturnType<typeof createFCMService>
