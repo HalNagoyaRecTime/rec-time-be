@@ -13,6 +13,7 @@ import type {
   ErrorControllerFunctions,
 } from './controllers';
 import type { DataUpdateControllerFunctions } from '../controllers/DataUpdateController';
+import type { VersionControllerFunctions } from '../controllers/VersionController';
 
 export type ControllerMap = {
   studentController: StudentControllerFunctions;
@@ -24,6 +25,7 @@ export type ControllerMap = {
   downloadLogController: DownloadLogControllerFunctions;
   errorController: ErrorControllerFunctions;
   dataUpdateController: DataUpdateControllerFunctions;
+  versionController: VersionControllerFunctions;
 };
 
 export type CustomContext = Context<{

@@ -32,6 +32,7 @@ import {
   createErrorController,
 } from '../controllers';
 import { createDataUpdateController } from '../controllers/DataUpdateController';
+import { createVersionController } from '../controllers/VersionController';
 
 import { D1Database } from '@cloudflare/workers-types';
 
@@ -88,6 +89,7 @@ export function createDIContainer(env?: Env) {
   const changeLogController = createChangeLogController(changeLogService);
   const downloadLogController = createDownloadLogController(downloadLogService);
   const dataUpdateController = createDataUpdateController(dataUpdateService);
+  const versionController = createVersionController();
   const errorController = createErrorController();
 
   // ------------------------------------------------------------
@@ -103,6 +105,7 @@ export function createDIContainer(env?: Env) {
     changeLogController,
     downloadLogController,
     dataUpdateController,
+    versionController,
     errorController,
   };
 }
