@@ -21,40 +21,44 @@ export function createVersionController(): VersionControllerFunctions {
             try {
                 const db = c.get('db');
                 
-                // DBから最新バージョンを取得
-                const result = await db
+                // 現在のバージョンを取得
+                const current = await db
                     .prepare('SELECT f_version, f_updated_at FROM m_app_version WHERE f_id = 1')
                     .first();
                 
-                if (!result) {
-                    // 念のため初期値を返す
-                    const now = new Date();
-                    const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9
-                    const formatted = jst.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
+                if (!current) {
                     return c.json({
                         version: "25.1.0",
-                        updated_at: formatted,
+                        updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' JST',
+                        message: "システムエラー",
                     });
                 }
                 
-                // ISO8601形式（UTC）を日本時間（JST = UTC+9）に変換
-                const utcDate = new Date(result.f_updated_at as string);
+                // 該当バージョンの変更メッセージを取得
+                const history = await db
+                    .prepare('SELECT f_message FROM t_version_history WHERE f_version = ? ORDER BY f_id DESC LIMIT 1')
+                    .bind(current.f_version)
+                    .first();
+                
+                // UTC → JST変換
+                const utcDate = new Date(current.f_updated_at as string);
                 const jstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
                 const formattedDate = jstDate.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
                 
                 return c.json({
-                    version: result.f_version as string,
-                    updated_at: formattedDate, // 例: "2025-01-25 04:29:09 JST"
+                    version: current.f_version as string,
+                    updated_at: formattedDate,
+                    message: (history?.f_message as string) || "更新情報なし",
                 });
             } catch (error) {
                 console.error('[VersionController] getVersion error:', error);
-                // エラー時はフォールバック
                 const now = new Date();
-                const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9
+                const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
                 const formatted = jst.toISOString().replace('T', ' ').substring(0, 19) + ' JST';
                 return c.json({
                     version: "25.1.0",
                     updated_at: formatted,
+                    message: "エラーが発生しました",
                 }, 500);
             }
         },
