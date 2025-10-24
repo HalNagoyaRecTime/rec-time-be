@@ -359,16 +359,37 @@ async function createJWT(env: {
 // =============================
 
 function decodePEM(pem: string): Uint8Array {
-  // 🔥 Cloudflare secret은 "\n"이 이스케이프 상태로 저장됨 → 실제 줄바꿈으로 복원
-  const normalized = pem
-    .replace(/\\n/g, '\n') // 문자열 "\n"을 실제 줄바꿈으로 바꿈
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\r?\n|\r/g, '') // 모든 줄바꿈 제거
+  console.log('[PEM] 원본 PEM 길이:', pem.length);
+  console.log('[PEM] 원본 PEM 처음 100자:', pem.substring(0, 100));
+  
+  // 🔥 다양한 이스케이프 패턴 처리
+  let normalized = pem
+    .replace(/\\n/g, '\n')           // 문자열 "\n"을 실제 줄바꿈으로
+    .replace(/\\r/g, '\r')           // 문자열 "\r"을 실제 캐리지 리턴으로
+    .replace(/\\t/g, '\t')           // 문자열 "\t"을 실제 탭으로
+    .replace(/-----BEGIN PRIVATE KEY-----\n?/, '')   // PEM 헤더 제거 (줄바꿈 포함 가능)
+    .replace(/-----END PRIVATE KEY-----\n?/, '')     // PEM 풋터 제거 (줄바꿈 포함 가능)
+    .replace(/-----BEGIN RSA PRIVATE KEY-----\n?/, '') // RSA 형식도 지원
+    .replace(/-----END RSA PRIVATE KEY-----\n?/, '')
+    .replace(/\r?\n|\r/g, '')        // 모든 줄바꿈 제거
+    .replace(/\s/g, '')              // 모든 공백 제거
     .trim();
 
-  const buffer = Buffer.from(normalized, 'base64');
-  return new Uint8Array(buffer);
+  console.log('[PEM] 정규화 후 길이:', normalized.length);
+  console.log('[PEM] 정규화 후 처음 50자:', normalized.substring(0, 50));
+  
+  if (!normalized) {
+    throw new Error('[PEM] 정규화 후 내용이 비어있습니다');
+  }
+
+  try {
+    const buffer = Buffer.from(normalized, 'base64');
+    console.log('[PEM] Base64 디코딩 성공, 바이트 길이:', buffer.length);
+    return new Uint8Array(buffer);
+  } catch (err) {
+    console.error('[PEM] Base64 디코딩 실패:', err);
+    throw new Error(`PEM 디코딩 실패: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 function base64UrlEncode(str: string) {
