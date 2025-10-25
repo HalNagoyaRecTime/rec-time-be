@@ -166,7 +166,11 @@ api.get('/data-update/check', c =>
 // ================================
 // ✅ Version Check (アプリ自動更新用)
 // ================================
-api.get('/version', c => c.get('versionController').getVersion(c));
+// 最新バージョン番号のみ取得（更新確認用・アナリティクス用）
+api.get('/version', c => c.get('versionController').getLatestVersion(c));
+
+// バージョン詳細取得用（アナリティクス：内容確認）
+api.get('/version/detail/:version', c => c.get('versionController').getVersionDetail(c));
 
 // ================================
 // 📝 에러 핸들링 (라우트 이후)
