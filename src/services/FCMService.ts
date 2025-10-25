@@ -4,6 +4,13 @@
 import { D1Database } from '@cloudflare/workers-types';
 import { SignJWT } from 'jose';
 
+// 🔧 Cloudflare Workers 환경에서 jose 라이브러리 WebCrypto 호환성 설정
+// @ts-ignore
+if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+  // @ts-ignore
+  SignJWT.cryptoRuntime = globalThis.crypto;
+}
+
 export interface FCMTokenData {
   token: string;
   studentNum: string;

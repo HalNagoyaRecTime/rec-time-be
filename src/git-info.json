@@ -1,15 +1,15 @@
 {
-  "commitHash": "caeead04ea75522e222505a675391e8aa5786220",
-  "commitMessage": "/",
+  "commitHash": "15dba1b5dfd9a442c3e619a38905e40974dd8d19",
+  "commitMessage": "?",
   "commitAuthor": "kim020613",
-  "commitDate": "2025-10-22 00:01:49 +0900",
+  "commitDate": "2025-10-25 03:15:30 +0900",
   "branch": "feature/#kimu_test",
   "lastMergeCommit": {
-    "hash": "50447ce0bbffbb301623b873f63bd167266f5872",
-    "message": "Merge branch 'develop' of https://github.com/HalNagoyaRecTime/rec-time-be into develop",
+    "hash": "91a82497e80ffcc56aa042eb66c7e92dd02f6791",
+    "message": "Merge branch 'feature/#kimu_test' of https://github.com/HalNagoyaRecTime/rec-time-be into feature/#kimu_test",
     "author": "kim020613",
-    "date": "2025-10-11 22:47:25 +0900"
+    "date": "2025-10-25 01:23:59 +0900"
   },
-  "buildTime": "2025-10-21T15:02:07.045Z",
+  "buildTime": "2025-10-25T06:23:50.286Z",
   "buildVersion": "unknown"
 }
