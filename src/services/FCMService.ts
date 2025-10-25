@@ -2,14 +2,6 @@
 // Firebase Cloud Messaging (FCM) 서비스 - Cloudflare Workers 호환 완전판
 
 import { D1Database } from '@cloudflare/workers-types';
-import { SignJWT } from 'jose';
-
-// 🔧 Cloudflare Workers 환경에서 jose 라이브러리 WebCrypto 호환성 설정
-// @ts-ignore
-if (typeof globalThis !== 'undefined' && globalThis.crypto) {
-  // @ts-ignore
-  SignJWT.cryptoRuntime = globalThis.crypto;
-}
 
 export interface FCMTokenData {
   token: string;
@@ -307,7 +299,7 @@ async function createJWT(env: {
   FCM_CLIENT_EMAIL?: string;
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;
 }): Promise<string> {
-  console.log('[JWT] JWT 생성 시작 (jose 사용)');
+  console.log('[JWT] JWT 생성 시작 (WebCrypto 직접 사용)');
 
   let clientEmail: string;
   let privateKey: string;
@@ -329,15 +321,48 @@ async function createJWT(env: {
   try {
     const now = Math.floor(Date.now() / 1000);
     
-    const jwt = await new SignJWT({
+    // JWT 헤더와 페이로드 생성
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const payload = {
       iss: clientEmail,
       scope: 'https://www.googleapis.com/auth/firebase.messaging',
       aud: 'https://oauth2.googleapis.com/token',
       iat: now,
       exp: now + 3600,
-    })
-      .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
-      .sign(await importPrivateKey(privateKey));
+    };
+
+    // Base64URL 인코딩 함수
+    const base64url = (obj: any) => {
+      const json = JSON.stringify(obj);
+      const base64 = btoa(json);
+      return base64
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    };
+
+    const encodedHeader = base64url(header);
+    const encodedPayload = base64url(payload);
+    const unsignedToken = `${encodedHeader}.${encodedPayload}`;
+
+    // 개인키를 CryptoKey로 변환
+    const cryptoKey = await importPrivateKey(privateKey);
+    
+    // 서명 생성
+    const encoder = new TextEncoder();
+    const signature = await crypto.subtle.sign(
+      'RSASSA-PKCS1-v1_5',
+      cryptoKey,
+      encoder.encode(unsignedToken)
+    );
+
+    // 서명을 Base64URL로 인코딩
+    const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const jwt = `${unsignedToken}.${signatureBase64}`;
 
     console.log('[JWT] JWT 생성 성공');
     return jwt;
